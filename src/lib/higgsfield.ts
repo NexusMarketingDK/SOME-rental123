@@ -223,14 +223,14 @@ export async function getVideoJobsStatus(jobSetIds: string[]): Promise<{
   videoUrls?: string[];
 }> {
   const client = getClient();
-  // @ts-expect-error accessing private field
-  const axiosClient = client.client;
+  type JobResult = { status: string; results?: { raw?: { url: string }; min?: { url: string } } };
+  type JobSetData = { jobs?: JobResult[] };
+  const axiosClient = (client as unknown as { client: { get: (url: string) => Promise<{ data: JobSetData }> } }).client;
 
   const results = await Promise.all(
     jobSetIds.map(async (id) => {
       const res = await axiosClient.get(`/v1/job-sets/${id}`);
-      const jobs: Array<{ status: string; results?: { raw?: { url: string }; min?: { url: string } } }> =
-        res.data.jobs ?? [];
+      const jobs: JobResult[] = res.data.jobs ?? [];
       const job = jobs[0];
       const s = job?.status ?? "queued";
       const videoUrl = job?.results?.raw?.url ?? job?.results?.min?.url;
