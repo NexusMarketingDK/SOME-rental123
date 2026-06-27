@@ -17,6 +17,7 @@ type Props = {
   orderId: string;
   initialStatus: Status;
   initialVideoUrl?: string;
+  initialVideoUrls?: string[];
   title: string;
   imageUrls: string[];
   accounts: SocialAccount[];
@@ -160,9 +161,10 @@ function SharePanel({ videoUrl, accounts }: { videoUrl: string; accounts: Social
   );
 }
 
-export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, title, imageUrls, accounts }: Props) {
+export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, initialVideoUrls, title, imageUrls, accounts }: Props) {
   const [status, setStatus] = useState<Status>(initialStatus);
   const [videoUrl, setVideoUrl] = useState<string | undefined>(initialVideoUrl);
+  const [videoUrls, setVideoUrls] = useState<string[]>(initialVideoUrls ?? (initialVideoUrl ? [initialVideoUrl] : []));
   const [stepIdx, setStepIdx] = useState(0);
   const [elapsedSec, setElapsedSec] = useState(0);
   const startRef = useRef<number>(Date.now());
@@ -171,6 +173,7 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, tit
     const result = await pollVideoOrder(orderId);
     setStatus(result.status as Status);
     if (result.videoUrl) setVideoUrl(result.videoUrl);
+    if (result.videoUrls?.length) setVideoUrls(result.videoUrls);
   }, [orderId]);
 
   useEffect(() => {
@@ -183,30 +186,40 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, tit
   }, [status, poll]);
 
   if (status === "ready" && videoUrl) {
+    const clips = videoUrls.length > 0 ? videoUrls : [videoUrl];
     return (
       <div className="space-y-5">
         <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4">
           <CheckCircle2 size={20} className="text-emerald-600 shrink-0" />
           <div>
-            <p className="font-semibold text-emerald-900">Din video er klar!</p>
-            <p className="text-sm text-emerald-700">AI-genereret præsentationsvideo</p>
+            <p className="font-semibold text-emerald-900">
+              {clips.length > 1 ? `${clips.length} videoklip er klar!` : "Din video er klar!"}
+            </p>
+            <p className="text-sm text-emerald-700">AI-genereret cinematisk præsentationsvideo</p>
           </div>
         </div>
 
-        <div className="rounded-2xl overflow-hidden border border-slate-200 bg-black shadow-lg">
-          <video src={videoUrl} controls autoPlay loop className="w-full" style={{ maxHeight: "520px" }} />
-        </div>
-
-        <a
-          href={videoUrl}
-          download={`${title}.mp4`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
-          style={{ background: "linear-gradient(135deg, #1B3F7A 0%, #2a5298 100%)" }}
-        >
-          <Download size={15} /> Download video
-        </a>
+        {clips.map((url, i) => (
+          <div key={i} className="space-y-2">
+            {clips.length > 1 && (
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Klip {i + 1} / {clips.length}
+              </p>
+            )}
+            <div className="rounded-2xl overflow-hidden border border-slate-200 bg-black shadow-lg">
+              <video src={url} controls autoPlay={i === 0} loop className="w-full" style={{ maxHeight: "480px" }} />
+            </div>
+            <a
+              href={url}
+              download={`${title}-klip-${i + 1}.mp4`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              <Download size={13} /> Download klip {i + 1}
+            </a>
+          </div>
+        ))}
 
         <SharePanel videoUrl={videoUrl} accounts={accounts} />
       </div>

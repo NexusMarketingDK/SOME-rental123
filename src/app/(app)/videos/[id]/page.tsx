@@ -32,6 +32,7 @@ export default async function VideoDetailPage({
           orderId={id}
           initialStatus={order.status}
           initialVideoUrl={order.video_url ?? undefined}
+          initialVideoUrls={(order as any).video_urls ?? undefined}
           title={order.title ?? ""}
           imageUrls={order.image_urls ?? []}
           accounts={(accounts ?? []) as SocialAccount[]}
