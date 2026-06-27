@@ -51,7 +51,7 @@ export default function NewVideoPage() {
     setUploading(false);
   }
 
-  const canSubmit = imageUrls.length >= 2 && title.trim().length > 0;
+  const canSubmit = title.trim().length > 0;
 
   return (
     <>
@@ -188,8 +188,8 @@ export default function NewVideoPage() {
                 {/* Images */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Billeder <span className="text-red-500">*</span>
-                    <span className="ml-1.5 text-xs font-normal text-slate-400">(mindst 2 påkrævet — jo flere, jo bedre video)</span>
+                    Billeder
+                    <span className="ml-1.5 text-xs font-normal text-slate-400">(valgfrit — jo flere, jo bedre video)</span>
                   </label>
 
                   {/* URL input */}
@@ -258,7 +258,7 @@ export default function NewVideoPage() {
                   className="w-full rounded-xl py-3.5 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
                 >
-                  {canSubmit ? "Opret video" : "Udfyld titel og tilføj mindst 2 billeder"}
+                  {canSubmit ? "Opret video" : "Udfyld titel for at fortsætte"}
                 </button>
                 <p className="text-center text-xs text-slate-400">
                   Video leveres inden for 15 minutter
