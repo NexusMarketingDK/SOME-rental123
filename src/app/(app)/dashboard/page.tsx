@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, CalendarClock, Send, Video, Sparkles, ArrowRight } from "lucide-react";
+import { Plus, CalendarClock, Send, Video, Sparkles, ArrowRight, Flame, Target, MessageSquare, TrendingUp, TrendingDown, Users, BarChart2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import type { Post, SocialAccount } from "@/types/database";
 
@@ -12,23 +12,20 @@ async function getDashboardData() {
   const prevWeekAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString();
 
   const [
-    propertiesRes,
     scheduledRes,
     sentThisWeekRes,
     sentLastWeekRes,
     accountsRes,
     upcomingRes,
   ] = await Promise.all([
-    supabase.from("properties").select("id", { count: "exact", head: true }),
     supabase.from("posts").select("id", { count: "exact", head: true }).eq("status", "scheduled"),
     supabase.from("posts").select("id", { count: "exact", head: true }).eq("status", "published").gte("published_at", weekAgo),
     supabase.from("posts").select("id", { count: "exact", head: true }).eq("status", "published").gte("published_at", prevWeekAgo).lt("published_at", weekAgo),
     supabase.from("social_accounts").select("*").order("created_at"),
-    supabase.from("posts").select("*").eq("status", "scheduled").order("scheduled_at").limit(3),
+    supabase.from("posts").select("*").eq("status", "scheduled").order("scheduled_at").limit(5),
   ]);
 
   return {
-    properties: propertiesRes.count ?? 0,
     scheduled: scheduledRes.count ?? 0,
     sentThisWeek: sentThisWeekRes.count ?? 0,
     sentLastWeek: sentLastWeekRes.count ?? 0,
@@ -38,178 +35,268 @@ async function getDashboardData() {
   };
 }
 
-function StatCard({ label, value, sub }: { label: string; value: number; sub?: string }) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <p className="text-xs font-medium uppercase tracking-wider text-slate-400">{label}</p>
-      <p className="mt-2 text-3xl font-bold text-slate-900">{value}</p>
-      {sub && <p className="mt-1 text-xs text-slate-400">{sub}</p>}
-    </div>
-  );
-}
-
 const PLATFORM_COLORS: Record<string, string> = {
   facebook: "#1877F2", instagram: "#E1306C", tiktok: "#000000",
   snapchat: "#F7C600", youtube: "#FF0000", linkedin: "#0A66C2",
 };
 
+function TrendBadge({ current, previous }: { current: number; previous: number }) {
+  const diff = current - previous;
+  if (diff === 0) return <span className="text-xs text-slate-400">Ingen ændring</span>;
+  const up = diff > 0;
+  return (
+    <span className={`flex items-center gap-0.5 text-xs font-medium ${up ? "text-emerald-600" : "text-red-500"}`}>
+      {up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+      {up ? "+" : ""}{diff} fra sidste uge
+    </span>
+  );
+}
+
 export default async function DashboardPage() {
   const data = await getDashboardData();
   const firstName = data.userEmail.split("@")[0];
   const now = new Date();
-  const dateStr = now.toLocaleDateString("da-DK", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-  const trend = data.sentThisWeek - data.sentLastWeek;
+  const weekStart = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000);
+  const weekRange = `${weekStart.toLocaleDateString("da-DK", { day: "numeric", month: "short" })} – ${now.toLocaleDateString("da-DK", { day: "numeric", month: "short", year: "numeric" })}`;
 
   return (
-    <div className="flex-1 px-8 py-7 max-w-5xl mx-auto w-full">
+    <div className="flex-1 px-8 py-7 max-w-5xl mx-auto w-full space-y-6">
 
-      {/* Greeting */}
-      <div className="mb-7">
+      {/* ── Greeting ── */}
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full text-xl" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>
-            👋
+          <div
+            className="flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold text-white shadow"
+            style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
+          >
+            {firstName[0]?.toUpperCase() ?? "?"}
           </div>
           <div>
             <h1 className="text-xl font-bold text-slate-900">Goddag, {firstName}!</h1>
-            <p className="text-sm text-slate-400 capitalize">{dateStr}</p>
+            <p className="text-xs text-slate-400 capitalize">
+              {now.toLocaleDateString("da-DK", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+            </p>
           </div>
         </div>
+        <Link
+          href="/posts/new"
+          className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white shadow transition-opacity hover:opacity-90"
+          style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
+        >
+          <Plus size={15} /> Nyt opslag
+        </Link>
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <StatCard label="Opslag denne uge" value={data.sentThisWeek} sub={trend >= 0 ? `+${trend} fra sidste uge` : `${trend} fra sidste uge`} />
-        <StatCard label="Planlagte opslag" value={data.scheduled} sub="Klar til publicering" />
-        <StatCard label="Tilkoblede konti" value={data.accounts.length} sub={data.accounts.length === 0 ? "Tilslut din første kanal" : undefined} />
+      {/* ── Streak / Goals / Score ── */}
+      <div className="grid grid-cols-3 gap-4">
+        {[
+          {
+            icon: Flame,
+            label: "Uge streak",
+            value: data.sentThisWeek > 0 ? 1 : 0,
+            sub: data.sentThisWeek > 0 ? "Du postede denne uge!" : "Post i dag for at starte en streak",
+            color: "#FF6B4A",
+            bg: "#FFF4F1",
+          },
+          {
+            icon: Target,
+            label: "Planlagte opslag",
+            value: data.scheduled,
+            sub: data.scheduled === 0 ? "Ingen mål sat endnu" : `${data.scheduled} klar til publicering`,
+            color: "#1B3F7A",
+            bg: "#EEF3FB",
+          },
+          {
+            icon: Users,
+            label: "Tilkoblede kanaler",
+            value: data.accounts.length,
+            sub: data.accounts.length === 0 ? "Tilslut din første kanal" : data.accounts.map(a => a.platform).join(", "),
+            color: "#059669",
+            bg: "#ECFDF5",
+          },
+        ].map((s) => (
+          <div key={s.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{s.label}</p>
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ backgroundColor: s.bg }}>
+                <s.icon size={14} style={{ color: s.color }} />
+              </div>
+            </div>
+            <p className="text-4xl font-bold text-slate-900">{s.value}</p>
+            <p className="mt-1.5 text-xs text-slate-400 leading-tight">{s.sub}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Weekly Pulse ── */}
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+          <div>
+            <h2 className="font-bold text-slate-900">Ugentlig puls</h2>
+            <p className="text-xs text-slate-400 mt-0.5">{weekRange} · Sammenlignet med forrige uge</p>
+          </div>
+          <BarChart2 size={18} className="text-slate-300" />
+        </div>
+        <div className="grid grid-cols-3 divide-x divide-slate-100">
+          {[
+            { label: "Opslag sendt", value: data.sentThisWeek, prev: data.sentLastWeek },
+            { label: "Planlagte opslag", value: data.scheduled, prev: 0 },
+            { label: "Tilkoblede konti", value: data.accounts.length, prev: 0 },
+          ].map((s) => (
+            <div key={s.label} className="px-6 py-5">
+              <p className="text-xs font-medium text-slate-400 mb-1">{s.label}</p>
+              <p className="text-3xl font-bold text-slate-900">{s.value}</p>
+              <div className="mt-1">
+                <TrendBadge current={s.value} previous={s.prev} />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-6">
 
-        {/* Up next */}
-        <div className="col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-slate-900">Kommende opslag</h2>
-            <Link href="/posts/new" className="flex items-center gap-1.5 text-sm font-medium text-[#FF6B4A] hover:opacity-80">
-              <Plus size={14} /> Nyt opslag
-            </Link>
-          </div>
-
-          {data.upcoming.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-slate-200 bg-white p-8 text-center">
-              <CalendarClock size={28} className="mx-auto mb-3 text-slate-200" />
-              <p className="text-sm font-medium text-slate-700">Ingen planlagte opslag</p>
-              <p className="mt-1 text-sm text-slate-400">Planlæg dit næste opslag til sociale medier.</p>
-              <Link
-                href="/posts/new"
-                className="mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white"
-                style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
-              >
-                <Plus size={14} /> Opret opslag
+        {/* ── Up Next ── */}
+        <div className="col-span-2">
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+              <h2 className="font-bold text-slate-900">Kommende opslag</h2>
+              <Link href="/posts" className="text-xs font-medium text-slate-400 hover:text-slate-700 transition-colors">
+                Se alle <ArrowRight size={11} className="inline" />
               </Link>
             </div>
-          ) : (
-            <div className="flex flex-col gap-3">
-              {data.upcoming.map((post) => (
-                <div key={post.id} className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50">
-                    <Send size={14} className="text-blue-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="line-clamp-2 text-sm text-slate-800">{post.content}</p>
-                    {post.scheduled_at && (
-                      <p className="mt-1 text-xs text-slate-400">
-                        {new Date(post.scheduled_at).toLocaleDateString("da-DK", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
-                      </p>
-                    )}
-                  </div>
+
+            {data.upcoming.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+                  <CalendarClock size={22} className="text-slate-300" />
                 </div>
-              ))}
-              <Link href="/posts" className="flex items-center justify-center gap-1 text-sm text-slate-400 hover:text-slate-700 py-1">
-                Se alle opslag <ArrowRight size={13} />
-              </Link>
-            </div>
-          )}
-
-          {/* Connected channels */}
-          {data.accounts.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="font-semibold text-slate-900">Tilkoblede kanaler</h2>
-                <Link href="/accounts" className="text-sm text-slate-400 hover:text-slate-700">Se alle</Link>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {data.accounts.map((a) => (
-                  <div key={a.id} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm">
-                    <div
-                      className="h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white shrink-0"
-                      style={{ backgroundColor: PLATFORM_COLORS[a.platform] ?? "#64748b" }}
-                    >
-                      {a.platform[0].toUpperCase()}
-                    </div>
-                    <span className="text-sm text-slate-700">{a.account_name}</span>
-                  </div>
-                ))}
+                <p className="text-sm font-semibold text-slate-700">Ingen planlagte opslag</p>
+                <p className="mt-1 text-xs text-slate-400">Planlæg dit næste opslag til sociale medier.</p>
                 <Link
-                  href="/accounts/connect"
-                  className="flex items-center gap-2 rounded-lg border border-dashed border-slate-200 bg-white px-3 py-2 text-sm text-slate-400 hover:border-slate-300 hover:text-slate-600 transition-colors"
+                  href="/posts/new"
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold text-white transition-opacity hover:opacity-90"
+                  style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
                 >
-                  <Plus size={13} /> Tilslut
+                  <Plus size={13} /> Opret opslag
                 </Link>
               </div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {data.upcoming.map((post) => (
+                  <div key={post.id} className="flex items-start gap-3 px-6 py-4 hover:bg-slate-50/60 transition-colors">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 mt-0.5">
+                      <Send size={13} className="text-blue-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="line-clamp-2 text-sm text-slate-800 leading-snug">{post.content}</p>
+                      {post.scheduled_at && (
+                        <p className="mt-1 text-xs text-slate-400">
+                          {new Date(post.scheduled_at).toLocaleDateString("da-DK", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      )}
+                    </div>
+                    <span className="shrink-0 rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-semibold text-orange-500">
+                      Planlagt
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Connected channels */}
+            <div className="border-t border-slate-100 px-6 py-4">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Kanaler</p>
+                <Link href="/accounts/connect" className="text-xs text-slate-400 hover:text-slate-700 transition-colors">
+                  + Tilslut
+                </Link>
+              </div>
+              {data.accounts.length === 0 ? (
+                <Link
+                  href="/accounts/connect"
+                  className="flex items-center gap-2 rounded-xl border border-dashed border-slate-200 px-4 py-3 text-sm text-slate-400 hover:border-slate-300 hover:text-slate-600 transition-colors"
+                >
+                  <Plus size={14} /> Tilslut din første kanal
+                </Link>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {data.accounts.map((a) => (
+                    <div key={a.id} className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-1.5">
+                      <div
+                        className="h-4 w-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white shrink-0"
+                        style={{ backgroundColor: PLATFORM_COLORS[a.platform] ?? "#64748b" }}
+                      >
+                        {a.platform[0].toUpperCase()}
+                      </div>
+                      <span className="text-xs font-medium text-slate-600">{a.account_name}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Right column */}
+        {/* ── Right column ── */}
         <div className="space-y-4">
+
           {/* Quick actions */}
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h3 className="text-sm font-semibold text-slate-900 mb-3">Hurtige handlinger</h3>
-            <div className="flex flex-col gap-2">
-              <Link
-                href="/posts/new"
-                className="flex items-center gap-2.5 rounded-lg p-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50">
-                  <Send size={14} className="text-blue-600" />
-                </div>
-                Opret opslag
-              </Link>
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="border-b border-slate-100 px-5 py-3.5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Hurtige handlinger</h3>
+            </div>
+            <div className="p-2">
+              {[
+                { href: "/posts/new", icon: Send, label: "Opret opslag", bg: "bg-blue-50", color: "text-blue-600" },
+                { href: "/videos/new", icon: Video, label: "Bestil video", bg: "bg-orange-50", color: "text-[#FF6B4A]" },
+                { href: "/properties/new", icon: Plus, label: "Tilføj bolig", bg: "bg-emerald-50", color: "text-emerald-600" },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center gap-3 rounded-xl p-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                >
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${item.bg}`}>
+                    <item.icon size={14} className={item.color} />
+                  </div>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* AI Video upsell */}
+          <div
+            className="rounded-2xl p-5 text-white relative overflow-hidden"
+            style={{ background: "linear-gradient(135deg, #1B3F7A 0%, #2a5298 100%)" }}
+          >
+            <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/5" />
+            <div className="absolute -right-2 top-8 h-16 w-16 rounded-full bg-white/5" />
+            <div className="relative">
+              <div className="mb-2 flex items-center gap-1.5">
+                <Sparkles size={13} className="text-orange-300" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-orange-300">AI Video</span>
+              </div>
+              <p className="text-sm font-bold leading-snug">Præsentationsvideo fra dine billeder</p>
+              <p className="mt-1 text-xs text-blue-200 leading-relaxed">Klar på 5-15 min. Henter automatisk fra Airbnb & Booking.com.</p>
               <Link
                 href="/videos/new"
-                className="flex items-center gap-2.5 rounded-lg p-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-[#1B3F7A] hover:opacity-90 transition-opacity"
               >
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-orange-50">
-                  <Video size={14} className="text-[#FF6B4A]" />
-                </div>
-                Bestil præsentationsvideo
-              </Link>
-              <Link
-                href="/properties/new"
-                className="flex items-center gap-2.5 rounded-lg p-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-50">
-                  <Plus size={14} className="text-emerald-600" />
-                </div>
-                Tilføj bolig
+                Bestil — 499 kr <ArrowRight size={11} />
               </Link>
             </div>
           </div>
 
-          {/* Video upsell */}
-          <div className="rounded-xl p-4 text-white" style={{ background: "linear-gradient(135deg, #1B3F7A 0%, #2a5298 100%)" }}>
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles size={16} className="text-orange-300" />
-              <span className="text-xs font-semibold uppercase tracking-wider text-orange-300">AI Video</span>
+          {/* Comments placeholder */}
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <MessageSquare size={14} className="text-slate-400" />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Kommentarer</h3>
             </div>
-            <p className="text-sm font-semibold leading-snug mb-1">Præsentationsvideo fra dine billeder</p>
-            <p className="text-xs text-blue-200 mb-3">Henter automatisk billeder fra Airbnb & Booking.com. Klar på 5-15 min.</p>
-            <Link
-              href="/videos/new"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-[#1B3F7A] hover:opacity-90 transition-opacity"
-            >
-              Bestil — 499 kr <ArrowRight size={11} />
-            </Link>
+            <p className="text-2xl font-bold text-slate-900">0</p>
+            <p className="text-xs text-slate-400 mt-1">Ingen ubesvarede kommentarer</p>
           </div>
         </div>
       </div>
