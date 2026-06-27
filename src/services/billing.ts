@@ -116,7 +116,7 @@ export async function createVideoOrderCheckout(formData: FormData): Promise<void
   }).select("id").single();
 
   // Start Higgsfield generation in background (don't block redirect)
-  if (imageUrls.length >= 2 && order?.id) {
+  if (imageUrls.length >= 1 && order?.id) {
     try {
       const { startVideoGeneration } = await import("@/lib/higgsfield");
       const jobSetId = await startVideoGeneration(imageUrls, title);
