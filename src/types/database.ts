@@ -28,6 +28,7 @@ export type SocialAccount = {
   account_name: string;
   account_id: string;
   access_token: string | null;
+  meta: Record<string, string> | null;
   created_at: string;
 };
 
