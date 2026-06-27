@@ -132,8 +132,8 @@ export default function LandingPage() {
               },
               {
                 icon: Video,
-                title: "Automatisk video af din bolig",
-                desc: "Upload dine billeder og lad Vakanza skabe en professionel fremvisningsvideo til sociale medier. Perfekt til at tiltrække nye lejere.",
+                title: "AI-genereret fremvisningsvideo",
+                desc: "Vakanza henter automatisk billeder fra din Airbnb eller Booking.com annonce via API — eller upload dine egne. AI skaber en professionel præsentationsvideo klar til Instagram Reels og TikTok.",
                 color: "bg-orange-50 text-orange-600",
               },
               {
@@ -255,8 +255,9 @@ export default function LandingPage() {
               </div>
               <ul className="mb-8 flex flex-col gap-3">
                 {[
-                  "Professionel fremvisningsvideo",
-                  "Baseret på dine egne billeder",
+                  "AI henter billeder direkte fra Airbnb & Booking.com",
+                  "Eller upload dine egne billeder",
+                  "AI genererer professionel præsentationsvideo automatisk",
                   "Optimeret til sociale medier",
                   "Perfekt til Instagram Reels & TikTok",
                   "Leveret inden for 24 timer",
