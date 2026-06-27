@@ -350,12 +350,33 @@ export default async function DashboardPage() {
                 </Link>
               </div>
               {data.accounts.length === 0 ? (
-                <Link
-                  href="/accounts/connect"
-                  className="flex items-center gap-2 rounded-xl border border-dashed border-slate-200 px-4 py-3 text-sm text-slate-400 hover:border-slate-300 hover:text-slate-600 transition-colors"
-                >
-                  <Plus size={14} /> Tilslut din første kanal
-                </Link>
+                <div>
+                  <p className="mb-3 text-xs text-slate-400">Vælg en platform for at komme i gang:</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { name: "Facebook", color: "#1877F2", bg: "#E7F0FD", letter: "f" },
+                      { name: "Instagram", color: "#E1306C", bg: "#FCE4EC", letter: "in" },
+                      { name: "TikTok", color: "#010101", bg: "#E8E8E8", letter: "T" },
+                      { name: "YouTube", color: "#FF0000", bg: "#FFEBEE", letter: "Y" },
+                      { name: "LinkedIn", color: "#0A66C2", bg: "#E3F2FD", letter: "Li" },
+                      { name: "Snapchat", color: "#FFAA00", bg: "#FFFDE7", letter: "S" },
+                    ].map((p) => (
+                      <Link
+                        key={p.name}
+                        href="/accounts/connect"
+                        className="flex flex-col items-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50 px-2 py-3 text-center hover:border-slate-200 hover:bg-white transition-colors group"
+                      >
+                        <div
+                          className="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-bold shrink-0"
+                          style={{ backgroundColor: p.color, color: "#fff" }}
+                        >
+                          {p.letter}
+                        </div>
+                        <span className="text-[10px] font-medium text-slate-500 group-hover:text-slate-700 leading-none">{p.name}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {data.accounts.map((a) => (
