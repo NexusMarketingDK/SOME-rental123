@@ -14,7 +14,6 @@ import {
   Users,
   TrendingUp,
   Play,
-  Instagram,
   Globe,
 } from "lucide-react";
 
@@ -459,7 +458,7 @@ export default function LandingPage() {
             <div className="absolute left-1/6 right-1/6 top-7 hidden h-px bg-gradient-to-r from-[#1B3F7A]/20 via-[#1B3F7A]/40 to-[#1B3F7A]/20 md:block" />
             {[
               { n: "1", icon: Home, title: "Tilføj din bolig", desc: "Upload billeder og beskriv din feriebolig. Tilslut din bookingkalender fra Airbnb eller Booking.com." },
-              { n: "2", icon: Instagram, title: "Forbind sociale medier", desc: "Forbind Facebook, Instagram, TikTok og LinkedIn med ét klik. Vælg hvilke platforme du vil poste til." },
+              { n: "2", icon: Share2, title: "Forbind sociale medier", desc: "Forbind Facebook, Instagram, TikTok og LinkedIn med ét klik. Vælg hvilke platforme du vil poste til." },
               { n: "3", icon: Zap, title: "Lad Vakanza klare resten", desc: "AI genererer og poster automatisk på dine valgte tidspunkter. Professionelt — uden du løfter en finger." },
             ].map((s) => (
               <div key={s.n} className="relative text-center">
