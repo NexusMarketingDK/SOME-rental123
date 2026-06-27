@@ -78,6 +78,7 @@ function parseFromHtml(html: string): ScrapedProperty {
   const title = getMeta(html, "og:title") ?? html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]?.trim();
   const description = getMeta(html, "og:description") ?? getMeta(html, "description") ?? extractJsonLdField(html, "description");
   const location = getMeta(html, "og:locality") ?? extractJsonLdField(html, "addressLocality", "addressRegion", "address");
+  const jsonLdConditions = extractJsonLdField(html, "houseRules", "house_rules", "termsOfService", "cancellationPolicy", "conditions");
   const imageUrls = extractImages(html);
   const jldPrice = extractJsonLdField(html, "price", "lowPrice", "highPrice");
   const metaPrice = getMeta(html, "product:price:amount") ?? getMeta(html, "og:price:amount");
@@ -86,13 +87,27 @@ function parseFromHtml(html: string): ScrapedProperty {
   const sizeMatch = plainText.match(/(\d+[\.,]?\d*)\s*m[²2]/i);
   const size = sizeMatch ? `${sizeMatch[1]} m²` : undefined;
   let conditions: string | undefined;
-  for (const re of [
-    /house rules?[\s\S]{0,50}?<[^>]+>([\s\S]{50,800}?)<\/(div|section|ul|p)/i,
-    /husregler[\s\S]{0,50}?<[^>]+>([\s\S]{50,500}?)<\/(div|section|ul|p)/i,
-    /betingelser[\s\S]{0,50}?<[^>]+>([\s\S]{50,500}?)<\/(div|section|ul|p)/i,
-  ]) {
+  // Extract conditions/house rules section from HTML — try progressively broader patterns
+  const conditionPatterns = [
+    // JSON-LD fields
+    /"(?:houseRules?|house_rules?|husregler|betingelser|terms|cancellationPolicy|conditions)":\s*"([^"]{30,1000})"/i,
+    // Heading followed by content block
+    /(?:house\s*rules?|husregler|betingelser|afbestilling|cancellation\s*policy|regler|conditions?)[\s\S]{0,80}?<(?:ul|ol|p|div)[^>]*>([\s\S]{40,1200}?)<\/(?:ul|ol|p|div)>/i,
+    // Any element with relevant data-testid or class
+    /(?:data-testid|class)="[^"]*(?:rule|condition|policy|husregel|betingelse)[^"]*"[^>]*>([\s\S]{30,1000}?)<\/(?:div|section|article|ul)/i,
+  ];
+  for (const re of conditionPatterns) {
     const m = html.match(re);
-    if (m?.[1]) { conditions = m[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 600); break; }
+    if (m?.[1]) {
+      const text = m[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      if (text.length >= 30) { conditions = text.slice(0, 800); break; }
+    }
+  }
+  // Fallback: scan plain text for conditions section
+  if (!conditions) {
+    const plain = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+    const m = plain.match(/(?:house\s*rules?|husregler|betingelser|afbestillingspolitik|regler for ophold)[:\s]{0,10}([\s\S]{30,800}?)(?:\n\n|\s{5,}|$)/i);
+    if (m?.[1]) conditions = m[1].trim().slice(0, 800);
   }
   return {
     title: title ? decodeHTMLEntities(title).slice(0, 200) : undefined,
@@ -101,7 +116,7 @@ function parseFromHtml(html: string): ScrapedProperty {
     imageUrls,
     price,
     size,
-    conditions,
+    conditions: jsonLdConditions ?? conditions,
   };
 }
 
@@ -121,9 +136,9 @@ function parseFromMarkdown(markdown: string): ScrapedProperty {
   const price = priceMatch?.[0]?.trim();
   const sizeMatch = markdown.match(/(\d+[\.,]?\d*)\s*m[²2]/i);
   const size = sizeMatch ? `${sizeMatch[1]} m²` : undefined;
-  const condIdx = lines.findIndex((l) => /house rules|husregler|betingelser|cancellation/i.test(l));
+  const condIdx = lines.findIndex((l) => /house\s*rules?|husregler|betingelser|afbestilling|cancellation\s*policy|regler for ophold/i.test(l));
   const conditions = condIdx >= 0
-    ? lines.slice(condIdx + 1, condIdx + 15).filter((l) => l.trim()).join("\n").trim().slice(0, 600) || undefined
+    ? lines.slice(condIdx + 1, condIdx + 20).filter((l) => l.trim()).join("\n").trim().slice(0, 800) || undefined
     : undefined;
   const locationMatch = markdown.match(/📍\s*(.+)|Located in ([^\n]+)|Beliggenhed:\s*([^\n]+)/i);
   const location = (locationMatch?.[1] ?? locationMatch?.[2] ?? locationMatch?.[3])?.trim();
