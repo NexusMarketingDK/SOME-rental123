@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
-import { generateVideo } from "@/lib/higgsfield";
+import { startVideoGeneration } from "@/lib/higgsfield";
 import { createClient } from "@/lib/supabase/server";
 import type Stripe from "stripe";
 
@@ -77,16 +77,11 @@ export async function POST(req: NextRequest) {
         // Trigger Higgsfield video generation
         if (order && imageUrls.length > 0) {
           try {
-            const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://some-rental123.vercel.app";
-            const { jobId } = await generateVideo({
-              imageUrls,
-              title,
-              webhookUrl: `${appUrl}/api/webhooks/higgsfield`,
-            });
+            const jobSetId = await startVideoGeneration(imageUrls, title);
 
             await supabase
               .from("video_orders")
-              .update({ higgsfield_job_id: jobId })
+              .update({ higgsfield_job_id: jobSetId })
               .eq("id", order.id);
           } catch (err) {
             console.error("Higgsfield error:", err);
