@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Video, Clock, CheckCircle2, XCircle, Loader2, Sparkles, ImageDown, Share2, TrendingUp, Star, Zap, Globe } from "lucide-react";
+import { Plus, Video, Clock, CheckCircle2, XCircle, Loader2, Sparkles, Share2, TrendingUp, Star, Zap, Play, Clapperboard } from "lucide-react";
 import { Topbar } from "@/components/layout/topbar";
 import { createClient } from "@/lib/supabase/server";
 import type { VideoOrder } from "@/types/database";
@@ -122,7 +122,7 @@ export default async function VideosPage() {
                     </span>
                   </h1>
                   <p className="mt-4 text-lg text-blue-200 leading-relaxed max-w-md">
-                    Upload billeder eller indsæt dit Airbnb- eller Booking.com-link — vores AI genererer en professionel præsentationsvideo på under 15 minutter.
+                    Lad AI'en skabe en professionel præsentationsvideo af din bolig — klar på under 15 minutter, klar til at dele på sociale medier.
                   </p>
                   <div className="mt-6 flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
@@ -143,7 +143,7 @@ export default async function VideosPage() {
 
               {/* Stats bar */}
               <div className="mx-auto mt-8 grid max-w-5xl grid-cols-3 gap-4">
-                <StatPill value="3×" label="Mere engagement end billeder" />
+                <StatPill value="3×" label="Flere bookingforespørgsler" />
                 <StatPill value="15 min" label="Gennemsnitlig leveringstid" />
                 <StatPill value="499 kr" label="Pr. video — ingen abonnement" />
               </div>
@@ -154,33 +154,33 @@ export default async function VideosPage() {
               <div className="mx-auto max-w-5xl">
                 <div className="mb-10 text-center">
                   <span className="text-xs font-bold uppercase tracking-widest text-[#FF6B4A]">Sådan fungerer det</span>
-                  <h2 className="mt-2 text-2xl font-bold text-slate-900">Fra billeder til professionel video på 3 trin</h2>
+                  <h2 className="mt-2 text-2xl font-bold text-slate-900">Professionel præsentationsvideo på 3 trin</h2>
                 </div>
                 <div className="grid grid-cols-3 gap-8">
                   {[
                     {
                       step: "01",
-                      icon: ImageDown,
+                      icon: Clapperboard,
                       color: "#1B3F7A",
                       bg: "#EEF3FB",
-                      title: "Indsæt link eller upload",
-                      text: "Indsæt dit Airbnb- eller Booking.com-link — vi henter billederne automatisk. Eller upload egne fotos direkte.",
+                      title: "Opret din video",
+                      text: "Angiv boligens titel og indsæt dit booking-link. Vi klargør alt automatisk — ingen teknisk viden nødvendig.",
                     },
                     {
                       step: "02",
                       icon: Sparkles,
                       color: "#FF6B4A",
                       bg: "#FFF4F1",
-                      title: "AI genererer din video",
-                      text: "Vores AI sætter billederne sammen til en flydende video med professionelle overgange og musik på bare 5-15 minutter.",
+                      title: "AI producerer videoen",
+                      text: "Vores AI skaber en flydende præsentationsvideo med professionelle kamerabevægelser, overgange og stemningsfuldt udtryk på bare 5-15 minutter.",
                     },
                     {
                       step: "03",
                       icon: Share2,
                       color: "#059669",
                       bg: "#ECFDF5",
-                      title: "Del og få bookinger",
-                      text: "Download videoen og del den på Facebook, Instagram, TikTok og YouTube. Tiltræk flere lejere med engagerende indhold.",
+                      title: "Del og få flere bookinger",
+                      text: "Download videoen og del den direkte på Facebook, Instagram, TikTok og YouTube. Skil dig ud og tiltræk kvalitetslejere.",
                     },
                   ].map((item) => (
                     <div key={item.step} className="relative">
@@ -217,32 +217,32 @@ export default async function VideosPage() {
                 <div className="grid grid-cols-2 gap-5">
                   {[
                     {
-                      icon: Globe,
+                      icon: Play,
                       color: "#1B3F7A",
                       bg: "#EEF3FB",
-                      title: "Automatisk billedhentning",
-                      text: "Indsæt blot dit link fra Airbnb, Booking.com, HomeAway eller en anden platform. Vi henter de bedste billeder automatisk — ingen manuel upload nødvendig.",
+                      title: "Cinematisk præsentationsvideo",
+                      text: "AI'en skaber en flydende video med professionelle kamerabevægelser og overgange — samme kvalitet som dyre videoProduktioner, uden den store pris.",
                     },
                     {
                       icon: Zap,
                       color: "#FF6B4A",
                       bg: "#FFF4F1",
-                      title: "Lynhurtig levering",
-                      text: "AI-teknologien bag Vakanza Video kan generere en professionel præsentationsvideo på bare 5-15 minutter. Du modtager besked, så snart din video er klar.",
+                      title: "Klar på 15 minutter",
+                      text: "Vakanza Video leverer din færdige præsentationsvideo på bare 5-15 minutter. Du modtager besked direkte i appen, så snart den er klar til download.",
                     },
                     {
                       icon: TrendingUp,
                       color: "#059669",
                       bg: "#ECFDF5",
-                      title: "Flere bookinger",
-                      text: "Videoer får op til 3× mere engagement på sociale medier end statiske billeder. Præsenter din bolig fra dens bedste side og tiltræk kvalitetslejere.",
+                      title: "Boost din synlighed",
+                      text: "Videoer skiller sig markant ud på sociale medier og driver 3× flere klik og bookingforespørgsler. Præsenter din bolig fra dens absolutte bedste side.",
                     },
                     {
                       icon: Share2,
                       color: "#7C3AED",
                       bg: "#F5F3FF",
-                      title: "Del overalt med ét klik",
-                      text: "Download videoen direkte fra appen og del den på Facebook, Instagram, TikTok, YouTube og Snapchat. Maksimal synlighed på alle platforme.",
+                      title: "Del på alle platforme",
+                      text: "Download og del din video direkte på Facebook, Instagram, TikTok, YouTube og Snapchat — alt fra ét sted. Maksimal synlighed, minimal indsats.",
                     },
                   ].map((f) => (
                     <div key={f.title} className="flex gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -266,7 +266,7 @@ export default async function VideosPage() {
                   {[
                     { quote: "Min booking-rate steg med 40% efter jeg begyndte at dele præsentationsvideoer på Instagram.", name: "Mette L.", role: "Sommerhusudlejer, Skagen" },
                     { quote: "Det tog bogstaveligt talt 2 minutter at bestille. 10 minutter senere havde jeg en professionel video klar til at dele.", name: "Thomas K.", role: "Airbnb-vært, København" },
-                    { quote: "Billederne blev hentet automatisk fra min Booking.com-annonce. Nemmeste investering jeg har gjort.", name: "Sofie A.", role: "Ferielejlighed, Bornholm" },
+                    { quote: "Præsentationsvideoerne har gjort en kæmpe forskel. Lejerne kan nu mærke stemningen inden de booker.", name: "Sofie A.", role: "Ferielejlighed, Bornholm" },
                   ].map((t) => (
                     <div key={t.name} className="rounded-2xl border border-slate-100 bg-slate-50 p-6">
                       <div className="mb-3 flex gap-0.5">
