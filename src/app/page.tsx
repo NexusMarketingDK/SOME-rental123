@@ -336,112 +336,157 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── AI section ── */}
-      <section id="ai" className="bg-slate-50 py-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mb-14 text-center">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600">
-              <Sparkles size={11} /> AI-funktioner
+      {/* ── AI Video section ── */}
+      <section id="ai" className="relative overflow-hidden py-28" style={{ background: "linear-gradient(160deg, #0a0f1e 0%, #0f1f3d 50%, #0a0f1e 100%)" }}>
+        {/* Background glow orbs */}
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -left-40 top-20 h-[500px] w-[500px] rounded-full opacity-20 blur-[120px]" style={{ background: "radial-gradient(circle, #FF6B4A, transparent 70%)" }} />
+          <div className="absolute -right-40 bottom-20 h-[400px] w-[400px] rounded-full opacity-15 blur-[100px]" style={{ background: "radial-gradient(circle, #FFB36B, transparent 70%)" }} />
+          <div className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-10 blur-[140px]" style={{ background: "radial-gradient(circle, #1B3F7A, transparent 70%)" }} />
+        </div>
+
+        <div className="relative mx-auto max-w-6xl px-6">
+          {/* Header */}
+          <div className="mb-16 text-center">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-1.5 text-xs font-semibold text-orange-400">
+              <Sparkles size={11} /> Drevet af Higgsfield AI
             </div>
-            <h2 className="text-3xl font-bold text-[#1B3F7A] md:text-4xl">
-              Professionelle billeder & videoer<br />— genereret af AI
+            <h2 className="text-4xl font-bold text-white md:text-5xl lg:text-6xl">
+              Fra billeder til<br />
+              <span style={{ background: "linear-gradient(90deg, #FFB36B, #FF6B4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                viral præsentationsvideo
+              </span>
             </h2>
-            <p className="mx-auto mt-3 max-w-xl text-slate-500">
-              Du behøver ikke ansætte en fotograf eller videograf. Vakanza's AI klarer det hele.
+            <p className="mx-auto mt-5 max-w-2xl text-lg text-slate-400">
+              Indsæt dit Airbnb- eller Booking.com-link. Vakanza henter billederne og skaber automatisk en professionel video klar til Reels, TikTok og Facebook — på under 15 minutter.
             </p>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-2">
-            {/* AI images card */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-              <div className="mb-5 flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-50">
-                  <ImageIcon size={22} className="text-pink-500" />
+          {/* Main content grid */}
+          <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+
+            {/* Left: Phone mockup with animated video preview */}
+            <div className="flex justify-center">
+              <div className="relative">
+                {/* Glow behind phone */}
+                <div className="absolute inset-0 scale-90 rounded-[2.5rem] opacity-40 blur-2xl" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }} />
+                {/* Phone frame */}
+                <div className="relative mx-auto w-[220px] overflow-hidden rounded-[2.5rem] border-4 border-white/10 bg-black shadow-2xl">
+                  {/* Notch */}
+                  <div className="absolute left-1/2 top-3 z-10 h-5 w-24 -translate-x-1/2 rounded-full bg-black" />
+                  {/* Video preview — animated gradient blocks */}
+                  <div className="relative aspect-[9/16] overflow-hidden" style={{ background: "linear-gradient(160deg, #1a2540 0%, #0d1520 100%)" }}>
+                    {/* Animated scene */}
+                    <div className="absolute inset-0 flex flex-col">
+                      <div className="h-1/2 w-full" style={{ background: "linear-gradient(180deg, #2d6a9f 0%, #1a3f5c 100%)" }} />
+                      <div className="h-1/2 w-full" style={{ background: "linear-gradient(0deg, #1a3020 0%, #2d5a3a 100%)" }} />
+                    </div>
+                    {/* Overlay content */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/30">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-sm">
+                        <Play size={22} className="text-white" fill="white" />
+                      </div>
+                      <div className="mt-2 px-4 text-center">
+                        <p className="text-[10px] font-semibold text-white/90">Sommerhus ved Skagen</p>
+                        <p className="text-[9px] text-white/60">AI-genereret præsentationsvideo</p>
+                      </div>
+                    </div>
+                    {/* Bottom gradient */}
+                    <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/80 to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <div className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                          <span className="text-[9px] font-medium text-white">REELS KLAR</span>
+                        </div>
+                        <span className="text-[9px] text-white/70">0:28</span>
+                      </div>
+                      <div className="mt-1.5 h-0.5 overflow-hidden rounded-full bg-white/20">
+                        <div className="h-full w-2/3 rounded-full" style={{ background: "linear-gradient(90deg, #FFB36B, #FF6B4A)" }} />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-slate-900">AI-genererede billeder</h3>
-                  <p className="text-sm text-slate-500">Skab professionelle marketingbilleder</p>
+                {/* Floating badges */}
+                <div className="absolute -right-8 top-12 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md">
+                  <p className="text-[10px] font-semibold text-white">9:16 format</p>
+                  <p className="text-[9px] text-slate-400">Reels & TikTok</p>
+                </div>
+                <div className="absolute -left-8 bottom-16 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md">
+                  <p className="text-[10px] font-semibold text-emerald-400">✓ Klar på 15 min</p>
+                  <p className="text-[9px] text-slate-400">AI genererer</p>
                 </div>
               </div>
-              {/* Fake image grid */}
-              <div className="mb-5 grid grid-cols-3 gap-2">
+            </div>
+
+            {/* Right: Steps + stats */}
+            <div className="flex flex-col gap-6">
+              {/* Steps */}
+              <div className="flex flex-col gap-4">
                 {[
-                  "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                  "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-                  "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-                  "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
-                  "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
-                  "linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)",
-                ].map((g, i) => (
-                  <div key={i} className="aspect-square rounded-xl" style={{ background: g }}>
-                    <div className="flex h-full items-center justify-center">
-                      <Home size={18} className="text-white/60" />
+                  { n: "01", title: "Indsæt dit booking-link", desc: "Vi henter automatisk billeder og boliginfo fra Airbnb, Booking.com eller din egen side." },
+                  { n: "02", title: "AI skaber din video", desc: "Higgsfield AI komponerer en flydende præsentationsvideo med cineastiske overgange og stemningsfuld musik." },
+                  { n: "03", title: "Del på alle platforme", desc: "Download videoen og del den direkte til Instagram Reels, TikTok og Facebook — alt fra én app." },
+                ].map((step) => (
+                  <div key={step.n} className="flex gap-4 rounded-2xl border border-white/5 bg-white/5 p-5 backdrop-blur-sm">
+                    <div className="shrink-0">
+                      <span className="text-2xl font-bold" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                        {step.n}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white">{step.title}</p>
+                      <p className="mt-1 text-sm text-slate-400">{step.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
-              <ul className="flex flex-col gap-2">
-                <Check>Upload én reference — AI genererer variationer</Check>
-                <Check>Optimerede til sociale medier (1:1, 4:5, 9:16)</Check>
-                <Check>Sommerhus, lejlighed, villa — alle boligtyper</Check>
-                <Check>Klar på sekunder</Check>
-              </ul>
-              <div className="mt-6 flex items-center justify-between rounded-xl bg-pink-50 p-4">
-                <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pris</p>
-                  <p className="text-2xl font-bold text-slate-900">5 kr <span className="text-sm font-normal text-slate-500">/ billede</span></p>
-                </div>
-                <Link href="/signup" className="rounded-lg bg-pink-500 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-600 transition-colors">
-                  Prøv nu
-                </Link>
-              </div>
-            </div>
 
-            {/* Video card */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-              <div className="mb-5 flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-50">
-                  <Video size={22} className="text-orange-500" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900">AI-præsentationsvideo</h3>
-                  <p className="text-sm text-slate-500">Professionel video på under 15 minutter</p>
-                </div>
+              {/* Stats row */}
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { value: "3×", label: "mere engagement" },
+                  { value: "15 min", label: "genereringstid" },
+                  { value: "9:16", label: "Reels & TikTok" },
+                ].map((s) => (
+                  <div key={s.label} className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
+                    <p className="text-xl font-bold text-white">{s.value}</p>
+                    <p className="mt-0.5 text-[11px] text-slate-500">{s.label}</p>
+                  </div>
+                ))}
               </div>
-              {/* Phone + description side by side */}
-              <div className="mb-5 flex items-center gap-6">
-                <PhoneMockup />
-                <div className="flex-1 space-y-3">
-                  <div className="flex items-start gap-2.5">
-                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}>1</div>
-                    <p className="text-xs text-slate-600">Indsæt dit Airbnb- eller Booking.com-link — vi henter billeder automatisk</p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}>2</div>
-                    <p className="text-xs text-slate-600">AI genererer video med musik og flydende overgange</p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}>3</div>
-                    <p className="text-xs text-slate-600">Download og del på Instagram Reels, TikTok og Facebook</p>
-                  </div>
-                </div>
-              </div>
-              <ul className="flex flex-col gap-2">
-                <Check>Henter billeder automatisk fra Airbnb & Booking.com</Check>
-                <Check>9:16 format — perfekt til Reels & TikTok</Check>
-                <Check>Leveret direkte i appen inden for 15 minutter</Check>
-                <Check>Op til 3× mere engagement end statiske billeder</Check>
-              </ul>
-              <div className="mt-6 flex items-center justify-between rounded-xl bg-orange-50 p-4">
+
+              {/* CTA */}
+              <div className="flex items-center justify-between rounded-2xl border border-orange-500/20 bg-orange-500/10 p-5">
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Engangspris</p>
-                  <p className="text-2xl font-bold text-slate-900">499 kr <span className="text-sm font-normal text-slate-500">/ video</span></p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-orange-400">Engangspris</p>
+                  <p className="text-3xl font-bold text-white">499 kr <span className="text-sm font-normal text-slate-400">/ video</span></p>
                 </div>
-                <Link href="/signup" className="rounded-lg px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}>
-                  Bestil video
+                <Link
+                  href="/signup"
+                  className="rounded-xl px-6 py-3 text-sm font-bold text-white shadow-lg transition-opacity hover:opacity-90"
+                  style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}
+                >
+                  Bestil video →
                 </Link>
               </div>
             </div>
+          </div>
+
+          {/* Feature chips row */}
+          <div className="mt-16 flex flex-wrap justify-center gap-3">
+            {[
+              "Airbnb & Booking.com integration",
+              "Cineastiske kameraovergange",
+              "Automatisk baggrundsmusik",
+              "Leveret på under 15 minutter",
+              "Download & del direkte",
+              "9:16 optimeret til Reels",
+            ].map((f) => (
+              <span key={f} className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-slate-300">
+                <CheckCircle2 size={11} className="text-orange-400" /> {f}
+              </span>
+            ))}
           </div>
         </div>
       </section>
