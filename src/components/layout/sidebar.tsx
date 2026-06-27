@@ -126,7 +126,7 @@ export function Sidebar({ accounts = [], userEmail }: SidebarProps) {
 
       {/* Analytics */}
       <nav className="relative flex flex-col gap-0.5 px-2">
-        <NavItem href="/billing" icon={BarChart2} label="Analytics" external />
+        <NavItem href="/analytics" icon={BarChart2} label="Analytics" />
       </nav>
 
       {/* Connected channels */}
