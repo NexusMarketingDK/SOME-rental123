@@ -43,11 +43,11 @@ src/
 - [x] **Step 1** — Project setup, Tailwind, Supabase clients, folder
       structure, sidebar app shell, dashboard placeholder
 - [x] **Step 2** — Auth system (signup, login, logout, session handling, protected routes)
-- [ ] Step 3 — Database schema
-- [ ] Step 4 — Properties module
+- [x] **Step 3** — Database schema (properties, property_images, social_accounts, posts, post_distributions, calendar_integrations, calendar_events)
+- [x] **Step 4** — Properties module (list, create, edit, delete)
 - [ ] Step 5 — Image upload
-- [ ] Step 6 — Social accounts (connected accounts model)
-- [ ] Step 7 — Posts system
+- [x] **Step 6** — Social accounts (Facebook + LinkedIn, connected accounts model)
+- [x] **Step 7** — Posts system (list, create, schedule, distribute to accounts)
 - [ ] Step 8 — AI content generation
 - [ ] Step 9 — Calendar sync (read-only)
 - [ ] Step 10 — Scheduler system
