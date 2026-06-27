@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
+import { generateVideo } from "@/lib/higgsfield";
 import { createClient } from "@/lib/supabase/server";
 import type Stripe from "stripe";
 
@@ -23,7 +24,6 @@ export async function POST(req: NextRequest) {
       if (!userId) break;
 
       if (session.mode === "subscription") {
-        // Activate subscription
         await supabase.from("subscriptions").upsert({
           user_id: userId,
           stripe_customer_id: String(session.customer),
@@ -34,7 +34,6 @@ export async function POST(req: NextRequest) {
 
       if (session.mode === "payment" && session.metadata?.type === "ai_credits") {
         const credits = parseInt(session.metadata.credits ?? "0");
-        // Upsert credit balance
         const { data: existing } = await supabase
           .from("ai_credits")
           .select("balance")
@@ -55,12 +54,48 @@ export async function POST(req: NextRequest) {
       }
 
       if (session.mode === "payment" && session.metadata?.type === "video") {
-        await supabase.from("video_orders").insert({
-          user_id: userId,
-          property_id: session.metadata.property_id || null,
-          stripe_payment_id: session.payment_intent as string,
-          status: "pending",
-        });
+        const propertyId = session.metadata.property_id || null;
+        const imageUrls = session.metadata.image_urls
+          ? JSON.parse(session.metadata.image_urls)
+          : [];
+        const title = session.metadata.title ?? "Bolig fremvisning";
+
+        // Insert order first
+        const { data: order } = await supabase
+          .from("video_orders")
+          .insert({
+            user_id: userId,
+            property_id: propertyId,
+            stripe_payment_id: session.payment_intent as string,
+            status: "processing",
+            image_urls: imageUrls,
+            title,
+          })
+          .select()
+          .single();
+
+        // Trigger Higgsfield video generation
+        if (order && imageUrls.length > 0) {
+          try {
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://some-rental123.vercel.app";
+            const { jobId } = await generateVideo({
+              imageUrls,
+              title,
+              webhookUrl: `${appUrl}/api/webhooks/higgsfield`,
+            });
+
+            await supabase
+              .from("video_orders")
+              .update({ higgsfield_job_id: jobId })
+              .eq("id", order.id);
+          } catch (err) {
+            console.error("Higgsfield error:", err);
+            await supabase
+              .from("video_orders")
+              .update({ status: "failed" })
+              .eq("id", order.id);
+          }
+        }
       }
       break;
     }

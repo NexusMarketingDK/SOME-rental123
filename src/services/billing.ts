@@ -98,8 +98,11 @@ export async function createAiCreditCheckout(formData: FormData): Promise<void> 
   redirect(session.url!);
 }
 
-export async function createVideoOrderCheckout(formData?: FormData): Promise<void> {
+export async function createVideoOrderCheckout(formData: FormData): Promise<void> {
   const propertyId = String(formData?.get("property_id") ?? "");
+  const title = String(formData?.get("title") ?? "Bolig fremvisning");
+  const imageUrls = formData?.getAll("image_urls[]").map(String) ?? [];
+  const bookingUrl = String(formData?.get("booking_url") ?? "");
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -121,7 +124,14 @@ export async function createVideoOrderCheckout(formData?: FormData): Promise<voi
     }],
     success_url: `${appUrl}/billing?payment=success`,
     cancel_url: `${appUrl}/billing`,
-    metadata: { user_id: user.id, type: "video", property_id: propertyId },
+    metadata: {
+      user_id: user.id,
+      type: "video",
+      property_id: propertyId,
+      title,
+      image_urls: JSON.stringify(imageUrls),
+      booking_url: bookingUrl,
+    },
     locale: "da",
   });
 

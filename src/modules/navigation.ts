@@ -6,6 +6,7 @@ import {
   SendHorizontal,
   Settings,
   CreditCard,
+  Video,
 } from "lucide-react";
 import type { NavItem } from "@/types/navigation";
 
@@ -15,6 +16,7 @@ export const primaryNav: NavItem[] = [
   { label: "Opslag", href: "/posts", icon: SendHorizontal },
   { label: "Sociale konti", href: "/accounts", icon: Share2 },
   { label: "Kalender", href: "/calendar", icon: CalendarDays },
+  { label: "Videoer", href: "/videos", icon: Video },
 ];
 
 export const secondaryNav: NavItem[] = [
