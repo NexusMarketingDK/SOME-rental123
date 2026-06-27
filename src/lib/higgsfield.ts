@@ -196,11 +196,11 @@ export async function startVideoGeneration(
         ? { type: "image_url" as const, image_url: await uploadBase64ToHiggsfield(client, url) }
         : { type: "image_url" as const, image_url: url };
 
-      const jobSet = await client.generate("/v1/image2video/dop", {
-        model: "dop-turbo",
-        prompt,
-        input_images: [inputImage],
-      });
+      const jobSet = await client.generate(
+        "/v1/image2video/dop",
+        { model: "dop-turbo", prompt, input_images: [inputImage] },
+        { withPolling: false }
+      );
 
       return jobSet.id;
     })

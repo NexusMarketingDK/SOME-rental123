@@ -135,6 +135,8 @@ const PLATFORMS = [
   },
 ];
 
+const OAUTH_PLATFORMS = new Set(["facebook", "instagram"]);
+
 export default function ConnectAccountPage() {
   const [step, setStep] = useState<"pick" | "details">("pick");
   const [selected, setSelected] = useState<typeof PLATFORMS[0] | null>(null);
@@ -147,6 +149,16 @@ export default function ConnectAccountPage() {
     const reader = new FileReader();
     reader.onload = () => setAvatarUrl(reader.result as string);
     reader.readAsDataURL(file);
+  }
+
+  function handlePickPlatform(p: typeof PLATFORMS[0]) {
+    if (OAUTH_PLATFORMS.has(p.value)) {
+      // Redirect to real OAuth — Facebook handles both FB + Instagram pages
+      window.location.href = "/api/facebook/auth";
+      return;
+    }
+    setSelected(p);
+    setStep("details");
   }
 
   return (
@@ -177,13 +189,18 @@ export default function ConnectAccountPage() {
                   <button
                     key={p.value}
                     type="button"
-                    onClick={() => { setSelected(p); setStep("details"); }}
+                    onClick={() => handlePickPlatform(p)}
                     className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3.5 text-left hover:border-slate-200 hover:bg-white hover:shadow-sm transition-all group"
                   >
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ backgroundColor: p.bg }}>
                       {p.icon}
                     </div>
-                    <span className="text-sm font-semibold text-slate-800 group-hover:text-slate-900">{p.label}</span>
+                    <div>
+                      <span className="text-sm font-semibold text-slate-800 group-hover:text-slate-900">{p.label}</span>
+                      {OAUTH_PLATFORMS.has(p.value) && (
+                        <p className="text-[10px] text-emerald-600 font-medium">OAuth tilslutning</p>
+                      )}
+                    </div>
                   </button>
                 ))}
               </div>
