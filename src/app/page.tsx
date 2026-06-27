@@ -211,7 +211,7 @@ export default function LandingPage() {
           <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
             <a href="#" className="hover:text-[#1B3F7A] transition-colors">Forside</a>
             <a href="#features" className="hover:text-[#1B3F7A] transition-colors">Funktioner</a>
-            <a href="#ai" className="hover:text-[#1B3F7A] transition-colors">AI Video</a>
+            <a href="#ai" className="hover:text-[#1B3F7A] transition-colors">Video</a>
             <a href="#pricing" className="hover:text-[#1B3F7A] transition-colors">Priser</a>
           </nav>
           <div className="flex items-center gap-3">
@@ -253,14 +253,14 @@ export default function LandingPage() {
                 <Pill><Video size={11} /> Præsentationsvideoer</Pill>
               </div>
               <h1 className="text-4xl font-bold leading-tight text-white md:text-5xl lg:text-[3.25rem]">
-                Markedsfør din<br />
-                feriebolig på<br />
+                Udlej din<br />
+                private bolig<br />
                 <span style={{ background: "linear-gradient(90deg, #FFB36B, #FF6B4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                  autopilot
+                  smartere
                 </span>
               </h1>
               <p className="mt-5 max-w-lg text-base leading-relaxed text-blue-100">
-                Vakanza poster automatisk til Facebook, Instagram, TikTok og LinkedIn, genererer AI-billeder og professionelle præsentationsvideoer — mens du bruger din tid på det der betyder mest.
+                Vakanza hjælper private udlejere med at markedsføre ferieboligen — automatisk. AI skaber præsentationsvideoer fra dine billeder, poster til sociale medier og synkroniserer din bookingkalender.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
@@ -308,7 +308,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-5xl px-6">
           <p className="mb-3 text-center text-xs font-semibold uppercase tracking-widest text-slate-400">Virker med</p>
           <div className="flex flex-wrap items-center justify-center gap-6">
-            {["Airbnb", "Booking.com", "Facebook", "Instagram", "TikTok", "LinkedIn", "Snapchat", "YouTube"].map((p) => (
+            {["Airbnb", "Booking.com", "Novasol", "Facebook", "Instagram", "TikTok", "LinkedIn", "YouTube"].map((p) => (
               <span key={p} className="text-sm font-semibold text-slate-400 hover:text-slate-600 transition-colors">{p}</span>
             ))}
           </div>
@@ -327,12 +327,12 @@ export default function LandingPage() {
             </p>
           </div>
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            <FeatureCard icon={Share2} title="Post på alle platforme på én gang" desc="Skriv ét opslag og send det til Facebook, Instagram, TikTok og LinkedIn simultant — automatisk på dine valgte tidspunkter." accent="bg-blue-50 text-blue-600" />
-            <FeatureCard icon={Sparkles} title="AI-genererede opslag" desc="Lad AI skrive professionelle, engagerende opslag baseret på din bolig. Vælg tone: familievenlig, luksus eller last-minute tilbud." accent="bg-purple-50 text-purple-600" />
-            <FeatureCard icon={ImageIcon} title="AI-genererede billeder" desc="Generer smukke billeder af din bolig med AI. Upload en reference, og Vakanza skaber professionelle marketingbilleder på få sekunder." accent="bg-pink-50 text-pink-600" />
-            <FeatureCard icon={Video} title="Præsentationsvideo på minutter" desc="Henter billeder automatisk fra Airbnb & Booking.com. AI skaber en professionel video med musik, klar til Reels og TikTok." accent="bg-orange-50 text-orange-600" />
-            <FeatureCard icon={CalendarDays} title="Kalendersynkronisering" desc="Importer din bookingkalender fra Airbnb, Booking.com eller Google Calendar automatisk. Se alle bookinger ét sted." accent="bg-emerald-50 text-emerald-600" />
-            <FeatureCard icon={Zap} title="Fuldautomatisk autopilot" desc="Sæt Vakanza til at generere og poste med dine foretrukne intervaller. Altid professionelt — uden du løfter en finger." accent="bg-yellow-50 text-yellow-600" />
+            <FeatureCard icon={Video} title="Virtuel fremvisning via video" desc="Upload billeder af din bolig — eller indsæt dit Novasol, Airbnb eller Booking.com-link. AI skaber en professionel præsentationsvideo med musik og filmiske kamerabevægelser på under 15 minutter." accent="bg-orange-50 text-orange-600" />
+            <FeatureCard icon={Share2} title="Automatisk post på sociale medier" desc="Ét klik sender dit indhold til Facebook, Instagram, TikTok og LinkedIn. Vakanza planlægger og poster automatisk på dine valgte tidspunkter." accent="bg-blue-50 text-blue-600" />
+            <FeatureCard icon={CalendarDays} title="Synkroniser din bookingkalender" desc="Importer din eksisterende kalender fra Airbnb, Booking.com, Novasol eller Google Calendar. Alle bookinger samlet ét sted — altid opdateret." accent="bg-emerald-50 text-emerald-600" />
+            <FeatureCard icon={Sparkles} title="AI skriver dine opslag" desc="Lad AI generere professionelle, engagerende opslag baseret på din bolig og sæson. Vælg tone: familievenlig, luksus eller last-minute tilbud." accent="bg-purple-50 text-purple-600" />
+            <FeatureCard icon={Home} title="Privat bolig eller feriehus" desc="Vakanza er skabt til private udlejere — sommerhus, lejlighed, villa eller kollegieværelse. Intet bureaugebyr, ingen bindinger." accent="bg-pink-50 text-pink-600" />
+            <FeatureCard icon={Zap} title="Fuldautomatisk autopilot" desc="Sæt Vakanza på autopilot og lad AI håndtere al markedsføring. Du fokuserer på dine gæster — Vakanza klarer resten." accent="bg-yellow-50 text-yellow-600" />
           </div>
         </div>
       </section>
@@ -353,13 +353,13 @@ export default function LandingPage() {
               <Sparkles size={11} /> Drevet af Higgsfield AI
             </div>
             <h2 className="text-4xl font-bold text-white md:text-5xl lg:text-6xl">
-              Fra billeder til<br />
+              Virtuel fremvisning<br />
               <span style={{ background: "linear-gradient(90deg, #FFB36B, #FF6B4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                viral præsentationsvideo
+                skabt af dine billeder
               </span>
             </h2>
             <p className="mx-auto mt-5 max-w-2xl text-lg text-slate-400">
-              Indsæt dit Airbnb- eller Booking.com-link. Vakanza henter billederne og skaber automatisk en professionel video klar til Reels, TikTok og Facebook — på under 15 minutter.
+              Upload billeder af din bolig — eller indsæt et link fra Novasol, Airbnb eller Booking.com. Vakanza henter billederne og skaber en professionel præsentationsvideo med musik og filmiske bevægelser på under 15 minutter.
             </p>
           </div>
 
@@ -425,7 +425,7 @@ export default function LandingPage() {
               {/* Steps */}
               <div className="flex flex-col gap-4">
                 {[
-                  { n: "01", title: "Indsæt dit booking-link", desc: "Vi henter automatisk billeder og boliginfo fra Airbnb, Booking.com eller din egen side." },
+                  { n: "01", title: "Indsæt link eller upload billeder", desc: "Vi henter automatisk billeder og boliginfo fra Novasol, Airbnb, Booking.com — eller upload dine egne billeder direkte." },
                   { n: "02", title: "AI skaber din video", desc: "Higgsfield AI komponerer en flydende præsentationsvideo med cineastiske overgange og stemningsfuld musik." },
                   { n: "03", title: "Del på alle platforme", desc: "Download videoen og del den direkte til Instagram Reels, TikTok og Facebook — alt fra én app." },
                 ].map((step) => (
@@ -477,12 +477,12 @@ export default function LandingPage() {
           {/* Feature chips row */}
           <div className="mt-16 flex flex-wrap justify-center gap-3">
             {[
-              "Airbnb & Booking.com integration",
+              "Novasol, Airbnb & Booking.com integration",
+              "Upload egne billeder",
               "Cineastiske kameraovergange",
               "Automatisk baggrundsmusik",
               "Leveret på under 15 minutter",
-              "Download & del direkte",
-              "9:16 optimeret til Reels",
+              "9:16 optimeret til Reels & TikTok",
             ].map((f) => (
               <span key={f} className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-slate-300">
                 <CheckCircle2 size={11} className="text-orange-400" /> {f}
@@ -503,9 +503,9 @@ export default function LandingPage() {
             {/* Connecting line */}
             <div className="absolute left-1/6 right-1/6 top-7 hidden h-px bg-gradient-to-r from-[#1B3F7A]/20 via-[#1B3F7A]/40 to-[#1B3F7A]/20 md:block" />
             {[
-              { n: "1", icon: Home, title: "Tilføj din bolig", desc: "Upload billeder og beskriv din feriebolig. Tilslut din bookingkalender fra Airbnb eller Booking.com." },
-              { n: "2", icon: Share2, title: "Forbind sociale medier", desc: "Forbind Facebook, Instagram, TikTok og LinkedIn med ét klik. Vælg hvilke platforme du vil poste til." },
-              { n: "3", icon: Zap, title: "Lad Vakanza klare resten", desc: "AI genererer og poster automatisk på dine valgte tidspunkter. Professionelt — uden du løfter en finger." },
+              { n: "1", icon: Home, title: "Tilføj din bolig", desc: "Upload billeder eller indsæt dit Novasol-, Airbnb- eller Booking.com-link. Synkroniser din eksisterende bookingkalender automatisk." },
+              { n: "2", icon: Video, title: "AI laver din præsentationsvideo", desc: "Vakanza skaber en professionel virtuel fremvisning med musik og filmiske kamerabevægelser — klar på under 15 minutter." },
+              { n: "3", icon: Zap, title: "Del automatisk på sociale medier", desc: "Vakanza poster din video og opslag til Facebook, Instagram, TikTok og LinkedIn — automatisk og på det rigtige tidspunkt." },
             ].map((s) => (
               <div key={s.n} className="relative text-center">
                 <div

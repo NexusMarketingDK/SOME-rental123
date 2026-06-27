@@ -1,6 +1,8 @@
 import { HiggsfieldClient } from "@higgsfield/client";
+import { createHiggsfieldClient } from "@higgsfield/client/v2";
 
 let _client: HiggsfieldClient | null = null;
+let _v2: ReturnType<typeof createHiggsfieldClient> | null = null;
 
 function getClient(): HiggsfieldClient {
   if (!_client) {
@@ -10,6 +12,16 @@ function getClient(): HiggsfieldClient {
     });
   }
   return _client;
+}
+
+function getV2Client() {
+  if (!_v2) {
+    _v2 = createHiggsfieldClient({
+      apiKey: process.env.HIGGSFIELD_API_KEY_ID,
+      apiSecret: process.env.HIGGSFIELD_API_SECRET,
+    });
+  }
+  return _v2;
 }
 
 type RoomPromptDef = {
@@ -192,17 +204,19 @@ export async function startVideoGeneration(
       const room = roomLabels?.[i] ?? `Image ${i + 1}`;
       const prompt = buildCinematicPrompt(room, title, i);
 
-      const inputImage = url.startsWith("data:")
-        ? { type: "image_url" as const, image_url: await uploadBase64ToHiggsfield(client, url) }
-        : { type: "image_url" as const, image_url: url };
+      const imageUrl = url.startsWith("data:")
+        ? await uploadBase64ToHiggsfield(client, url)
+        : url;
 
-      const jobSet = await client.generate(
-        "/v1/image2video/dop",
-        { model: "dop-turbo", prompt, input_images: [inputImage] },
-        { withPolling: false }
-      );
+      const inputImage = { type: "image_url" as const, image_url: imageUrl };
 
-      return jobSet.id;
+      const v2 = getV2Client();
+      const response = await v2.subscribe("/v1/image2video/dop", {
+        input: { model: "dop-turbo", prompt, input_images: [inputImage] },
+        withPolling: false,
+      }) as { request_id?: string; id?: string };
+
+      return response.request_id ?? response.id ?? "";
     })
   );
 
@@ -218,6 +232,13 @@ async function uploadBase64ToHiggsfield(client: HiggsfieldClient, dataUrl: strin
   return client.uploadImage(buffer, format);
 }
 
+type V2StatusResponse = {
+  status: string;
+  request_id?: string;
+  video?: { url: string };
+  images?: { url: string }[];
+};
+
 export async function getVideoJobsStatus(jobSetIds: string[]): Promise<{
   status: "queued" | "in_progress" | "completed" | "failed";
   videoUrls?: string[];
@@ -225,12 +246,26 @@ export async function getVideoJobsStatus(jobSetIds: string[]): Promise<{
   const client = getClient();
   type JobResult = { status: string; results?: { raw?: { url: string }; min?: { url: string } } };
   type JobSetData = { jobs?: JobResult[] };
-  const axiosClient = (client as unknown as { client: { get: (url: string) => Promise<{ data: JobSetData }> } }).client;
+  const axiosClient = (client as unknown as { client: { get: (url: string) => Promise<{ data: JobSetData | V2StatusResponse }> } }).client;
 
   const results = await Promise.all(
     jobSetIds.map(async (id) => {
+      // Try v2 endpoint first (/requests/{id}/status)
+      try {
+        const res = await axiosClient.get(`/requests/${id}/status`);
+        const data = res.data as V2StatusResponse;
+        if (data.status) {
+          const videoUrl = data.video?.url ?? data.images?.[0]?.url;
+          return { status: data.status, videoUrl };
+        }
+      } catch {
+        // fall through to v1
+      }
+
+      // Fallback: v1 job-sets endpoint
       const res = await axiosClient.get(`/v1/job-sets/${id}`);
-      const jobs: JobResult[] = res.data.jobs ?? [];
+      const v1Data = res.data as JobSetData;
+      const jobs: JobResult[] = v1Data.jobs ?? [];
       const job = jobs[0];
       const s = job?.status ?? "queued";
       const videoUrl = job?.results?.raw?.url ?? job?.results?.min?.url;
