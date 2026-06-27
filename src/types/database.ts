@@ -19,7 +19,7 @@ export type PropertyImage = {
   created_at: string;
 };
 
-export type SocialPlatform = "facebook" | "linkedin";
+export type SocialPlatform = "facebook" | "instagram" | "tiktok" | "snapchat" | "youtube" | "linkedin";
 
 export type SocialAccount = {
   id: string;
