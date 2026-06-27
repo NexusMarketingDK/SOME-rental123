@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, CalendarClock, Send, Video, Sparkles, ArrowRight, Flame, Target, MessageSquare, TrendingUp, TrendingDown, Users, BarChart2 } from "lucide-react";
+import { Plus, CalendarClock, Send, Video, Sparkles, ArrowRight, Flame, Target, Users, BarChart2, TrendingUp, TrendingDown, CheckCircle2, Loader2, Clock, XCircle, Play } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import type { Post, SocialAccount } from "@/types/database";
 
@@ -17,12 +17,14 @@ async function getDashboardData() {
     sentLastWeekRes,
     accountsRes,
     upcomingRes,
+    videoOrdersRes,
   ] = await Promise.all([
     supabase.from("posts").select("id", { count: "exact", head: true }).eq("status", "scheduled"),
     supabase.from("posts").select("id", { count: "exact", head: true }).eq("status", "published").gte("published_at", weekAgo),
     supabase.from("posts").select("id", { count: "exact", head: true }).eq("status", "published").gte("published_at", prevWeekAgo).lt("published_at", weekAgo),
     supabase.from("social_accounts").select("*").order("created_at"),
     supabase.from("posts").select("*").eq("status", "scheduled").order("scheduled_at").limit(5),
+    supabase.from("video_orders").select("*").order("created_at", { ascending: false }).limit(4),
   ]);
 
   return {
@@ -31,6 +33,7 @@ async function getDashboardData() {
     sentLastWeek: sentLastWeekRes.count ?? 0,
     accounts: (accountsRes.data ?? []) as SocialAccount[],
     upcoming: (upcomingRes.data ?? []) as Post[],
+    videoOrders: videoOrdersRes.data ?? [],
     userEmail: user?.email ?? "",
   };
 }
@@ -52,12 +55,36 @@ function TrendBadge({ current, previous }: { current: number; previous: number }
   );
 }
 
+function VideoStatusBadge({ status }: { status: string }) {
+  if (status === "ready") return (
+    <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+      <CheckCircle2 size={10} /> Klar
+    </span>
+  );
+  if (status === "processing") return (
+    <span className="flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+      <Loader2 size={10} className="animate-spin" /> Genereres
+    </span>
+  );
+  if (status === "failed") return (
+    <span className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-600">
+      <XCircle size={10} /> Fejlede
+    </span>
+  );
+  return (
+    <span className="flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+      <Clock size={10} /> Afventer
+    </span>
+  );
+}
+
 export default async function DashboardPage() {
   const data = await getDashboardData();
   const firstName = data.userEmail.split("@")[0];
   const now = new Date();
   const weekStart = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000);
   const weekRange = `${weekStart.toLocaleDateString("da-DK", { day: "numeric", month: "short" })} – ${now.toLocaleDateString("da-DK", { day: "numeric", month: "short", year: "numeric" })}`;
+  const hasVideos = data.videoOrders.length > 0;
 
   return (
     <div className="flex-1 px-8 py-7 max-w-5xl mx-auto w-full space-y-6">
@@ -87,6 +114,116 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
+      {/* ── AI Video — hero section ── */}
+      {hasVideos ? (
+        /* Has orders: show list + new button */
+        <div className="rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100"
+            style={{ background: "linear-gradient(135deg, #1B3F7A 0%, #2a5298 100%)" }}>
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15">
+                <Video size={15} className="text-white" />
+              </div>
+              <div>
+                <p className="font-bold text-white text-sm">AI Præsentationsvideoer</p>
+                <p className="text-[11px] text-blue-200">{data.videoOrders.length} video{data.videoOrders.length !== 1 ? "er" : ""}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/videos"
+                className="text-xs text-blue-200 hover:text-white transition-colors"
+              >
+                Se alle <ArrowRight size={11} className="inline" />
+              </Link>
+              <Link
+                href="/videos/new"
+                className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-[#1B3F7A] hover:opacity-90 transition-opacity"
+              >
+                <Plus size={12} /> Ny video
+              </Link>
+            </div>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {data.videoOrders.map((order) => (
+              <Link
+                key={order.id}
+                href={`/videos/${order.id}`}
+                className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 transition-colors group"
+              >
+                {/* Thumbnail */}
+                <div className="relative h-14 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100 border border-slate-200">
+                  {order.image_urls?.[0] ? (
+                    <img src={order.image_urls[0]} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center">
+                      <Video size={18} className="text-slate-300" />
+                    </div>
+                  )}
+                  {order.status === "ready" && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Play size={16} className="text-white fill-white" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-slate-900 truncate text-sm">{order.title ?? "Bolig fremvisning"}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    {new Date(order.created_at).toLocaleDateString("da-DK", { day: "numeric", month: "short", year: "numeric" })}
+                  </p>
+                </div>
+                <VideoStatusBadge status={order.status} />
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : (
+        /* No orders: prominent CTA */
+        <div
+          className="relative overflow-hidden rounded-2xl p-8"
+          style={{ background: "linear-gradient(135deg, #1B3F7A 0%, #14306b 60%, #0f2347 100%)" }}
+        >
+          {/* Decorative circles */}
+          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #FFB36B, transparent)" }} />
+          <div className="pointer-events-none absolute -bottom-12 -left-12 h-40 w-40 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #FF6B4A, transparent)" }} />
+
+          <div className="relative flex items-center gap-8">
+            <div className="flex-1">
+              <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-orange-400/30 bg-orange-400/10 px-3 py-1.5 text-xs font-semibold text-orange-300">
+                <Sparkles size={11} /> AI-drevet præsentationsvideo
+              </div>
+              <h2 className="text-2xl font-bold text-white leading-tight">
+                Præsentér din bolig<br />med en professionel video
+              </h2>
+              <p className="mt-2 text-sm text-blue-200 leading-relaxed max-w-sm">
+                Indsæt dit Airbnb- eller Booking.com-link — AI'en genererer en flot præsentationsvideo på under 15 minutter, klar til at dele på sociale medier.
+              </p>
+              <div className="mt-5 flex items-center gap-3">
+                <Link
+                  href="/videos/new"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-[#1B3F7A] shadow hover:opacity-90 transition-opacity"
+                >
+                  <Video size={15} /> Opret video nu
+                </Link>
+                <Link href="/videos" className="text-sm text-blue-300 hover:text-white transition-colors flex items-center gap-1">
+                  Se eksempler <ArrowRight size={13} />
+                </Link>
+              </div>
+            </div>
+
+            {/* Visual */}
+            <div className="hidden md:flex shrink-0 flex-col gap-2">
+              {["3× mere engagement", "Klar på 15 min", "Del direkte på sociale medier"].map((t) => (
+                <div key={t} className="flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 backdrop-blur-sm">
+                  <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
+                  <span className="text-sm text-white font-medium">{t}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Streak / Goals / Score ── */}
       <div className="grid grid-cols-3 gap-4">
         {[
@@ -102,7 +239,7 @@ export default async function DashboardPage() {
             icon: Target,
             label: "Planlagte opslag",
             value: data.scheduled,
-            sub: data.scheduled === 0 ? "Ingen mål sat endnu" : `${data.scheduled} klar til publicering`,
+            sub: data.scheduled === 0 ? "Ingen planlagte opslag" : `${data.scheduled} klar til publicering`,
             color: "#1B3F7A",
             bg: "#EEF3FB",
           },
@@ -248,8 +385,8 @@ export default async function DashboardPage() {
             </div>
             <div className="p-2">
               {[
+                { href: "/videos/new", icon: Video, label: "Opret video", bg: "bg-orange-50", color: "text-[#FF6B4A]" },
                 { href: "/posts/new", icon: Send, label: "Opret opslag", bg: "bg-blue-50", color: "text-blue-600" },
-                { href: "/videos/new", icon: Video, label: "Bestil video", bg: "bg-orange-50", color: "text-[#FF6B4A]" },
                 { href: "/properties/new", icon: Plus, label: "Tilføj bolig", bg: "bg-emerald-50", color: "text-emerald-600" },
               ].map((item) => (
                 <Link
@@ -266,7 +403,7 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {/* AI Video upsell */}
+          {/* Video stats / tip */}
           <div
             className="rounded-2xl p-5 text-white relative overflow-hidden"
             style={{ background: "linear-gradient(135deg, #1B3F7A 0%, #2a5298 100%)" }}
@@ -275,28 +412,20 @@ export default async function DashboardPage() {
             <div className="absolute -right-2 top-8 h-16 w-16 rounded-full bg-white/5" />
             <div className="relative">
               <div className="mb-2 flex items-center gap-1.5">
-                <Sparkles size={13} className="text-orange-300" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-orange-300">AI Video</span>
+                <TrendingUp size={13} className="text-orange-300" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-orange-300">Vidste du?</span>
               </div>
-              <p className="text-sm font-bold leading-snug">Præsentationsvideo fra dine billeder</p>
-              <p className="mt-1 text-xs text-blue-200 leading-relaxed">Klar på 5-15 min. Henter automatisk fra Airbnb & Booking.com.</p>
+              <p className="text-sm font-bold leading-snug">Videoer får 3× mere engagement end billeder</p>
+              <p className="mt-1 text-xs text-blue-200 leading-relaxed">
+                Udlejere der deler præsentationsvideoer får markant flere bookingforespørgsler.
+              </p>
               <Link
                 href="/videos/new"
                 className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-[#1B3F7A] hover:opacity-90 transition-opacity"
               >
-                Bestil — 499 kr <ArrowRight size={11} />
+                Prøv det nu <ArrowRight size={11} />
               </Link>
             </div>
-          </div>
-
-          {/* Comments placeholder */}
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <MessageSquare size={14} className="text-slate-400" />
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Kommentarer</h3>
-            </div>
-            <p className="text-2xl font-bold text-slate-900">0</p>
-            <p className="text-xs text-slate-400 mt-1">Ingen ubesvarede kommentarer</p>
           </div>
         </div>
       </div>
