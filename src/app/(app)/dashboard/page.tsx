@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Plus, CalendarClock, Send, Video, Sparkles, ArrowRight, Flame, Target, Users, BarChart2, TrendingUp, TrendingDown, CheckCircle2, Loader2, Clock, XCircle, Play } from "lucide-react";
+import { Plus, CalendarClock, Send, Video, Sparkles, ArrowRight, Flame, Target, Users, BarChart2, TrendingUp, TrendingDown, CheckCircle2, Clock, Play } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import type { Post, SocialAccount } from "@/types/database";
+import { VideoProgressBadge } from "@/components/video-progress-badge";
 
 async function getDashboardData() {
   const supabase = await createClient();
@@ -55,28 +56,6 @@ function TrendBadge({ current, previous }: { current: number; previous: number }
   );
 }
 
-function VideoStatusBadge({ status }: { status: string }) {
-  if (status === "ready") return (
-    <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-      <CheckCircle2 size={10} /> Klar
-    </span>
-  );
-  if (status === "processing") return (
-    <span className="flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
-      <Loader2 size={10} className="animate-spin" /> Genereres
-    </span>
-  );
-  if (status === "failed") return (
-    <span className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-600">
-      <XCircle size={10} /> Fejlede
-    </span>
-  );
-  return (
-    <span className="flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
-      <Clock size={10} /> Afventer
-    </span>
-  );
-}
 
 export default async function DashboardPage() {
   const data = await getDashboardData();
@@ -172,7 +151,7 @@ export default async function DashboardPage() {
                     {new Date(order.created_at).toLocaleDateString("da-DK", { day: "numeric", month: "short", year: "numeric" })}
                   </p>
                 </div>
-                <VideoStatusBadge status={order.status} />
+                <VideoProgressBadge status={order.status} createdAt={order.created_at} />
               </Link>
             ))}
           </div>

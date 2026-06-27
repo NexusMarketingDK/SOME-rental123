@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Link2, Loader2, CheckCircle2, AlertCircle, X } from "lucide-react";
 import { Topbar } from "@/components/layout/topbar";
 import { createPropertyAction } from "@/services/properties";
@@ -29,6 +30,7 @@ function Field({
 }
 
 export default function NewPropertyPage() {
+  const router = useRouter();
   const [importUrl, setImportUrl] = useState("");
   const [importing, startImport] = useTransition();
   const [importResult, setImportResult] = useState<{ ok?: ScrapedProperty; error?: string } | null>(null);
@@ -41,6 +43,8 @@ export default function NewPropertyPage() {
   const [price, setPrice] = useState("");
   const [conditions, setConditions] = useState("");
   const [images, setImages] = useState<string[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -64,13 +68,26 @@ export default function NewPropertyPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setSubmitError("");
+    setSubmitting(true);
     const fd = new FormData();
     fd.set("title", title);
     fd.set("location", location);
     fd.set("description", [description, size && `Størrelse: ${size}`, price && `Pris: ${price}`, conditions && `Betingelser: ${conditions}`].filter(Boolean).join("\n\n"));
     fd.set("booking_url", bookingUrl);
     images.forEach((url) => fd.append("image_urls[]", url));
-    await createPropertyAction(fd);
+    try {
+      const result = await createPropertyAction(fd);
+      if (result?.error) {
+        setSubmitError(result.error);
+        setSubmitting(false);
+      } else {
+        router.push("/properties");
+      }
+    } catch {
+      // redirect() throws — means success, navigate
+      router.push("/properties");
+    }
   }
 
   return (
@@ -175,17 +192,23 @@ export default function NewPropertyPage() {
               </div>
             )}
 
+            {submitError && (
+              <div className="flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs text-red-700">
+                <AlertCircle size={13} className="shrink-0" /> {submitError}
+              </div>
+            )}
             <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
               <Link href="/properties" className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
                 Annuller
               </Link>
               <button
                 type="submit"
-                disabled={!title.trim()}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40"
+                disabled={!title.trim() || submitting}
+                className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40"
                 style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
               >
-                Tilføj bolig
+                {submitting && <Loader2 size={14} className="animate-spin" />}
+                {submitting ? "Gemmer..." : "Tilføj bolig"}
               </button>
             </div>
           </form>

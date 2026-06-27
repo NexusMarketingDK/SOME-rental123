@@ -27,12 +27,12 @@ export async function getProperty(id: string): Promise<Property | null> {
   return data;
 }
 
-export async function createPropertyAction(formData: FormData): Promise<void> {
+export async function createPropertyAction(formData: FormData): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const imageUrls = formData.getAll("image_urls[]").map(String).filter((u) => u.startsWith("http"));
+  const coverUrl = formData.getAll("image_urls[]").map(String).find((u) => u.startsWith("http")) ?? null;
 
   const { error } = await supabase.from("properties").insert({
     user_id: user.id,
@@ -40,10 +40,10 @@ export async function createPropertyAction(formData: FormData): Promise<void> {
     description: String(formData.get("description") ?? "").trim() || null,
     location: String(formData.get("location") ?? "").trim() || null,
     booking_url: String(formData.get("booking_url") ?? "").trim() || null,
-    image_urls: imageUrls.length > 0 ? imageUrls : null,
+    cover_url: coverUrl,
   });
 
-  if (error) redirect("/properties/new?error=db");
+  if (error) return { error: error.message };
   revalidatePath("/properties");
   redirect("/properties");
 }
