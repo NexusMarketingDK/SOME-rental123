@@ -252,29 +252,16 @@ export default function NewVideoPage() {
                   )}
                 </div>
 
-                {/* Price summary */}
-                <div className="rounded-xl border border-orange-100 bg-orange-50 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-slate-900">AI-præsentationsvideo</p>
-                      <p className="text-xs text-slate-500 mt-0.5">Engangsbetaling · Ingen abonnement · Leveres i appen</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-slate-900">499 kr</p>
-                    </div>
-                  </div>
-                </div>
-
                 <button
                   type="submit"
                   disabled={!canSubmit}
                   className="w-full rounded-xl py-3.5 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
                 >
-                  {canSubmit ? "Gå til betaling — 499 kr" : "Udfyld titel og tilføj mindst 2 billeder"}
+                  {canSubmit ? "Opret video" : "Udfyld titel og tilføj mindst 2 billeder"}
                 </button>
                 <p className="text-center text-xs text-slate-400">
-                  Sikker betaling via Stripe · Video leveres inden for 15 minutter
+                  Video leveres inden for 15 minutter
                 </p>
               </form>
             </div>

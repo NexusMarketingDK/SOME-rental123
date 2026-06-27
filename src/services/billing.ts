@@ -99,43 +99,22 @@ export async function createAiCreditCheckout(formData: FormData): Promise<void> 
 }
 
 export async function createVideoOrderCheckout(formData: FormData): Promise<void> {
-  const propertyId = String(formData?.get("property_id") ?? "");
+  const propertyId = String(formData?.get("property_id") ?? "") || null;
   const title = String(formData?.get("title") ?? "Bolig fremvisning");
   const imageUrls = formData?.getAll("image_urls[]").map(String) ?? [];
-  const bookingUrl = String(formData?.get("booking_url") ?? "");
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://some-rental123.vercel.app";
-
-  const session = await getStripe().checkout.sessions.create({
-    mode: "payment",
-    line_items: [{
-      price_data: {
-        currency: "dkk",
-        product_data: {
-          name: "Bolig-fremvisningsvideo",
-          description: "AI-genereret præsentationsvideo fra dine billeder",
-        },
-        unit_amount: PRICES.video,
-      },
-      quantity: 1,
-    }],
-    success_url: `${appUrl}/billing?payment=success`,
-    cancel_url: `${appUrl}/billing`,
-    metadata: {
-      user_id: user.id,
-      type: "video",
-      property_id: propertyId,
-      title,
-      image_urls: JSON.stringify(imageUrls),
-      booking_url: bookingUrl,
-    },
-    locale: "da",
+  await supabase.from("video_orders").insert({
+    user_id: user.id,
+    property_id: propertyId,
+    title,
+    image_urls: imageUrls,
+    status: "pending",
   });
 
-  redirect(session.url!);
+  redirect("/videos?order=created");
 }
 
 export async function createBillingPortalSession(): Promise<void> {
