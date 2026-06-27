@@ -70,6 +70,22 @@ export type CalendarIntegration = {
   created_at: string;
 };
 
+export type VideoOrderStatus = "pending" | "processing" | "ready" | "failed";
+
+export type VideoOrder = {
+  id: string;
+  user_id: string;
+  property_id: string | null;
+  stripe_payment_id: string | null;
+  higgsfield_job_id: string | null;
+  status: VideoOrderStatus;
+  image_urls: string[];
+  title: string | null;
+  video_url: string | null;
+  created_at: string;
+};
+
+
 export type CalendarEvent = {
   id: string;
   property_id: string;

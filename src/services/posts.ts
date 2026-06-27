@@ -16,6 +16,7 @@ export async function getPosts(): Promise<PostWithProperty[]> {
     .select("*, properties(title)")
     .order("created_at", { ascending: false });
   if (error) return [];
+  if (error) throw error;
   return (data ?? []) as PostWithProperty[];
 }
 
