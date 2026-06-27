@@ -75,43 +75,25 @@ function extractJsonLdField(html: string, ...keys: string[]): string | undefined
 
 function parseFromHtml(html: string): ScrapedProperty {
   const plainText = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
-
-  const title =
-    getMeta(html, "og:title") ??
-    html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]?.trim();
-
-  const description =
-    getMeta(html, "og:description") ??
-    getMeta(html, "description") ??
-    extractJsonLdField(html, "description");
-
-  const location =
-    getMeta(html, "og:locality") ??
-    extractJsonLdField(html, "addressLocality", "addressRegion", "address");
-
+  const title = getMeta(html, "og:title") ?? html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]?.trim();
+  const description = getMeta(html, "og:description") ?? getMeta(html, "description") ?? extractJsonLdField(html, "description");
+  const location = getMeta(html, "og:locality") ?? extractJsonLdField(html, "addressLocality", "addressRegion", "address");
   const imageUrls = extractImages(html);
-
   const jldPrice = extractJsonLdField(html, "price", "lowPrice", "highPrice");
   const metaPrice = getMeta(html, "product:price:amount") ?? getMeta(html, "og:price:amount");
   const textPrice = plainText.match(/(\d[\d\s.,]*)\s*(kr\.?|DKK|€|\$)/i)?.[0]?.trim();
   const price = jldPrice ?? metaPrice ?? textPrice;
-
   const sizeMatch = plainText.match(/(\d+[\.,]?\d*)\s*m[²2]/i);
   const size = sizeMatch ? `${sizeMatch[1]} m²` : undefined;
-
-  // Look for house rules section
-  const condPatterns = [
+  let conditions: string | undefined;
+  for (const re of [
     /house rules?[\s\S]{0,50}?<[^>]+>([\s\S]{50,800}?)<\/(div|section|ul|p)/i,
     /husregler[\s\S]{0,50}?<[^>]+>([\s\S]{50,500}?)<\/(div|section|ul|p)/i,
     /betingelser[\s\S]{0,50}?<[^>]+>([\s\S]{50,500}?)<\/(div|section|ul|p)/i,
-    /cancellation policy[\s\S]{0,50}?<[^>]+>([\s\S]{50,500}?)<\/(div|section|ul|p)/i,
-  ];
-  let conditions: string | undefined;
-  for (const re of condPatterns) {
+  ]) {
     const m = html.match(re);
     if (m?.[1]) { conditions = m[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 600); break; }
   }
-
   return {
     title: title ? decodeHTMLEntities(title).slice(0, 200) : undefined,
     description: description ? decodeHTMLEntities(description).slice(0, 2000) : undefined,
@@ -123,111 +105,108 @@ function parseFromHtml(html: string): ScrapedProperty {
   };
 }
 
-function parseFromMarkdown(markdown: string, originalUrl: string): ScrapedProperty {
+function parseFromMarkdown(markdown: string): ScrapedProperty {
   const lines = markdown.split("\n");
-
-  // Title: first H1 or H2
   const title = lines.find((l) => /^#{1,2}\s/.test(l))?.replace(/^#+\s*/, "").trim();
-
-  // Description: first substantial paragraph (not a heading, not too short)
   const description = lines
-    .filter((l) => l.trim().length > 80 && !/^[#!*\-\d]/.test(l.trim()))
-    .slice(0, 3)
-    .join("\n")
-    .trim()
-    .slice(0, 2000) || undefined;
-
-  // Images: markdown image syntax
+    .filter((l) => l.trim().length > 80 && !/^[#!*\-\d\[|]/.test(l.trim()))
+    .slice(0, 3).join("\n").trim().slice(0, 2000) || undefined;
   const imageUrls: string[] = [];
   const imgRe = /!\[.*?\]\((https?:\/\/[^)]+)\)/g;
   let m;
   while ((m = imgRe.exec(markdown)) !== null) {
     if (!imageUrls.includes(m[1])) imageUrls.push(m[1]);
   }
-
-  // Price: look for price patterns
-  const priceMatch = markdown.match(/(\d[\d\s.,]*)\s*(kr\.?|DKK|€|\$)/i) ??
-    markdown.match(/(kr\.?|DKK|€|\$)\s*(\d[\d\s.,]*)/i);
+  const priceMatch = markdown.match(/(\d[\d\s.,]*)\s*(kr\.?|DKK|€|\$)/i);
   const price = priceMatch?.[0]?.trim();
-
-  // Size: m² pattern
   const sizeMatch = markdown.match(/(\d+[\.,]?\d*)\s*m[²2]/i);
   const size = sizeMatch ? `${sizeMatch[1]} m²` : undefined;
-
-  // Conditions: section after "House rules" / "Husregler" / "Betingelser"
-  const condIdx = lines.findIndex((l) =>
-    /house rules|husregler|betingelser|cancellation/i.test(l)
-  );
-  let conditions: string | undefined;
-  if (condIdx >= 0) {
-    conditions = lines
-      .slice(condIdx + 1, condIdx + 15)
-      .filter((l) => l.trim())
-      .join("\n")
-      .trim()
-      .slice(0, 600) || undefined;
-  }
-
-  // Location: look for address-like lines
-  const locationMatch = markdown.match(/📍\s*(.+)|Located in (.+)|Beliggenhed:\s*(.+)/i);
-  const location = locationMatch?.[1] ?? locationMatch?.[2] ?? locationMatch?.[3];
-
+  const condIdx = lines.findIndex((l) => /house rules|husregler|betingelser|cancellation/i.test(l));
+  const conditions = condIdx >= 0
+    ? lines.slice(condIdx + 1, condIdx + 15).filter((l) => l.trim()).join("\n").trim().slice(0, 600) || undefined
+    : undefined;
+  const locationMatch = markdown.match(/📍\s*(.+)|Located in ([^\n]+)|Beliggenhed:\s*([^\n]+)/i);
+  const location = (locationMatch?.[1] ?? locationMatch?.[2] ?? locationMatch?.[3])?.trim();
   return { title, description, location, imageUrls: imageUrls.slice(0, 20), price, size, conditions };
+}
+
+function isBlockedDomain(url: string): boolean {
+  return /airbnb\.(com|es|co\.|dk|de|fr|it|nl|se|no)/i.test(url);
 }
 
 async function fetchViaJina(url: string): Promise<{ markdown?: string; error?: string }> {
   try {
-    const res = await fetch(`https://r.jina.ai/${url}`, {
+    const res = await fetch(`https://r.jina.ai/${encodeURIComponent(url)}`, {
       headers: {
         "Accept": "text/plain",
         "X-Return-Format": "markdown",
+        "X-No-Cache": "true",
       },
-      signal: AbortSignal.timeout(20_000),
+      signal: AbortSignal.timeout(25_000),
     });
-    if (!res.ok) return { error: `Jina svarede med ${res.status}` };
+    if (!res.ok) return { error: `proxy_${res.status}` };
     const text = await res.text();
+    if (text.length < 200) return { error: "proxy_empty" };
     return { markdown: text };
   } catch {
-    return { error: "Timeout ved hentning via proxy" };
+    return { error: "proxy_timeout" };
   }
 }
 
-async function fetchDirect(url: string): Promise<{ html?: string; status?: number }> {
+async function fetchDirect(url: string): Promise<{ html?: string }> {
   try {
     const res = await fetch(url, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "da,en-US;q=0.9,en;q=0.8",
-        "Accept-Encoding": "gzip, deflate, br",
         "Cache-Control": "no-cache",
       },
       signal: AbortSignal.timeout(12_000),
     });
-    if (!res.ok) return { status: res.status };
+    if (!res.ok) return {};
     return { html: await res.text() };
   } catch {
-    return { status: 0 };
+    return {};
   }
 }
 
 export async function scrapePropertyUrl(url: string): Promise<{ data?: ScrapedProperty; error?: string }> {
   if (!url || !url.startsWith("http")) return { error: "Ugyldig URL" };
 
-  // Try direct fetch first (works for many sites)
-  const direct = await fetchDirect(url);
-  if (direct.html) {
-    const data = parseFromHtml(direct.html);
-    // If we got meaningful data, return it
-    if (data.title || data.description || data.imageUrls.length > 0) {
-      return { data };
+  const blocked = isBlockedDomain(url);
+
+  // For known bot-protected sites, go straight to Jina
+  if (!blocked) {
+    const direct = await fetchDirect(url);
+    if (direct.html) {
+      const data = parseFromHtml(direct.html);
+      if (data.title || data.description || data.imageUrls.length > 0) return { data };
     }
   }
 
-  // Fall back to Jina Reader (bypasses bot protection, renders JS)
+  // Jina Reader — renders JS and bypasses most bot protection
   const jina = await fetchViaJina(url);
-  if (jina.error) return { error: jina.error };
+  if (jina.markdown) {
+    const data = parseFromMarkdown(jina.markdown);
+    // If Jina returned something useful
+    if (data.title || data.description) return { data };
+    // Jina succeeded but page was near-empty (bot wall)
+  }
 
-  const data = parseFromMarkdown(jina.markdown!, url);
-  return { data };
+  // For Airbnb specifically, give a helpful message
+  if (blocked) {
+    return {
+      error: "Airbnb blokerer automatisk hentning. Udfyld felterne manuelt, eller brug booking-linket nedenfor.",
+    };
+  }
+
+  // Generic fallback — still try direct if we haven't yet
+  const direct2 = await fetchDirect(url);
+  if (direct2.html) {
+    const data = parseFromHtml(direct2.html);
+    if (data.title || data.description || data.imageUrls.length > 0) return { data };
+  }
+
+  return { error: "Kunne ikke hente oplysninger fra siden. Prøv en anden URL eller udfyld manuelt." };
 }
