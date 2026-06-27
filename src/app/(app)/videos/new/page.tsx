@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Topbar } from "@/components/layout/topbar";
 import { createVideoOrderCheckout } from "@/services/billing";
 import { Upload, Link as LinkIcon, X, Image as ImageIcon, Loader2, Sparkles, CheckCircle2, Clock, Star } from "lucide-react";
@@ -13,8 +14,14 @@ const BENEFITS = [
 ];
 
 export default function NewVideoPage() {
+  const searchParams = useSearchParams();
   const [title, setTitle] = useState("");
   const [bookingUrl, setBookingUrl] = useState("");
+
+  useEffect(() => {
+    const urlParam = searchParams.get("booking_url");
+    if (urlParam) setBookingUrl(urlParam);
+  }, [searchParams]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [urlInput, setUrlInput] = useState("");
   const [uploading, setUploading] = useState(false);

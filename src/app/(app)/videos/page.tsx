@@ -3,6 +3,7 @@ import { Plus, Video, Clock, CheckCircle2, XCircle, Loader2, Sparkles, ImageDown
 import { Topbar } from "@/components/layout/topbar";
 import { createClient } from "@/lib/supabase/server";
 import type { VideoOrder } from "@/types/database";
+import { VideoDemo } from "@/components/video-demo";
 
 async function getVideoOrders(): Promise<VideoOrder[]> {
   const supabase = await createClient();
@@ -123,16 +124,6 @@ export default async function VideosPage() {
                   <p className="mt-4 text-lg text-blue-200 leading-relaxed max-w-md">
                     Upload billeder eller indsæt dit Airbnb- eller Booking.com-link — vores AI genererer en professionel præsentationsvideo på under 15 minutter.
                   </p>
-                  <div className="mt-8 flex items-center gap-4">
-                    <Link
-                      href="/videos/new"
-                      className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold text-white shadow-lg transition-opacity hover:opacity-90"
-                      style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
-                    >
-                      <Sparkles size={16} /> Bestil video nu — 499 kr
-                    </Link>
-                    <span className="text-sm text-blue-300">Leveres inden for 15 min</span>
-                  </div>
                   <div className="mt-6 flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} size={14} className="fill-orange-400 text-orange-400" />
@@ -145,8 +136,13 @@ export default async function VideosPage() {
                 </div>
               </div>
 
+              {/* Interactive demo */}
+              <div className="mx-auto mt-10 max-w-5xl">
+                <VideoDemo />
+              </div>
+
               {/* Stats bar */}
-              <div className="mx-auto mt-12 grid max-w-5xl grid-cols-3 gap-4">
+              <div className="mx-auto mt-8 grid max-w-5xl grid-cols-3 gap-4">
                 <StatPill value="3×" label="Mere engagement end billeder" />
                 <StatPill value="15 min" label="Gennemsnitlig leveringstid" />
                 <StatPill value="499 kr" label="Pr. video — ingen abonnement" />
