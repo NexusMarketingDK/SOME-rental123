@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useTransition } from "react";
+import { useState, useEffect, useCallback, useTransition, useRef } from "react";
 import { CheckCircle2, Loader2, XCircle, Download, Share2, Send } from "lucide-react";
 import { pollVideoOrder } from "@/services/video-orders";
 import { shareVideoToSocial } from "@/services/share-video";
@@ -164,6 +164,8 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, tit
   const [status, setStatus] = useState<Status>(initialStatus);
   const [videoUrl, setVideoUrl] = useState<string | undefined>(initialVideoUrl);
   const [stepIdx, setStepIdx] = useState(0);
+  const [elapsedSec, setElapsedSec] = useState(0);
+  const startRef = useRef<number>(Date.now());
 
   const poll = useCallback(async () => {
     const result = await pollVideoOrder(orderId);
@@ -173,9 +175,11 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, tit
 
   useEffect(() => {
     if (status === "ready" || status === "failed") return;
+    startRef.current = Date.now();
     const interval = setInterval(poll, 10_000);
     const stepTimer = setInterval(() => setStepIdx((i) => (i + 1) % STEPS.length), 8_000);
-    return () => { clearInterval(interval); clearInterval(stepTimer); };
+    const ticker = setInterval(() => setElapsedSec(Math.floor((Date.now() - startRef.current) / 1000)), 1_000);
+    return () => { clearInterval(interval); clearInterval(stepTimer); clearInterval(ticker); };
   }, [status, poll]);
 
   if (status === "ready" && videoUrl) {
@@ -221,20 +225,44 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, tit
     );
   }
 
+  // Max expected duration: 15 min = 900s. Cap visible progress at 92% until done.
+  const progressPct = Math.min(92, Math.round((elapsedSec / 900) * 100));
+  const isDelayed = elapsedSec > 600; // >10 min → show extra message
+
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4">
-        <div className="flex items-center gap-3 mb-3">
+      <div className="rounded-2xl border border-blue-100 bg-blue-50 px-5 py-5">
+        <div className="flex items-center gap-3 mb-4">
           <Loader2 size={20} className="text-blue-600 animate-spin shrink-0" />
           <div>
             <p className="font-semibold text-blue-900">AI genererer din video...</p>
             <p className="text-sm text-blue-700">Leveres inden for 5-15 minutter</p>
           </div>
         </div>
-        <p className="text-xs text-blue-600 min-h-[1rem]">{STEPS[stepIdx]}</p>
-        <div className="mt-3 h-1.5 rounded-full bg-blue-200 overflow-hidden">
-          <div className="h-full rounded-full bg-blue-500 animate-pulse" style={{ width: "60%" }} />
+
+        {/* Step label */}
+        <p className="text-xs text-blue-600 min-h-[1rem] mb-2">{STEPS[stepIdx]}</p>
+
+        {/* Real progress bar */}
+        <div className="h-2 rounded-full bg-blue-200 overflow-hidden">
+          <div
+            className="h-full rounded-full bg-blue-500 transition-all duration-[3000ms] ease-linear"
+            style={{ width: `${progressPct}%` }}
+          />
         </div>
+
+        <div className="mt-2 flex justify-between items-center">
+          <span className="text-xs text-blue-400">
+            {Math.floor(elapsedSec / 60)}:{String(elapsedSec % 60).padStart(2, "0")} forløbet
+          </span>
+          <span className="text-xs text-blue-400">{progressPct}%</span>
+        </div>
+
+        {isDelayed && (
+          <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+            Dette tager lidt længere end normalt — AI'en arbejder stadig. Du behøver ikke vente her; siden tjekker automatisk og vi sender dig besked, når videoen er klar.
+          </div>
+        )}
       </div>
 
       {imageUrls.length > 0 && (
@@ -250,7 +278,7 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, tit
         </div>
       )}
 
-      <p className="text-xs text-slate-400 text-center">Siden opdaterer automatisk hvert 10. sekund</p>
+      <p className="text-xs text-slate-400 text-center">Siden tjekker for opdateringer hvert 10. sekund</p>
     </div>
   );
 }

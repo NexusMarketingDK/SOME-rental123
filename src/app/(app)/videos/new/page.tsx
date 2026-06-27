@@ -4,14 +4,169 @@ import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Topbar } from "@/components/layout/topbar";
 import { createVideoOrderCheckout } from "@/services/billing";
-import { Upload, Link as LinkIcon, X, Image as ImageIcon, Loader2, Sparkles, CheckCircle2, Clock, Star } from "lucide-react";
+import { Upload, Link as LinkIcon, X, Loader2, Sparkles, CheckCircle2, Clock, Star, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+
+const ROOM_LABELS = [
+  "Stue", "Køkken", "Soveværelse", "Badeværelse", "Altan/Terrasse",
+  "Spisestue", "Entre", "Soveværelse 2", "Badeværelse 2", "Udendørs",
+  "Udsigt", "Detaljer", "Soveværelse 3", "Kontor", "Bryggers",
+  "Pool", "Have", "Garage", "Kælder", "Loft",
+];
 
 const BENEFITS = [
-  "Henter automatisk billeder fra Airbnb & Booking.com",
-  "Professionel video med flydende overgange og musik",
+  "Cinematisk præsentationsvideo med AI",
+  "Professionelle kamerabevægelser og overgange",
   "Klar på 5-15 minutter — leveres direkte i appen",
-  "Op til 3× mere engagement end statiske billeder",
+  "Del direkte på sociale medier",
 ];
+
+function PhotoTour({
+  images,
+  onRemove,
+  onAdd,
+  fileRef,
+  uploading,
+}: {
+  images: string[];
+  onRemove: (i: number) => void;
+  onAdd: () => void;
+  fileRef: React.RefObject<HTMLInputElement | null>;
+  uploading: boolean;
+}) {
+  const [selected, setSelected] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (selected >= images.length && images.length > 0) setSelected(images.length - 1);
+  }, [images.length, selected]);
+
+  function scrollStrip(dir: "left" | "right") {
+    scrollRef.current?.scrollBy({ left: dir === "left" ? -120 : 120, behavior: "smooth" });
+  }
+
+  const current = images[selected];
+  const label = ROOM_LABELS[selected] ?? `Billede ${selected + 1}`;
+
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-bold text-slate-900">Fotorute</p>
+          <p className="text-xs text-slate-400 mt-0.5">{images.length} billede{images.length !== 1 ? "r" : ""} valgt til video</p>
+        </div>
+        <button
+          type="button"
+          onClick={onAdd}
+          className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+        >
+          <Plus size={12} /> Tilføj
+        </button>
+      </div>
+
+      {/* Thumbnail strip */}
+      <div className="relative px-4 py-3 border-b border-slate-100 bg-slate-50">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => scrollStrip("left")}
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors"
+          >
+            <ChevronLeft size={13} />
+          </button>
+          <div ref={scrollRef} className="flex gap-2.5 overflow-x-auto scrollbar-hide flex-1 scroll-smooth">
+            {images.map((url, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setSelected(i)}
+                className={`relative flex-shrink-0 flex flex-col items-center gap-1 group focus:outline-none`}
+              >
+                <div className={`relative h-16 w-24 overflow-hidden rounded-xl border-2 transition-all ${
+                  selected === i ? "border-[#FF6B4A] shadow-md" : "border-transparent hover:border-slate-300"
+                }`}>
+                  <img
+                    src={url.startsWith("data:") || url.startsWith("http") ? url : ""}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                  {/* Remove button */}
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); onRemove(i); }}
+                    className="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X size={8} />
+                  </button>
+                  {selected === i && (
+                    <div className="absolute inset-0 rounded-xl ring-2 ring-[#FF6B4A] ring-inset pointer-events-none" />
+                  )}
+                </div>
+                <span className={`text-[9px] font-medium leading-none truncate w-24 text-center ${
+                  selected === i ? "text-[#FF6B4A]" : "text-slate-400"
+                }`}>
+                  {ROOM_LABELS[i] ?? `#${i + 1}`}
+                </span>
+              </button>
+            ))}
+            {/* Add more */}
+            <button
+              type="button"
+              onClick={onAdd}
+              className="flex-shrink-0 flex flex-col items-center gap-1"
+            >
+              <div className="flex h-16 w-24 items-center justify-center rounded-xl border-2 border-dashed border-slate-200 hover:border-[#FF6B4A]/40 hover:bg-orange-50/30 transition-colors">
+                {uploading ? <Loader2 size={16} className="animate-spin text-[#FF6B4A]" /> : <Plus size={16} className="text-slate-300" />}
+              </div>
+              <span className="text-[9px] text-slate-300 leading-none">Tilføj</span>
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => scrollStrip("right")}
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors"
+          >
+            <ChevronRight size={13} />
+          </button>
+        </div>
+      </div>
+
+      {/* Large preview */}
+      {current && (
+        <div className="relative">
+          <div className="aspect-video w-full overflow-hidden bg-slate-100">
+            <img
+              src={current.startsWith("data:") || current.startsWith("http") ? current : ""}
+              alt={label}
+              className="h-full w-full object-cover"
+            />
+          </div>
+          {/* Caption overlay */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-5 py-4">
+            <p className="text-base font-bold text-white">{label}</p>
+            <p className="text-xs text-white/70">{selected + 1} / {images.length}</p>
+          </div>
+          {/* Prev/Next */}
+          <button
+            type="button"
+            onClick={() => setSelected((s) => Math.max(0, s - 1))}
+            disabled={selected === 0}
+            className="absolute left-3 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 shadow hover:bg-white transition-colors disabled:opacity-30"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelected((s) => Math.min(images.length - 1, s + 1))}
+            disabled={selected === images.length - 1}
+            className="absolute right-3 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 shadow hover:bg-white transition-colors disabled:opacity-30"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function NewVideoPage() {
   const searchParams = useSearchParams();
@@ -22,17 +177,10 @@ export default function NewVideoPage() {
     const urlParam = searchParams.get("booking_url");
     if (urlParam) setBookingUrl(urlParam);
   }, [searchParams]);
+
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [urlInput, setUrlInput] = useState("");
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-
-  function addUrlImage() {
-    const trimmed = urlInput.trim();
-    if (!trimmed) return;
-    setImageUrls((prev) => [...prev, trimmed]);
-    setUrlInput("");
-  }
 
   function removeImage(i: number) {
     setImageUrls((prev) => prev.filter((_, idx) => idx !== i));
@@ -49,6 +197,7 @@ export default function NewVideoPage() {
     })));
     setImageUrls((prev) => [...prev, ...urls]);
     setUploading(false);
+    if (e.target) e.target.value = "";
   }
 
   const canSubmit = title.trim().length > 0;
@@ -66,8 +215,6 @@ export default function NewVideoPage() {
 
             {/* ── Left: sales content ── */}
             <div className="col-span-2 space-y-6">
-
-              {/* Hero card */}
               <div className="rounded-2xl p-6 text-white" style={{ background: "linear-gradient(135deg, #1B3F7A 0%, #14306b 100%)" }}>
                 <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-orange-400/30 bg-orange-400/10 px-2.5 py-1 text-xs font-semibold text-orange-300">
                   <Sparkles size={11} /> AI-drevet
@@ -79,10 +226,8 @@ export default function NewVideoPage() {
                   </span>
                 </h2>
                 <p className="mt-2 text-sm text-blue-200 leading-relaxed">
-                  Vores AI omdanner dine billeder til en professionel præsentationsvideo med musik og flydende overgange — uden at du behøver løfte en finger.
+                  Vores AI omdanner dine billeder til en professionel præsentationsvideo med musik og flydende overgange.
                 </p>
-
-                {/* Stars */}
                 <div className="mt-4 flex items-center gap-1">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} size={12} className="fill-orange-400 text-orange-400" />
@@ -91,7 +236,6 @@ export default function NewVideoPage() {
                 </div>
               </div>
 
-              {/* Benefits */}
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 className="text-sm font-bold text-slate-900 mb-4">Hvad du får</h3>
                 <ul className="space-y-3">
@@ -104,32 +248,6 @@ export default function NewVideoPage() {
                 </ul>
               </div>
 
-              {/* How it works */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <h3 className="text-sm font-bold text-slate-900 mb-4">Sådan fungerer det</h3>
-                <ol className="space-y-4">
-                  {[
-                    { n: "1", title: "Indsæt dit Airbnb- eller Booking.com-link", text: "Vi henter billederne automatisk — eller upload egne fotos." },
-                    { n: "2", title: "AI genererer din video", text: "Professionelle overgange, musik og 9:16 format til sociale medier." },
-                    { n: "3", title: "Download og del", text: "Videoen leveres direkte i appen inden for 5-15 minutter." },
-                  ].map((s) => (
-                    <li key={s.n} className="flex gap-3">
-                      <div
-                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                        style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}
-                      >
-                        {s.n}
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-slate-900">{s.title}</p>
-                        <p className="text-xs text-slate-500 mt-0.5">{s.text}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-
-              {/* Delivery promise */}
               <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <Clock size={20} className="shrink-0 text-[#FF6B4A]" />
                 <div>
@@ -141,18 +259,18 @@ export default function NewVideoPage() {
 
             {/* ── Right: order form ── */}
             <div className="col-span-3">
-              <form action={createVideoOrderCheckout} className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm space-y-6">
+              <form action={createVideoOrderCheckout} className="space-y-5">
                 {imageUrls.map((url, i) => (
                   <input key={i} type="hidden" name="image_urls[]" value={url} />
                 ))}
 
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 mb-5">Oplysninger om din bolig</h3>
+                {/* Title + URL */}
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+                  <h3 className="text-base font-bold text-slate-900">Oplysninger om din bolig</h3>
 
-                  {/* Title */}
-                  <div className="mb-4">
+                  <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                      Titel på boligen <span className="text-red-500">*</span>
+                      Titel <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -165,11 +283,10 @@ export default function NewVideoPage() {
                     />
                   </div>
 
-                  {/* Booking URL */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                      Link til Airbnb / Booking.com
-                      <span className="ml-1.5 text-xs font-normal text-slate-400">(valgfrit — vi henter billeder automatisk)</span>
+                      Airbnb / Booking.com link
+                      <span className="ml-1.5 text-xs font-normal text-slate-400">(valgfrit)</span>
                     </label>
                     <div className="relative">
                       <LinkIcon size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -185,72 +302,29 @@ export default function NewVideoPage() {
                   </div>
                 </div>
 
-                {/* Images */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Billeder
-                    <span className="ml-1.5 text-xs font-normal text-slate-400">(valgfrit — jo flere, jo bedre video)</span>
-                  </label>
-
-                  {/* URL input */}
-                  <div className="flex gap-2 mb-3">
-                    <input
-                      type="text"
-                      value={urlInput}
-                      onChange={(e) => setUrlInput(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addUrlImage())}
-                      placeholder="Indsæt billed-URL og tryk Tilføj..."
-                      className="flex-1 rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#1B3F7A] focus:outline-none focus:ring-2 focus:ring-[#1B3F7A]/10"
-                    />
-                    <button
-                      type="button"
-                      onClick={addUrlImage}
-                      className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-                    >
-                      Tilføj
-                    </button>
-                  </div>
-
-                  {/* File upload */}
+                {/* Photo tour or upload CTA */}
+                {imageUrls.length > 0 ? (
+                  <PhotoTour
+                    images={imageUrls}
+                    onRemove={removeImage}
+                    onAdd={() => fileRef.current?.click()}
+                    fileRef={fileRef}
+                    uploading={uploading}
+                  />
+                ) : (
                   <button
                     type="button"
                     onClick={() => fileRef.current?.click()}
                     disabled={uploading}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 py-7 text-sm text-slate-500 hover:border-[#FF6B4A]/40 hover:bg-orange-50/30 transition-colors disabled:opacity-50"
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 py-10 text-sm text-slate-500 hover:border-[#FF6B4A]/40 hover:bg-orange-50/30 transition-colors disabled:opacity-50"
                   >
-                    {uploading ? <Loader2 size={18} className="animate-spin text-[#FF6B4A]" /> : <Upload size={18} className="text-[#FF6B4A]" />}
-                    <span>{uploading ? "Uploader billeder..." : "Klik for at uploade billeder fra din computer"}</span>
+                    {uploading
+                      ? <Loader2 size={18} className="animate-spin text-[#FF6B4A]" />
+                      : <Upload size={18} className="text-[#FF6B4A]" />}
+                    <span>{uploading ? "Uploader billeder..." : "Klik for at tilføje billeder til din fotorute"}</span>
                   </button>
-                  <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} />
-
-                  {/* Preview */}
-                  {imageUrls.length > 0 && (
-                    <div className="mt-3 grid grid-cols-5 gap-2">
-                      {imageUrls.map((url, i) => (
-                        <div key={i} className="relative aspect-video rounded-lg overflow-hidden border border-slate-200 bg-slate-100">
-                          {url.startsWith("data:") || url.startsWith("http") ? (
-                            <img src={url} alt="" className="h-full w-full object-cover" />
-                          ) : (
-                            <div className="flex h-full items-center justify-center">
-                              <ImageIcon size={16} className="text-slate-300" />
-                            </div>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => removeImage(i)}
-                            className="absolute right-0.5 top-0.5 rounded-full bg-black/60 p-0.5 text-white hover:bg-black/80"
-                          >
-                            <X size={9} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {imageUrls.length > 0 && (
-                    <p className="mt-2 text-xs text-slate-400">{imageUrls.length} billede{imageUrls.length !== 1 ? "r" : ""} tilføjet — anbefalet: 5-15 billeder for bedste resultat</p>
-                  )}
-                </div>
+                )}
+                <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} />
 
                 <button
                   type="submit"
@@ -260,9 +334,7 @@ export default function NewVideoPage() {
                 >
                   {canSubmit ? "Opret video" : "Udfyld titel for at fortsætte"}
                 </button>
-                <p className="text-center text-xs text-slate-400">
-                  Video leveres inden for 15 minutter
-                </p>
+                <p className="text-center text-xs text-slate-400">Video leveres inden for 15 minutter</p>
               </form>
             </div>
           </div>
