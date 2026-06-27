@@ -85,6 +85,7 @@ export type VideoOrder = {
   created_at: string;
 };
 
+
 export type CalendarEvent = {
   id: string;
   property_id: string;

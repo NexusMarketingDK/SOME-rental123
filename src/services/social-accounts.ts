@@ -11,6 +11,7 @@ export async function getSocialAccounts(): Promise<SocialAccount[]> {
     .from("social_accounts")
     .select("*")
     .order("created_at", { ascending: false });
+  if (error) return [];
   if (error) throw error;
   return data ?? [];
 }

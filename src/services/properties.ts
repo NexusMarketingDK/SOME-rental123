@@ -11,6 +11,7 @@ export async function getProperties(): Promise<Property[]> {
     .from("properties")
     .select("*")
     .order("created_at", { ascending: false });
+  if (error) return [];
   if (error) throw error;
   return data ?? [];
 }
