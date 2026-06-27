@@ -40,7 +40,7 @@ export async function createPostAction(formData: FormData): Promise<void> {
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) redirect("/posts/new?error=db");
 
   if (accountIds.length > 0) {
     await supabase.from("post_distributions").insert(

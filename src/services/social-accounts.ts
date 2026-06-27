@@ -36,7 +36,7 @@ export async function connectAccountAction(formData: FormData): Promise<void> {
     access_token: "mock_token",
   });
 
-  if (error) throw error;
+  if (error) redirect("/accounts/connect?error=db");
   revalidatePath("/accounts");
   redirect("/accounts");
 }
