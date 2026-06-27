@@ -22,10 +22,13 @@ export async function startVideoGeneration(
   const jobSet = await client.generate("/v1/image2video/dop", {
     model: "dop-turbo",
     prompt,
-    input_images: imageUrls.map((url) => ({
-      type: "image_url",
-      image_url: url,
-    })),
+    input_images: imageUrls.map((url) => {
+      if (url.startsWith("data:")) {
+        const base64 = url.split(",")[1];
+        return { type: "image_base64", image_base64: base64 };
+      }
+      return { type: "image_url", image_url: url };
+    }),
   });
 
   return jobSet.id;

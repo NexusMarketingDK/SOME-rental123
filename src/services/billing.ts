@@ -101,7 +101,7 @@ export async function createAiCreditCheckout(formData: FormData): Promise<void> 
 export async function createVideoOrderCheckout(formData: FormData): Promise<void> {
   const propertyId = String(formData?.get("property_id") ?? "") || null;
   const title = String(formData?.get("title") ?? "Bolig fremvisning");
-  const imageUrls = formData?.getAll("image_urls[]").map(String).filter((u) => u.startsWith("http")) ?? [];
+  const imageUrls = formData?.getAll("image_urls[]").map(String).filter((u) => u.startsWith("http") || u.startsWith("data:")) ?? [];
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");

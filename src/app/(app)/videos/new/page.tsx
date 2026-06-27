@@ -190,11 +190,23 @@ export default function NewVideoPage() {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
     setUploading(true);
-    const urls = await Promise.all(files.map((f) => new Promise<string>((res) => {
-      const reader = new FileReader();
-      reader.onload = () => res(reader.result as string);
-      reader.readAsDataURL(f);
-    })));
+    const urls = await Promise.all(
+      files.map(async (file) => {
+        const fd = new FormData();
+        fd.append("file", file);
+        const res = await fetch("/api/upload-image", { method: "POST", body: fd });
+        if (res.ok) {
+          const { url } = await res.json();
+          return url as string;
+        }
+        // Fallback to local preview if upload fails
+        return await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
+      })
+    );
     setImageUrls((prev) => [...prev, ...urls]);
     setUploading(false);
     if (e.target) e.target.value = "";
