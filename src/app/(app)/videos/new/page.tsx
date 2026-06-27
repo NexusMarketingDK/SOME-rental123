@@ -275,6 +275,9 @@ export default function NewVideoPage() {
                 {imageUrls.map((url, i) => (
                   <input key={i} type="hidden" name="image_urls[]" value={url} />
                 ))}
+                {imageUrls.map((_, i) => (
+                  <input key={`label-${i}`} type="hidden" name="room_labels[]" value={ROOM_LABELS[i] ?? `Billede ${i + 1}`} />
+                ))}
 
                 {/* Title + URL */}
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
