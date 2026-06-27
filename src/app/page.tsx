@@ -209,8 +209,9 @@ export default function LandingPage() {
             <span className="text-lg font-bold text-[#1B3F7A]">Vakanza</span>
           </div>
           <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
+            <a href="#" className="hover:text-[#1B3F7A] transition-colors">Forside</a>
             <a href="#features" className="hover:text-[#1B3F7A] transition-colors">Funktioner</a>
-            <a href="#ai" className="hover:text-[#1B3F7A] transition-colors">AI-billeder & Video</a>
+            <a href="#ai" className="hover:text-[#1B3F7A] transition-colors">AI Video</a>
             <a href="#pricing" className="hover:text-[#1B3F7A] transition-colors">Priser</a>
           </nav>
           <div className="flex items-center gap-3">
@@ -671,21 +672,93 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-slate-100 bg-white py-8">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-6 md:flex-row md:justify-between">
-          <div className="flex items-center gap-2">
-            <span
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-sm font-bold text-white"
-              style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
-            >
-              V
-            </span>
-            <span className="font-bold text-[#1B3F7A]">Vakanza</span>
+      <footer className="border-t border-slate-200 bg-[#0d1f3c]">
+        <div className="mx-auto max-w-6xl px-6 py-16">
+          {/* Top row */}
+          <div className="grid gap-12 md:grid-cols-4">
+            {/* Brand */}
+            <div className="md:col-span-1">
+              <div className="flex items-center gap-2">
+                <span
+                  className="flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white"
+                  style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
+                >
+                  V
+                </span>
+                <span className="text-lg font-bold text-white">Vakanza</span>
+              </div>
+              <p className="mt-4 text-sm leading-relaxed text-slate-400">
+                AI-drevet marketing til ferieboligudlejere. Spar tid og nå flere lejere automatisk.
+              </p>
+              <div className="mt-5 flex gap-3">
+                {/* Facebook */}
+                <a href="#" aria-label="Facebook" className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-colors hover:border-orange-400/40 hover:text-orange-400">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                </a>
+                {/* Instagram */}
+                <a href="#" aria-label="Instagram" className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-colors hover:border-orange-400/40 hover:text-orange-400">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+                </a>
+                {/* TikTok */}
+                <a href="#" aria-label="TikTok" className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-colors hover:border-orange-400/40 hover:text-orange-400">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.17 8.17 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg>
+                </a>
+              </div>
+            </div>
+
+            {/* Produkt */}
+            <div>
+              <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-500">Produkt</p>
+              <ul className="flex flex-col gap-3 text-sm text-slate-400">
+                <li><a href="#features" className="transition-colors hover:text-white">Funktioner</a></li>
+                <li><a href="#ai" className="transition-colors hover:text-white">AI Video</a></li>
+                <li><a href="#pricing" className="transition-colors hover:text-white">Priser</a></li>
+                <li><Link href="/signup" className="transition-colors hover:text-white">Opret gratis konto</Link></li>
+                <li><Link href="/login" className="transition-colors hover:text-white">Log ind</Link></li>
+              </ul>
+            </div>
+
+            {/* Integrationer */}
+            <div>
+              <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-500">Integrationer</p>
+              <ul className="flex flex-col gap-3 text-sm text-slate-400">
+                <li><span className="transition-colors hover:text-white cursor-default">Airbnb</span></li>
+                <li><span className="transition-colors hover:text-white cursor-default">Booking.com</span></li>
+                <li><span className="transition-colors hover:text-white cursor-default">Facebook & Instagram</span></li>
+                <li><span className="transition-colors hover:text-white cursor-default">TikTok</span></li>
+                <li><span className="transition-colors hover:text-white cursor-default">LinkedIn</span></li>
+              </ul>
+            </div>
+
+            {/* Support */}
+            <div>
+              <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-500">Support</p>
+              <ul className="flex flex-col gap-3 text-sm text-slate-400">
+                <li><a href="mailto:kontakt@vakanza.dk" className="transition-colors hover:text-white">kontakt@vakanza.dk</a></li>
+                <li><Link href="/signup" className="transition-colors hover:text-white">Kom i gang</Link></li>
+              </ul>
+              <div className="mt-6 rounded-xl border border-orange-500/20 bg-orange-500/10 p-4">
+                <p className="text-xs font-semibold text-orange-400">Prøv gratis i dag</p>
+                <p className="mt-1 text-xs text-slate-400">Ingen kreditkort krævet</p>
+                <Link
+                  href="/signup"
+                  className="mt-3 block w-full rounded-lg py-2 text-center text-xs font-bold text-white transition-opacity hover:opacity-90"
+                  style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}
+                >
+                  Start nu →
+                </Link>
+              </div>
+            </div>
           </div>
-          <p className="text-xs text-slate-400">© 2026 Vakanza. Alle rettigheder forbeholdes.</p>
-          <div className="flex gap-5 text-xs text-slate-400">
-            <Link href="/login" className="hover:text-slate-700 transition-colors">Log ind</Link>
-            <Link href="/signup" className="hover:text-slate-700 transition-colors">Opret konto</Link>
+
+          {/* Bottom row */}
+          <div className="mt-12 flex flex-col items-center gap-4 border-t border-white/5 pt-8 md:flex-row md:justify-between">
+            <p className="text-xs text-slate-600">© 2026 Vakanza. Alle rettigheder forbeholdes.</p>
+            <div className="flex gap-6 text-xs text-slate-600">
+              <a href="#" className="transition-colors hover:text-slate-400">Privatlivspolitik</a>
+              <a href="#" className="transition-colors hover:text-slate-400">Cookiepolitik</a>
+              <a href="#" className="transition-colors hover:text-slate-400">Handelsbetingelser</a>
+            </div>
           </div>
         </div>
       </footer>
