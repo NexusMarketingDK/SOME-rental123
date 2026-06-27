@@ -101,20 +101,34 @@ export async function createAiCreditCheckout(formData: FormData): Promise<void> 
 export async function createVideoOrderCheckout(formData: FormData): Promise<void> {
   const propertyId = String(formData?.get("property_id") ?? "") || null;
   const title = String(formData?.get("title") ?? "Bolig fremvisning");
-  const imageUrls = formData?.getAll("image_urls[]").map(String) ?? [];
+  const imageUrls = formData?.getAll("image_urls[]").map(String).filter((u) => u.startsWith("http")) ?? [];
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  await supabase.from("video_orders").insert({
+  // Insert order as pending first
+  const { data: order } = await supabase.from("video_orders").insert({
     user_id: user.id,
     property_id: propertyId,
     title,
     image_urls: imageUrls,
-    status: "pending",
-  });
+    status: "processing",
+  }).select("id").single();
 
-  redirect("/videos?order=created");
+  // Start Higgsfield generation in background (don't block redirect)
+  if (imageUrls.length >= 2 && order?.id) {
+    try {
+      const { startVideoGeneration } = await import("@/lib/higgsfield");
+      const jobSetId = await startVideoGeneration(imageUrls, title);
+      await supabase.from("video_orders").update({
+        higgsfield_job_id: jobSetId,
+      }).eq("id", order.id);
+    } catch (_e) {
+      // Generation start failed — order remains in processing state for retry
+    }
+  }
+
+  redirect(`/videos/${order?.id ?? ""}?started=1`);
 }
 
 export async function createBillingPortalSession(): Promise<void> {
