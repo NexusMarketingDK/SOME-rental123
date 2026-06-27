@@ -10,6 +10,12 @@ export type ScrapedProperty = {
   conditions?: string;
 };
 
+function decodeHTMLEntities(str: string): string {
+  return str
+    .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, " ");
+}
+
 function getMeta(html: string, property: string): string | undefined {
   const m =
     html.match(new RegExp(`<meta[^>]+property=["']${property}["'][^>]+content=["']([^"']+)["']`, "i")) ??
@@ -19,28 +25,14 @@ function getMeta(html: string, property: string): string | undefined {
   return m?.[1] ? decodeHTMLEntities(m[1]) : undefined;
 }
 
-function decodeHTMLEntities(str: string): string {
-  return str
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, " ");
-}
-
 function extractImages(html: string): string[] {
   const images: string[] = [];
-
-  // og:image tags
   const ogRe = /<meta[^>]+(?:property=["']og:image["'][^>]+content=["']([^"']+)["']|content=["']([^"']+)["'][^>]+property=["']og:image["'])/gi;
   let m;
   while ((m = ogRe.exec(html)) !== null) {
     const url = m[1] ?? m[2];
-    if (url && url.startsWith("http") && !images.includes(url)) images.push(url);
+    if (url?.startsWith("http") && !images.includes(url)) images.push(url);
   }
-
-  // JSON-LD images
   const jsonLdRe = /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
   while ((m = jsonLdRe.exec(html)) !== null) {
     try {
@@ -56,7 +48,6 @@ function extractImages(html: string): string[] {
       extract(data);
     } catch {}
   }
-
   return images.slice(0, 20);
 }
 
@@ -82,60 +73,7 @@ function extractJsonLdField(html: string, ...keys: string[]): string | undefined
   }
 }
 
-function extractSize(text: string): string | undefined {
-  const m = text.match(/(\d+[\.,]?\d*)\s*m[²2]/i);
-  if (m) return `${m[1]} m²`;
-}
-
-function extractPrice(html: string, text: string): string | undefined {
-  // JSON-LD price
-  const jld = extractJsonLdField(html, "price", "lowPrice", "highPrice");
-  if (jld) return jld;
-
-  // meta price
-  const metaPrice = getMeta(html, "product:price:amount") ?? getMeta(html, "og:price:amount");
-  if (metaPrice) return metaPrice;
-
-  // text pattern: kr, DKK, €, $
-  const m = text.match(/(\d[\d\s.,]*)\s*(kr\.?|DKK|€|\$)/i) ?? text.match(/(kr\.?|DKK|€|\$)\s*(\d[\d\s.,]*)/i);
-  if (m) return m[0].trim();
-}
-
-function extractConditions(html: string): string | undefined {
-  // Look for house rules / betingelser sections
-  const patterns = [
-    /house rules?[\s\S]{0,50}?<[^>]+>([\s\S]{50,800}?)<\/(div|section|ul|p)/i,
-    /husregler[\s\S]{0,50}?<[^>]+>([\s\S]{50,500}?)<\/(div|section|ul|p)/i,
-    /betingelser[\s\S]{0,50}?<[^>]+>([\s\S]{50,500}?)<\/(div|section|ul|p)/i,
-    /cancellation policy[\s\S]{0,50}?<[^>]+>([\s\S]{50,500}?)<\/(div|section|ul|p)/i,
-  ];
-  for (const re of patterns) {
-    const m = html.match(re);
-    if (m?.[1]) {
-      return m[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 600);
-    }
-  }
-}
-
-export async function scrapePropertyUrl(url: string): Promise<{ data?: ScrapedProperty; error?: string }> {
-  if (!url || !url.startsWith("http")) return { error: "Ugyldig URL" };
-
-  let html: string;
-  try {
-    const res = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
-        "Accept": "text/html,application/xhtml+xml",
-        "Accept-Language": "da,en;q=0.9",
-      },
-      signal: AbortSignal.timeout(12_000),
-    });
-    if (!res.ok) return { error: `Siden svarede med status ${res.status}` };
-    html = await res.text();
-  } catch {
-    return { error: "Kunne ikke hente siden. Tjek URL og prøv igen." };
-  }
-
+function parseFromHtml(html: string): ScrapedProperty {
   const plainText = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
 
   const title =
@@ -152,19 +90,144 @@ export async function scrapePropertyUrl(url: string): Promise<{ data?: ScrapedPr
     extractJsonLdField(html, "addressLocality", "addressRegion", "address");
 
   const imageUrls = extractImages(html);
-  const price = extractPrice(html, plainText);
-  const size = extractSize(plainText);
-  const conditions = extractConditions(html);
+
+  const jldPrice = extractJsonLdField(html, "price", "lowPrice", "highPrice");
+  const metaPrice = getMeta(html, "product:price:amount") ?? getMeta(html, "og:price:amount");
+  const textPrice = plainText.match(/(\d[\d\s.,]*)\s*(kr\.?|DKK|€|\$)/i)?.[0]?.trim();
+  const price = jldPrice ?? metaPrice ?? textPrice;
+
+  const sizeMatch = plainText.match(/(\d+[\.,]?\d*)\s*m[²2]/i);
+  const size = sizeMatch ? `${sizeMatch[1]} m²` : undefined;
+
+  // Look for house rules section
+  const condPatterns = [
+    /house rules?[\s\S]{0,50}?<[^>]+>([\s\S]{50,800}?)<\/(div|section|ul|p)/i,
+    /husregler[\s\S]{0,50}?<[^>]+>([\s\S]{50,500}?)<\/(div|section|ul|p)/i,
+    /betingelser[\s\S]{0,50}?<[^>]+>([\s\S]{50,500}?)<\/(div|section|ul|p)/i,
+    /cancellation policy[\s\S]{0,50}?<[^>]+>([\s\S]{50,500}?)<\/(div|section|ul|p)/i,
+  ];
+  let conditions: string | undefined;
+  for (const re of condPatterns) {
+    const m = html.match(re);
+    if (m?.[1]) { conditions = m[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 600); break; }
+  }
 
   return {
-    data: {
-      title: title ? decodeHTMLEntities(title).slice(0, 200) : undefined,
-      description: description ? decodeHTMLEntities(description).slice(0, 2000) : undefined,
-      location: location ? decodeHTMLEntities(String(location)).slice(0, 200) : undefined,
-      imageUrls,
-      price,
-      size,
-      conditions,
-    },
+    title: title ? decodeHTMLEntities(title).slice(0, 200) : undefined,
+    description: description ? decodeHTMLEntities(description).slice(0, 2000) : undefined,
+    location: location ? decodeHTMLEntities(String(location)).slice(0, 200) : undefined,
+    imageUrls,
+    price,
+    size,
+    conditions,
   };
+}
+
+function parseFromMarkdown(markdown: string, originalUrl: string): ScrapedProperty {
+  const lines = markdown.split("\n");
+
+  // Title: first H1 or H2
+  const title = lines.find((l) => /^#{1,2}\s/.test(l))?.replace(/^#+\s*/, "").trim();
+
+  // Description: first substantial paragraph (not a heading, not too short)
+  const description = lines
+    .filter((l) => l.trim().length > 80 && !/^[#!*\-\d]/.test(l.trim()))
+    .slice(0, 3)
+    .join("\n")
+    .trim()
+    .slice(0, 2000) || undefined;
+
+  // Images: markdown image syntax
+  const imageUrls: string[] = [];
+  const imgRe = /!\[.*?\]\((https?:\/\/[^)]+)\)/g;
+  let m;
+  while ((m = imgRe.exec(markdown)) !== null) {
+    if (!imageUrls.includes(m[1])) imageUrls.push(m[1]);
+  }
+
+  // Price: look for price patterns
+  const priceMatch = markdown.match(/(\d[\d\s.,]*)\s*(kr\.?|DKK|€|\$)/i) ??
+    markdown.match(/(kr\.?|DKK|€|\$)\s*(\d[\d\s.,]*)/i);
+  const price = priceMatch?.[0]?.trim();
+
+  // Size: m² pattern
+  const sizeMatch = markdown.match(/(\d+[\.,]?\d*)\s*m[²2]/i);
+  const size = sizeMatch ? `${sizeMatch[1]} m²` : undefined;
+
+  // Conditions: section after "House rules" / "Husregler" / "Betingelser"
+  const condIdx = lines.findIndex((l) =>
+    /house rules|husregler|betingelser|cancellation/i.test(l)
+  );
+  let conditions: string | undefined;
+  if (condIdx >= 0) {
+    conditions = lines
+      .slice(condIdx + 1, condIdx + 15)
+      .filter((l) => l.trim())
+      .join("\n")
+      .trim()
+      .slice(0, 600) || undefined;
+  }
+
+  // Location: look for address-like lines
+  const locationMatch = markdown.match(/📍\s*(.+)|Located in (.+)|Beliggenhed:\s*(.+)/i);
+  const location = locationMatch?.[1] ?? locationMatch?.[2] ?? locationMatch?.[3];
+
+  return { title, description, location, imageUrls: imageUrls.slice(0, 20), price, size, conditions };
+}
+
+async function fetchViaJina(url: string): Promise<{ markdown?: string; error?: string }> {
+  try {
+    const res = await fetch(`https://r.jina.ai/${url}`, {
+      headers: {
+        "Accept": "text/plain",
+        "X-Return-Format": "markdown",
+      },
+      signal: AbortSignal.timeout(20_000),
+    });
+    if (!res.ok) return { error: `Jina svarede med ${res.status}` };
+    const text = await res.text();
+    return { markdown: text };
+  } catch {
+    return { error: "Timeout ved hentning via proxy" };
+  }
+}
+
+async function fetchDirect(url: string): Promise<{ html?: string; status?: number }> {
+  try {
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "da,en-US;q=0.9,en;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Cache-Control": "no-cache",
+      },
+      signal: AbortSignal.timeout(12_000),
+    });
+    if (!res.ok) return { status: res.status };
+    return { html: await res.text() };
+  } catch {
+    return { status: 0 };
+  }
+}
+
+export async function scrapePropertyUrl(url: string): Promise<{ data?: ScrapedProperty; error?: string }> {
+  if (!url || !url.startsWith("http")) return { error: "Ugyldig URL" };
+
+  // Try direct fetch first (works for many sites)
+  const direct = await fetchDirect(url);
+  if (direct.html) {
+    const data = parseFromHtml(direct.html);
+    // If we got meaningful data, return it
+    if (data.title || data.description || data.imageUrls.length > 0) {
+      return { data };
+    }
+  }
+
+  // Fall back to Jina Reader (bypasses bot protection, renders JS)
+  const jina = await fetchViaJina(url);
+  if (jina.error) return { error: jina.error };
+
+  const data = parseFromMarkdown(jina.markdown!, url);
+  return { data };
 }
