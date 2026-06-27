@@ -1,11 +1,12 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getVideoJobStatus } from "@/lib/higgsfield";
+import { getVideoJobsStatus } from "@/lib/higgsfield";
 
 export async function pollVideoOrder(orderId: string): Promise<{
   status: string;
   videoUrl?: string;
+  videoUrls?: string[];
 }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -19,18 +20,30 @@ export async function pollVideoOrder(orderId: string): Promise<{
     .single();
 
   if (!order) return { status: "failed" };
-  if (order.status === "ready") return { status: "ready", videoUrl: order.video_url };
-  if (!order.higgsfield_job_id) return { status: order.status };
 
-  // Check Higgsfield status
-  const result = await getVideoJobStatus(order.higgsfield_job_id);
+  if (order.status === "ready") {
+    const urls: string[] = order.video_urls?.length ? order.video_urls : order.video_url ? [order.video_url] : [];
+    return { status: "ready", videoUrl: urls[0], videoUrls: urls };
+  }
 
-  if (result.status === "completed" && result.videoUrl) {
+  // Use multi-job IDs if available, else fall back to single job
+  const jobIds: string[] = order.higgsfield_job_ids?.length
+    ? order.higgsfield_job_ids
+    : order.higgsfield_job_id
+    ? [order.higgsfield_job_id]
+    : [];
+
+  if (!jobIds.length) return { status: order.status };
+
+  const result = await getVideoJobsStatus(jobIds);
+
+  if (result.status === "completed" && result.videoUrls?.length) {
     await supabase.from("video_orders").update({
       status: "ready",
-      video_url: result.videoUrl,
+      video_url: result.videoUrls[0],
+      video_urls: result.videoUrls,
     }).eq("id", orderId);
-    return { status: "ready", videoUrl: result.videoUrl };
+    return { status: "ready", videoUrl: result.videoUrls[0], videoUrls: result.videoUrls };
   }
 
   if (result.status === "failed") {

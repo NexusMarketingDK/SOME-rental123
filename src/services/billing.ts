@@ -102,6 +102,7 @@ export async function createVideoOrderCheckout(formData: FormData): Promise<void
   const propertyId = String(formData?.get("property_id") ?? "") || null;
   const title = String(formData?.get("title") ?? "Bolig fremvisning");
   const imageUrls = formData?.getAll("image_urls[]").map(String).filter((u) => u.startsWith("http") || u.startsWith("data:")) ?? [];
+  const roomLabels = formData?.getAll("room_labels[]").map(String) ?? [];
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -115,13 +116,14 @@ export async function createVideoOrderCheckout(formData: FormData): Promise<void
     status: "processing",
   }).select("id").single();
 
-  // Start Higgsfield generation in background (don't block redirect)
+  // Start one Higgsfield job per image with cinematic per-room prompt
   if (imageUrls.length >= 1 && order?.id) {
     try {
       const { startVideoGeneration } = await import("@/lib/higgsfield");
-      const jobSetId = await startVideoGeneration(imageUrls, title);
+      const jobIds = await startVideoGeneration(imageUrls, title, roomLabels.length ? roomLabels : undefined);
       await supabase.from("video_orders").update({
-        higgsfield_job_id: jobSetId,
+        higgsfield_job_id: jobIds[0] ?? null,
+        higgsfield_job_ids: jobIds,
       }).eq("id", order.id);
     } catch (_e) {
       // Generation start failed — order remains in processing state for retry

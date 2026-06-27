@@ -130,37 +130,29 @@ function parseFromMarkdown(markdown: string): ScrapedProperty {
   return { title, description, location, imageUrls: imageUrls.slice(0, 20), price, size, conditions };
 }
 
-function isBlockedDomain(url: string): boolean {
+function isAirbnb(url: string): boolean {
   return /airbnb\.(com|es|co\.|dk|de|fr|it|nl|se|no)/i.test(url);
 }
 
-async function fetchViaJina(url: string): Promise<{ markdown?: string; error?: string }> {
-  try {
-    const res = await fetch(`https://r.jina.ai/${encodeURIComponent(url)}`, {
-      headers: {
-        "Accept": "text/plain",
-        "X-Return-Format": "markdown",
-        "X-No-Cache": "true",
-      },
-      signal: AbortSignal.timeout(25_000),
-    });
-    if (!res.ok) return { error: `proxy_${res.status}` };
-    const text = await res.text();
-    if (text.length < 200) return { error: "proxy_empty" };
-    return { markdown: text };
-  } catch {
-    return { error: "proxy_timeout" };
-  }
-}
+const USER_AGENTS = [
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15",
+  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+];
 
-async function fetchDirect(url: string): Promise<{ html?: string }> {
+async function fetchDirect(url: string, uaIndex = 0): Promise<{ html?: string }> {
   try {
     const res = await fetch(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "da,en-US;q=0.9,en;q=0.8",
+        "User-Agent": USER_AGENTS[uaIndex % USER_AGENTS.length],
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "da-DK,da;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
         "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
       },
       signal: AbortSignal.timeout(12_000),
     });
@@ -171,42 +163,130 @@ async function fetchDirect(url: string): Promise<{ html?: string }> {
   }
 }
 
+async function fetchViaJina(url: string): Promise<{ markdown?: string }> {
+  try {
+    const res = await fetch(`https://r.jina.ai/${encodeURIComponent(url)}`, {
+      headers: {
+        "Accept": "text/plain",
+        "X-Return-Format": "markdown",
+        "X-No-Cache": "true",
+        "X-With-Images-Summary": "true",
+      },
+      signal: AbortSignal.timeout(30_000),
+    });
+    if (!res.ok) return {};
+    const text = await res.text();
+    if (text.length < 200) return {};
+    return { markdown: text };
+  } catch {
+    return {};
+  }
+}
+
+async function fetchViaAllOrigins(url: string): Promise<{ html?: string }> {
+  try {
+    const res = await fetch(
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+      { signal: AbortSignal.timeout(15_000) }
+    );
+    if (!res.ok) return {};
+    const html = await res.text();
+    if (html.length < 500) return {};
+    return { html };
+  } catch {
+    return {};
+  }
+}
+
+async function fetchViaScraperApi(url: string): Promise<{ html?: string }> {
+  // Uses a free public CORS proxy — no API key needed
+  try {
+    const res = await fetch(
+      `https://corsproxy.io/?${encodeURIComponent(url)}`,
+      {
+        headers: { "User-Agent": USER_AGENTS[1] },
+        signal: AbortSignal.timeout(15_000),
+      }
+    );
+    if (!res.ok) return {};
+    const html = await res.text();
+    if (html.length < 500) return {};
+    return { html };
+  } catch {
+    return {};
+  }
+}
+
+async function fetchViaGoogleCache(url: string): Promise<{ html?: string }> {
+  try {
+    const cacheUrl = `https://webcache.googleusercontent.com/search?q=cache:${encodeURIComponent(url)}&hl=da`;
+    const res = await fetch(cacheUrl, {
+      headers: { "User-Agent": USER_AGENTS[0] },
+      signal: AbortSignal.timeout(12_000),
+    });
+    if (!res.ok) return {};
+    return { html: await res.text() };
+  } catch {
+    return {};
+  }
+}
+
+function hasUsefulData(data: ScrapedProperty): boolean {
+  return !!(data.title || data.description || data.imageUrls.length > 0);
+}
+
 export async function scrapePropertyUrl(url: string): Promise<{ data?: ScrapedProperty; error?: string }> {
   if (!url || !url.startsWith("http")) return { error: "Ugyldig URL" };
 
-  const blocked = isBlockedDomain(url);
-
-  // For known bot-protected sites, go straight to Jina
-  if (!blocked) {
-    const direct = await fetchDirect(url);
-    if (direct.html) {
-      const data = parseFromHtml(direct.html);
-      if (data.title || data.description || data.imageUrls.length > 0) return { data };
-    }
-  }
-
-  // Jina Reader — renders JS and bypasses most bot protection
-  const jina = await fetchViaJina(url);
-  if (jina.markdown) {
-    const data = parseFromMarkdown(jina.markdown);
-    // If Jina returned something useful
-    if (data.title || data.description) return { data };
-    // Jina succeeded but page was near-empty (bot wall)
-  }
-
-  // For Airbnb specifically, give a helpful message
-  if (blocked) {
+  if (isAirbnb(url)) {
     return {
-      error: "Airbnb blokerer automatisk hentning. Udfyld felterne manuelt, eller brug booking-linket nedenfor.",
+      error: "Airbnb blokerer automatisk hentning. Gem billederne manuelt fra Airbnb og upload dem herunder.",
     };
   }
 
-  // Generic fallback — still try direct if we haven't yet
-  const direct2 = await fetchDirect(url);
-  if (direct2.html) {
-    const data = parseFromHtml(direct2.html);
-    if (data.title || data.description || data.imageUrls.length > 0) return { data };
+  // 1. Direct fetch — fastest, works on simple sites
+  const direct = await fetchDirect(url, 0);
+  if (direct.html) {
+    const data = parseFromHtml(direct.html);
+    if (hasUsefulData(data)) return { data };
   }
 
-  return { error: "Kunne ikke hente oplysninger fra siden. Prøv en anden URL eller udfyld manuelt." };
+  // 2. Alternative User-Agent
+  const direct2 = await fetchDirect(url, 1);
+  if (direct2.html) {
+    const data = parseFromHtml(direct2.html);
+    if (hasUsefulData(data)) return { data };
+  }
+
+  // 3. Jina Reader — renders JavaScript, bypasses many bot walls
+  const jina = await fetchViaJina(url);
+  if (jina.markdown) {
+    const data = parseFromMarkdown(jina.markdown);
+    if (hasUsefulData(data)) return { data };
+  }
+
+  // 4. allorigins.win — CORS proxy, different IP
+  const allorigins = await fetchViaAllOrigins(url);
+  if (allorigins.html) {
+    const data = parseFromHtml(allorigins.html);
+    if (hasUsefulData(data)) return { data };
+  }
+
+  // 5. corsproxy.io — another public proxy
+  const cors = await fetchViaScraperApi(url);
+  if (cors.html) {
+    const data = parseFromHtml(cors.html);
+    if (hasUsefulData(data)) return { data };
+  }
+
+  // 6. Google Cache — last resort
+  const cache = await fetchViaGoogleCache(url);
+  if (cache.html) {
+    const data = parseFromHtml(cache.html);
+    if (hasUsefulData(data)) return { data };
+  }
+
+  return {
+    error: "Siden er beskyttet mod automatisk hentning. Upload billeder manuelt, eller prøv at kopiere billede-URLs direkte fra siden.",
+  };
 }
