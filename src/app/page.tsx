@@ -218,11 +218,12 @@ export default function LandingPage() {
                 {[
                   "4 sociale medie platforme",
                   "Ubegrænsede opslag",
-                  "AI-genererede tekster",
-                  "Automatisk posting med interval",
+                  "Billede-upload eller hent billeder fra Airbnb & Booking.com via API",
+                  "AI-genererede professionelle opslag — 5 kr/opslag",
+                  "Post automatisk på dine egne sider og i grupper du er medlem af",
+                  "Automatisk posting med valgfrit interval",
                   "Kalendersynkronisering",
                   "Op til 5 boliger",
-                  "Billede-upload",
                 ].map((f) => (
                   <li key={f} className="flex items-center gap-2 text-sm text-slate-700">
                     <CheckCircle2 size={16} className="text-[#1B3F7A] shrink-0" />
