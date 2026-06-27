@@ -4,7 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Topbar } from "@/components/layout/topbar";
 import { createVideoOrderCheckout } from "@/services/billing";
-import { Upload, Link as LinkIcon, X, Loader2, Sparkles, CheckCircle2, Clock, Star, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { Upload, Link as LinkIcon, X, Loader2, Sparkles, CheckCircle2, Clock, Star, ChevronLeft, ChevronRight, Plus, Search, AlertCircle } from "lucide-react";
+import { scrapePropertyUrl } from "@/services/scrape-property";
+import { ScreenshotImporter } from "@/components/screenshot-importer";
 
 const ROOM_LABELS = [
   "Stue", "Køkken", "Soveværelse", "Badeværelse", "Altan/Terrasse",
@@ -182,6 +184,33 @@ export default function NewVideoPage() {
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // URL import state
+  const [importUrl, setImportUrl] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState("");
+
+  async function handleUrlImport() {
+    if (!importUrl.trim()) return;
+    setImporting(true);
+    setImportError("");
+    const result = await scrapePropertyUrl(importUrl.trim());
+    setImporting(false);
+    if (result.error) { setImportError(result.error); return; }
+    if (result.data) {
+      if (result.data.title && !title) setTitle(result.data.title);
+      if (result.data.imageUrls.length > 0) {
+        setImageUrls((prev) => [...prev, ...result.data!.imageUrls.slice(0, 20 - prev.length)]);
+      } else {
+        setImportError("Ingen billeder fundet på siden. Upload billeder manuelt.");
+      }
+    }
+  }
+
+  function handleScreenshotImport(urls: string[], detectedTitle?: string) {
+    if (detectedTitle && !title) setTitle(detectedTitle);
+    setImageUrls((prev) => [...prev, ...urls.slice(0, 20 - prev.length)]);
+  }
+
   function removeImage(i: number) {
     setImageUrls((prev) => prev.filter((_, idx) => idx !== i));
   }
@@ -270,10 +299,57 @@ export default function NewVideoPage() {
             </div>
 
             {/* ── Right: order form ── */}
-            <div className="col-span-3">
+            <div className="col-span-3 space-y-5">
+
+              {/* Import options */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+                <p className="text-sm font-bold text-slate-900">Hent billeder automatisk</p>
+
+                {/* URL import */}
+                <div>
+                  <p className="text-xs text-slate-500 mb-2">Fra booking-link (Booking.com, VRBO m.fl.)</p>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="url"
+                        value={importUrl}
+                        onChange={(e) => { setImportUrl(e.target.value); setImportError(""); }}
+                        onKeyDown={(e) => e.key === "Enter" && handleUrlImport()}
+                        placeholder="https://www.booking.com/hotel/..."
+                        className="w-full rounded-lg border border-slate-200 pl-8 pr-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#1B3F7A] focus:outline-none focus:ring-2 focus:ring-[#1B3F7A]/10"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleUrlImport}
+                      disabled={importing || !importUrl.trim()}
+                      className="flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
+                      style={{ background: "linear-gradient(135deg, #1B3F7A 0%, #2a5298 100%)" }}
+                    >
+                      {importing ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+                      {importing ? "Henter..." : "Hent"}
+                    </button>
+                  </div>
+                  {importError && (
+                    <div className="mt-1.5 flex items-start gap-1.5 text-xs text-red-600">
+                      <AlertCircle size={12} className="mt-0.5 shrink-0" /> {importError}
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-t border-slate-100 pt-4">
+                  <p className="text-xs text-slate-500 mb-2">Fra screenshot (Airbnb, alle sider)</p>
+                  <ScreenshotImporter onImport={handleScreenshotImport} />
+                </div>
+              </div>
+
               <form action={createVideoOrderCheckout} className="space-y-5">
                 {imageUrls.map((url, i) => (
                   <input key={i} type="hidden" name="image_urls[]" value={url} />
+                ))}
+                {imageUrls.map((_, i) => (
+                  <input key={`label-${i}`} type="hidden" name="room_labels[]" value={ROOM_LABELS[i] ?? `Billede ${i + 1}`} />
                 ))}
 
                 {/* Title + URL */}
