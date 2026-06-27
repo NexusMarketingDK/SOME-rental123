@@ -1,6 +1,6 @@
 "use server";
 
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export type DetectedImage = {
   x: number;       // 0-1 relative to screenshot width
@@ -21,10 +21,11 @@ export async function extractImagesFromScreenshot(
   base64Image: string,
   mimeType: "image/jpeg" | "image/png" | "image/webp" = "image/jpeg"
 ): Promise<ScreenshotExtractResult> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return { error: "ANTHROPIC_API_KEY ikke konfigureret." };
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return { error: "GEMINI_API_KEY ikke konfigureret." };
 
-  const client = new Anthropic({ apiKey });
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const prompt = `This is a screenshot of a holiday rental property listing (e.g. Airbnb, Booking.com, or similar site).
 
@@ -49,28 +50,12 @@ Return ONLY valid JSON, no markdown, no explanation:
 Be generous — include every property photo you can see, even small thumbnails. Aim to find 5-15 images if present.`;
 
   try {
-    const response = await client.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 2000,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "image",
-              source: {
-                type: "base64",
-                media_type: mimeType,
-                data: base64Image,
-              },
-            },
-            { type: "text", text: prompt },
-          ],
-        },
-      ],
-    });
+    const result = await model.generateContent([
+      { inlineData: { mimeType, data: base64Image } },
+      prompt,
+    ]);
 
-    const text = response.content[0].type === "text" ? response.content[0].text : "";
+    const text = result.response.text();
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) return { error: "Kunne ikke fortolke svar fra AI." };
 
