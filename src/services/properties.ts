@@ -32,12 +32,15 @@ export async function createPropertyAction(formData: FormData): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  const imageUrls = formData.getAll("image_urls[]").map(String).filter((u) => u.startsWith("http"));
+
   const { error } = await supabase.from("properties").insert({
     user_id: user.id,
     title: String(formData.get("title") ?? "").trim(),
     description: String(formData.get("description") ?? "").trim() || null,
     location: String(formData.get("location") ?? "").trim() || null,
     booking_url: String(formData.get("booking_url") ?? "").trim() || null,
+    image_urls: imageUrls.length > 0 ? imageUrls : null,
   });
 
   if (error) redirect("/properties/new?error=db");
