@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { stripe, PLANS, PRICES } from "@/lib/stripe";
+import { getStripe, PLANS, PRICES } from "@/lib/stripe";
 
 export async function getSubscription() {
   const supabase = await createClient();
@@ -53,11 +53,11 @@ export async function createSubscriptionCheckout(): Promise<void> {
   if (sub?.stripe_customer_id) {
     customerId = sub.stripe_customer_id;
   } else {
-    const customer = await stripe.customers.create({ email: user.email });
+    const customer = await getStripe().customers.create({ email: user.email });
     customerId = customer.id;
   }
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await getStripe().checkout.sessions.create({
     customer: customerId,
     mode: "subscription",
     line_items: [{ price: PLANS.social.priceId, quantity: 1 }],
@@ -79,7 +79,7 @@ export async function createAiCreditCheckout(formData: FormData): Promise<void> 
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://some-rental123.vercel.app";
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await getStripe().checkout.sessions.create({
     mode: "payment",
     line_items: [{
       price_data: {
@@ -106,7 +106,7 @@ export async function createVideoOrderCheckout(formData?: FormData): Promise<voi
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://some-rental123.vercel.app";
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await getStripe().checkout.sessions.create({
     mode: "payment",
     line_items: [{
       price_data: {
@@ -143,7 +143,7 @@ export async function createBillingPortalSession(): Promise<void> {
 
   if (!sub?.stripe_customer_id) redirect("/billing");
 
-  const session = await stripe.billingPortal.sessions.create({
+  const session = await getStripe().billingPortal.sessions.create({
     customer: sub.stripe_customer_id,
     return_url: `${appUrl}/billing`,
   });
