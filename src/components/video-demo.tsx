@@ -158,8 +158,8 @@ export function VideoDemo() {
               <CheckCircle2 size={18} className="text-emerald-400" />
             </div>
             <div>
-              <p className="text-sm font-bold text-white">Din video er klar til produktion!</p>
-              <p className="text-xs text-white/50">Betal nu for at modtage din video inden for 15 minutter</p>
+              <p className="text-sm font-bold text-white">Din video er klar!</p>
+              <p className="text-xs text-white/50">Opret din ordre og modtag videoen inden for 15 minutter</p>
             </div>
           </div>
 
@@ -190,7 +190,7 @@ export function VideoDemo() {
             className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold text-slate-900 shadow-lg transition-opacity hover:opacity-90"
             style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
           >
-            <Sparkles size={15} /> Betal og modtag video — 499 kr <ArrowRight size={15} />
+            <Sparkles size={15} /> Opret video <ArrowRight size={15} />
           </a>
 
           <button
