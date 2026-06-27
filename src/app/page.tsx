@@ -209,8 +209,9 @@ export default function LandingPage() {
             <span className="text-lg font-bold text-[#1B3F7A]">Vakanza</span>
           </div>
           <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
+            <a href="#" className="hover:text-[#1B3F7A] transition-colors">Forside</a>
             <a href="#features" className="hover:text-[#1B3F7A] transition-colors">Funktioner</a>
-            <a href="#ai" className="hover:text-[#1B3F7A] transition-colors">AI-billeder & Video</a>
+            <a href="#ai" className="hover:text-[#1B3F7A] transition-colors">Video</a>
             <a href="#pricing" className="hover:text-[#1B3F7A] transition-colors">Priser</a>
           </nav>
           <div className="flex items-center gap-3">
@@ -252,14 +253,14 @@ export default function LandingPage() {
                 <Pill><Video size={11} /> Præsentationsvideoer</Pill>
               </div>
               <h1 className="text-4xl font-bold leading-tight text-white md:text-5xl lg:text-[3.25rem]">
-                Markedsfør din<br />
-                feriebolig på<br />
+                Udlej din<br />
+                private bolig<br />
                 <span style={{ background: "linear-gradient(90deg, #FFB36B, #FF6B4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                  autopilot
+                  smartere
                 </span>
               </h1>
               <p className="mt-5 max-w-lg text-base leading-relaxed text-blue-100">
-                Vakanza poster automatisk til Facebook, Instagram, TikTok og LinkedIn, genererer AI-billeder og professionelle præsentationsvideoer — mens du bruger din tid på det der betyder mest.
+                Vakanza hjælper private udlejere med at markedsføre ferieboligen — automatisk. AI skaber præsentationsvideoer fra dine billeder, poster til sociale medier og synkroniserer din bookingkalender.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
@@ -307,7 +308,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-5xl px-6">
           <p className="mb-3 text-center text-xs font-semibold uppercase tracking-widest text-slate-400">Virker med</p>
           <div className="flex flex-wrap items-center justify-center gap-6">
-            {["Airbnb", "Booking.com", "Facebook", "Instagram", "TikTok", "LinkedIn", "Snapchat", "YouTube"].map((p) => (
+            {["Airbnb", "Booking.com", "Novasol", "Facebook", "Instagram", "TikTok", "LinkedIn", "YouTube"].map((p) => (
               <span key={p} className="text-sm font-semibold text-slate-400 hover:text-slate-600 transition-colors">{p}</span>
             ))}
           </div>
@@ -326,122 +327,167 @@ export default function LandingPage() {
             </p>
           </div>
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            <FeatureCard icon={Share2} title="Post på alle platforme på én gang" desc="Skriv ét opslag og send det til Facebook, Instagram, TikTok og LinkedIn simultant — automatisk på dine valgte tidspunkter." accent="bg-blue-50 text-blue-600" />
-            <FeatureCard icon={Sparkles} title="AI-genererede opslag" desc="Lad AI skrive professionelle, engagerende opslag baseret på din bolig. Vælg tone: familievenlig, luksus eller last-minute tilbud." accent="bg-purple-50 text-purple-600" />
-            <FeatureCard icon={ImageIcon} title="AI-genererede billeder" desc="Generer smukke billeder af din bolig med AI. Upload en reference, og Vakanza skaber professionelle marketingbilleder på få sekunder." accent="bg-pink-50 text-pink-600" />
-            <FeatureCard icon={Video} title="Præsentationsvideo på minutter" desc="Henter billeder automatisk fra Airbnb & Booking.com. AI skaber en professionel video med musik, klar til Reels og TikTok." accent="bg-orange-50 text-orange-600" />
-            <FeatureCard icon={CalendarDays} title="Kalendersynkronisering" desc="Importer din bookingkalender fra Airbnb, Booking.com eller Google Calendar automatisk. Se alle bookinger ét sted." accent="bg-emerald-50 text-emerald-600" />
-            <FeatureCard icon={Zap} title="Fuldautomatisk autopilot" desc="Sæt Vakanza til at generere og poste med dine foretrukne intervaller. Altid professionelt — uden du løfter en finger." accent="bg-yellow-50 text-yellow-600" />
+            <FeatureCard icon={Video} title="Virtuel fremvisning via video" desc="Upload billeder af din bolig — eller indsæt dit Novasol, Airbnb eller Booking.com-link. AI skaber en professionel præsentationsvideo med musik og filmiske kamerabevægelser på under 15 minutter." accent="bg-orange-50 text-orange-600" />
+            <FeatureCard icon={Share2} title="Automatisk post på sociale medier" desc="Ét klik sender dit indhold til Facebook, Instagram, TikTok og LinkedIn. Vakanza planlægger og poster automatisk på dine valgte tidspunkter." accent="bg-blue-50 text-blue-600" />
+            <FeatureCard icon={CalendarDays} title="Synkroniser din bookingkalender" desc="Importer din eksisterende kalender fra Airbnb, Booking.com, Novasol eller Google Calendar. Alle bookinger samlet ét sted — altid opdateret." accent="bg-emerald-50 text-emerald-600" />
+            <FeatureCard icon={Sparkles} title="AI skriver dine opslag" desc="Lad AI generere professionelle, engagerende opslag baseret på din bolig og sæson. Vælg tone: familievenlig, luksus eller last-minute tilbud." accent="bg-purple-50 text-purple-600" />
+            <FeatureCard icon={Home} title="Privat bolig eller feriehus" desc="Vakanza er skabt til private udlejere — sommerhus, lejlighed, villa eller kollegieværelse. Intet bureaugebyr, ingen bindinger." accent="bg-pink-50 text-pink-600" />
+            <FeatureCard icon={Zap} title="Fuldautomatisk autopilot" desc="Sæt Vakanza på autopilot og lad AI håndtere al markedsføring. Du fokuserer på dine gæster — Vakanza klarer resten." accent="bg-yellow-50 text-yellow-600" />
           </div>
         </div>
       </section>
 
-      {/* ── AI section ── */}
-      <section id="ai" className="bg-slate-50 py-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mb-14 text-center">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600">
-              <Sparkles size={11} /> AI-funktioner
+      {/* ── AI Video section ── */}
+      <section id="ai" className="relative overflow-hidden py-28" style={{ background: "linear-gradient(160deg, #0a0f1e 0%, #0f1f3d 50%, #0a0f1e 100%)" }}>
+        {/* Background glow orbs */}
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -left-40 top-20 h-[500px] w-[500px] rounded-full opacity-20 blur-[120px]" style={{ background: "radial-gradient(circle, #FF6B4A, transparent 70%)" }} />
+          <div className="absolute -right-40 bottom-20 h-[400px] w-[400px] rounded-full opacity-15 blur-[100px]" style={{ background: "radial-gradient(circle, #FFB36B, transparent 70%)" }} />
+          <div className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-10 blur-[140px]" style={{ background: "radial-gradient(circle, #1B3F7A, transparent 70%)" }} />
+        </div>
+
+        <div className="relative mx-auto max-w-6xl px-6">
+          {/* Header */}
+          <div className="mb-16 text-center">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-1.5 text-xs font-semibold text-orange-400">
+              <Sparkles size={11} /> Drevet af Higgsfield AI
             </div>
-            <h2 className="text-3xl font-bold text-[#1B3F7A] md:text-4xl">
-              Professionelle billeder & videoer<br />— genereret af AI
+            <h2 className="text-4xl font-bold text-white md:text-5xl lg:text-6xl">
+              Virtuel fremvisning<br />
+              <span style={{ background: "linear-gradient(90deg, #FFB36B, #FF6B4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                skabt af dine billeder
+              </span>
             </h2>
-            <p className="mx-auto mt-3 max-w-xl text-slate-500">
-              Du behøver ikke ansætte en fotograf eller videograf. Vakanza's AI klarer det hele.
+            <p className="mx-auto mt-5 max-w-2xl text-lg text-slate-400">
+              Upload billeder af din bolig — eller indsæt et link fra Novasol, Airbnb eller Booking.com. Vakanza henter billederne og skaber en professionel præsentationsvideo med musik og filmiske bevægelser på under 15 minutter.
             </p>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-2">
-            {/* AI images card */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-              <div className="mb-5 flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-50">
-                  <ImageIcon size={22} className="text-pink-500" />
+          {/* Main content grid */}
+          <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+
+            {/* Left: Phone mockup with animated video preview */}
+            <div className="flex justify-center">
+              <div className="relative">
+                {/* Glow behind phone */}
+                <div className="absolute inset-0 scale-90 rounded-[2.5rem] opacity-40 blur-2xl" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }} />
+                {/* Phone frame */}
+                <div className="relative mx-auto w-[220px] overflow-hidden rounded-[2.5rem] border-4 border-white/10 bg-black shadow-2xl">
+                  {/* Notch */}
+                  <div className="absolute left-1/2 top-3 z-10 h-5 w-24 -translate-x-1/2 rounded-full bg-black" />
+                  {/* Video preview — animated gradient blocks */}
+                  <div className="relative aspect-[9/16] overflow-hidden" style={{ background: "linear-gradient(160deg, #1a2540 0%, #0d1520 100%)" }}>
+                    {/* Animated scene */}
+                    <div className="absolute inset-0 flex flex-col">
+                      <div className="h-1/2 w-full" style={{ background: "linear-gradient(180deg, #2d6a9f 0%, #1a3f5c 100%)" }} />
+                      <div className="h-1/2 w-full" style={{ background: "linear-gradient(0deg, #1a3020 0%, #2d5a3a 100%)" }} />
+                    </div>
+                    {/* Overlay content */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/30">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-sm">
+                        <Play size={22} className="text-white" fill="white" />
+                      </div>
+                      <div className="mt-2 px-4 text-center">
+                        <p className="text-[10px] font-semibold text-white/90">Sommerhus ved Skagen</p>
+                        <p className="text-[9px] text-white/60">AI-genereret præsentationsvideo</p>
+                      </div>
+                    </div>
+                    {/* Bottom gradient */}
+                    <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/80 to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <div className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                          <span className="text-[9px] font-medium text-white">REELS KLAR</span>
+                        </div>
+                        <span className="text-[9px] text-white/70">0:28</span>
+                      </div>
+                      <div className="mt-1.5 h-0.5 overflow-hidden rounded-full bg-white/20">
+                        <div className="h-full w-2/3 rounded-full" style={{ background: "linear-gradient(90deg, #FFB36B, #FF6B4A)" }} />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-bold text-slate-900">AI-genererede billeder</h3>
-                  <p className="text-sm text-slate-500">Skab professionelle marketingbilleder</p>
+                {/* Floating badges */}
+                <div className="absolute -right-8 top-12 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md">
+                  <p className="text-[10px] font-semibold text-white">9:16 format</p>
+                  <p className="text-[9px] text-slate-400">Reels & TikTok</p>
+                </div>
+                <div className="absolute -left-8 bottom-16 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md">
+                  <p className="text-[10px] font-semibold text-emerald-400">✓ Klar på 15 min</p>
+                  <p className="text-[9px] text-slate-400">AI genererer</p>
                 </div>
               </div>
-              {/* Fake image grid */}
-              <div className="mb-5 grid grid-cols-3 gap-2">
+            </div>
+
+            {/* Right: Steps + stats */}
+            <div className="flex flex-col gap-6">
+              {/* Steps */}
+              <div className="flex flex-col gap-4">
                 {[
-                  "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                  "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-                  "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-                  "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
-                  "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
-                  "linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)",
-                ].map((g, i) => (
-                  <div key={i} className="aspect-square rounded-xl" style={{ background: g }}>
-                    <div className="flex h-full items-center justify-center">
-                      <Home size={18} className="text-white/60" />
+                  { n: "01", title: "Indsæt link eller upload billeder", desc: "Vi henter automatisk billeder og boliginfo fra Novasol, Airbnb, Booking.com — eller upload dine egne billeder direkte." },
+                  { n: "02", title: "AI skaber din video", desc: "Higgsfield AI komponerer en flydende præsentationsvideo med cineastiske overgange og stemningsfuld musik." },
+                  { n: "03", title: "Del på alle platforme", desc: "Download videoen og del den direkte til Instagram Reels, TikTok og Facebook — alt fra én app." },
+                ].map((step) => (
+                  <div key={step.n} className="flex gap-4 rounded-2xl border border-white/5 bg-white/5 p-5 backdrop-blur-sm">
+                    <div className="shrink-0">
+                      <span className="text-2xl font-bold" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                        {step.n}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white">{step.title}</p>
+                      <p className="mt-1 text-sm text-slate-400">{step.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
-              <ul className="flex flex-col gap-2">
-                <Check>Upload én reference — AI genererer variationer</Check>
-                <Check>Optimerede til sociale medier (1:1, 4:5, 9:16)</Check>
-                <Check>Sommerhus, lejlighed, villa — alle boligtyper</Check>
-                <Check>Klar på sekunder</Check>
-              </ul>
-              <div className="mt-6 flex items-center justify-between rounded-xl bg-pink-50 p-4">
-                <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pris</p>
-                  <p className="text-2xl font-bold text-slate-900">5 kr <span className="text-sm font-normal text-slate-500">/ billede</span></p>
-                </div>
-                <Link href="/signup" className="rounded-lg bg-pink-500 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-600 transition-colors">
-                  Prøv nu
-                </Link>
-              </div>
-            </div>
 
-            {/* Video card */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-              <div className="mb-5 flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-50">
-                  <Video size={22} className="text-orange-500" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900">AI-præsentationsvideo</h3>
-                  <p className="text-sm text-slate-500">Professionel video på under 15 minutter</p>
-                </div>
+              {/* Stats row */}
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { value: "3×", label: "mere engagement" },
+                  { value: "15 min", label: "genereringstid" },
+                  { value: "9:16", label: "Reels & TikTok" },
+                ].map((s) => (
+                  <div key={s.label} className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
+                    <p className="text-xl font-bold text-white">{s.value}</p>
+                    <p className="mt-0.5 text-[11px] text-slate-500">{s.label}</p>
+                  </div>
+                ))}
               </div>
-              {/* Phone + description side by side */}
-              <div className="mb-5 flex items-center gap-6">
-                <PhoneMockup />
-                <div className="flex-1 space-y-3">
-                  <div className="flex items-start gap-2.5">
-                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}>1</div>
-                    <p className="text-xs text-slate-600">Indsæt dit Airbnb- eller Booking.com-link — vi henter billeder automatisk</p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}>2</div>
-                    <p className="text-xs text-slate-600">AI genererer video med musik og flydende overgange</p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}>3</div>
-                    <p className="text-xs text-slate-600">Download og del på Instagram Reels, TikTok og Facebook</p>
-                  </div>
-                </div>
-              </div>
-              <ul className="flex flex-col gap-2">
-                <Check>Henter billeder automatisk fra Airbnb & Booking.com</Check>
-                <Check>9:16 format — perfekt til Reels & TikTok</Check>
-                <Check>Leveret direkte i appen inden for 15 minutter</Check>
-                <Check>Op til 3× mere engagement end statiske billeder</Check>
-              </ul>
-              <div className="mt-6 flex items-center justify-between rounded-xl bg-orange-50 p-4">
+
+              {/* CTA */}
+              <div className="flex items-center justify-between rounded-2xl border border-orange-500/20 bg-orange-500/10 p-5">
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Engangspris</p>
-                  <p className="text-2xl font-bold text-slate-900">499 kr <span className="text-sm font-normal text-slate-500">/ video</span></p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-orange-400">Engangspris</p>
+                  <p className="text-3xl font-bold text-white">499 kr <span className="text-sm font-normal text-slate-400">/ video</span></p>
                 </div>
-                <Link href="/signup" className="rounded-lg px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}>
-                  Bestil video
+                <Link
+                  href="/signup"
+                  className="rounded-xl px-6 py-3 text-sm font-bold text-white shadow-lg transition-opacity hover:opacity-90"
+                  style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}
+                >
+                  Bestil video →
                 </Link>
               </div>
             </div>
+          </div>
+
+          {/* Feature chips row */}
+          <div className="mt-16 flex flex-wrap justify-center gap-3">
+            {[
+              "Novasol, Airbnb & Booking.com integration",
+              "Upload egne billeder",
+              "Cineastiske kameraovergange",
+              "Automatisk baggrundsmusik",
+              "Leveret på under 15 minutter",
+              "9:16 optimeret til Reels & TikTok",
+            ].map((f) => (
+              <span key={f} className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-slate-300">
+                <CheckCircle2 size={11} className="text-orange-400" /> {f}
+              </span>
+            ))}
           </div>
         </div>
       </section>
@@ -457,9 +503,9 @@ export default function LandingPage() {
             {/* Connecting line */}
             <div className="absolute left-1/6 right-1/6 top-7 hidden h-px bg-gradient-to-r from-[#1B3F7A]/20 via-[#1B3F7A]/40 to-[#1B3F7A]/20 md:block" />
             {[
-              { n: "1", icon: Home, title: "Tilføj din bolig", desc: "Upload billeder og beskriv din feriebolig. Tilslut din bookingkalender fra Airbnb eller Booking.com." },
-              { n: "2", icon: Share2, title: "Forbind sociale medier", desc: "Forbind Facebook, Instagram, TikTok og LinkedIn med ét klik. Vælg hvilke platforme du vil poste til." },
-              { n: "3", icon: Zap, title: "Lad Vakanza klare resten", desc: "AI genererer og poster automatisk på dine valgte tidspunkter. Professionelt — uden du løfter en finger." },
+              { n: "1", icon: Home, title: "Tilføj din bolig", desc: "Upload billeder eller indsæt dit Novasol-, Airbnb- eller Booking.com-link. Synkroniser din eksisterende bookingkalender automatisk." },
+              { n: "2", icon: Video, title: "AI laver din præsentationsvideo", desc: "Vakanza skaber en professionel virtuel fremvisning med musik og filmiske kamerabevægelser — klar på under 15 minutter." },
+              { n: "3", icon: Zap, title: "Del automatisk på sociale medier", desc: "Vakanza poster din video og opslag til Facebook, Instagram, TikTok og LinkedIn — automatisk og på det rigtige tidspunkt." },
             ].map((s) => (
               <div key={s.n} className="relative text-center">
                 <div
@@ -626,21 +672,93 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-slate-100 bg-white py-8">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-6 md:flex-row md:justify-between">
-          <div className="flex items-center gap-2">
-            <span
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-sm font-bold text-white"
-              style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
-            >
-              V
-            </span>
-            <span className="font-bold text-[#1B3F7A]">Vakanza</span>
+      <footer className="border-t border-slate-200 bg-[#0d1f3c]">
+        <div className="mx-auto max-w-6xl px-6 py-16">
+          {/* Top row */}
+          <div className="grid gap-12 md:grid-cols-4">
+            {/* Brand */}
+            <div className="md:col-span-1">
+              <div className="flex items-center gap-2">
+                <span
+                  className="flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white"
+                  style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
+                >
+                  V
+                </span>
+                <span className="text-lg font-bold text-white">Vakanza</span>
+              </div>
+              <p className="mt-4 text-sm leading-relaxed text-slate-400">
+                AI-drevet marketing til ferieboligudlejere. Spar tid og nå flere lejere automatisk.
+              </p>
+              <div className="mt-5 flex gap-3">
+                {/* Facebook */}
+                <a href="#" aria-label="Facebook" className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-colors hover:border-orange-400/40 hover:text-orange-400">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                </a>
+                {/* Instagram */}
+                <a href="#" aria-label="Instagram" className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-colors hover:border-orange-400/40 hover:text-orange-400">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+                </a>
+                {/* TikTok */}
+                <a href="#" aria-label="TikTok" className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-colors hover:border-orange-400/40 hover:text-orange-400">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.17 8.17 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg>
+                </a>
+              </div>
+            </div>
+
+            {/* Produkt */}
+            <div>
+              <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-500">Produkt</p>
+              <ul className="flex flex-col gap-3 text-sm text-slate-400">
+                <li><a href="#features" className="transition-colors hover:text-white">Funktioner</a></li>
+                <li><a href="#ai" className="transition-colors hover:text-white">AI Video</a></li>
+                <li><a href="#pricing" className="transition-colors hover:text-white">Priser</a></li>
+                <li><Link href="/signup" className="transition-colors hover:text-white">Opret gratis konto</Link></li>
+                <li><Link href="/login" className="transition-colors hover:text-white">Log ind</Link></li>
+              </ul>
+            </div>
+
+            {/* Integrationer */}
+            <div>
+              <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-500">Integrationer</p>
+              <ul className="flex flex-col gap-3 text-sm text-slate-400">
+                <li><span className="transition-colors hover:text-white cursor-default">Airbnb</span></li>
+                <li><span className="transition-colors hover:text-white cursor-default">Booking.com</span></li>
+                <li><span className="transition-colors hover:text-white cursor-default">Facebook & Instagram</span></li>
+                <li><span className="transition-colors hover:text-white cursor-default">TikTok</span></li>
+                <li><span className="transition-colors hover:text-white cursor-default">LinkedIn</span></li>
+              </ul>
+            </div>
+
+            {/* Support */}
+            <div>
+              <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-500">Support</p>
+              <ul className="flex flex-col gap-3 text-sm text-slate-400">
+                <li><a href="mailto:kontakt@vakanza.dk" className="transition-colors hover:text-white">kontakt@vakanza.dk</a></li>
+                <li><Link href="/signup" className="transition-colors hover:text-white">Kom i gang</Link></li>
+              </ul>
+              <div className="mt-6 rounded-xl border border-orange-500/20 bg-orange-500/10 p-4">
+                <p className="text-xs font-semibold text-orange-400">Prøv gratis i dag</p>
+                <p className="mt-1 text-xs text-slate-400">Ingen kreditkort krævet</p>
+                <Link
+                  href="/signup"
+                  className="mt-3 block w-full rounded-lg py-2 text-center text-xs font-bold text-white transition-opacity hover:opacity-90"
+                  style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}
+                >
+                  Start nu →
+                </Link>
+              </div>
+            </div>
           </div>
-          <p className="text-xs text-slate-400">© 2026 Vakanza. Alle rettigheder forbeholdes.</p>
-          <div className="flex gap-5 text-xs text-slate-400">
-            <Link href="/login" className="hover:text-slate-700 transition-colors">Log ind</Link>
-            <Link href="/signup" className="hover:text-slate-700 transition-colors">Opret konto</Link>
+
+          {/* Bottom row */}
+          <div className="mt-12 flex flex-col items-center gap-4 border-t border-white/5 pt-8 md:flex-row md:justify-between">
+            <p className="text-xs text-slate-600">© 2026 Vakanza. Alle rettigheder forbeholdes.</p>
+            <div className="flex gap-6 text-xs text-slate-600">
+              <a href="#" className="transition-colors hover:text-slate-400">Privatlivspolitik</a>
+              <a href="#" className="transition-colors hover:text-slate-400">Cookiepolitik</a>
+              <a href="#" className="transition-colors hover:text-slate-400">Handelsbetingelser</a>
+            </div>
           </div>
         </div>
       </footer>
