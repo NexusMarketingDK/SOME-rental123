@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Loader2, Clock, XCircle, Trash2, ArrowRight, Download, Share2 } from "lucide-react";
+import { CheckCircle2, Loader2, Clock, XCircle, Trash2, ArrowRight, Download, Share2, RefreshCw, AlertTriangle } from "lucide-react";
 import { deleteVideoOrder } from "@/services/video-orders";
+
+const MAX_PROCESSING_SEC = 20 * 60; // 20 minutes before showing timeout warning
 
 type Order = {
   id: string;
@@ -15,19 +17,24 @@ type Order = {
   image_urls: string[] | null;
 };
 
-function ProgressBadge({ status, createdAt }: { status: string; createdAt: string }) {
-  const [pct, setPct] = useState(0);
-
+function useElapsed(createdAt: string, active: boolean) {
+  const [elapsed, setElapsed] = useState(() =>
+    Math.floor((Date.now() - new Date(createdAt).getTime()) / 1000)
+  );
   useEffect(() => {
-    if (status !== "processing") return;
-    const tick = () => {
-      const elapsed = (Date.now() - new Date(createdAt).getTime()) / 1000;
-      setPct(Math.min(92, Math.round((elapsed / 900) * 100)));
-    };
-    tick();
-    const id = setInterval(tick, 1000);
+    if (!active) return;
+    const id = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - new Date(createdAt).getTime()) / 1000));
+    }, 1000);
     return () => clearInterval(id);
-  }, [status, createdAt]);
+  }, [active, createdAt]);
+  return elapsed;
+}
+
+function ProgressBadge({ status, createdAt }: { status: string; createdAt: string }) {
+  const elapsed = useElapsed(createdAt, status === "processing");
+  const pct = Math.min(92, Math.round((elapsed / 900) * 100));
+  const timedOut = elapsed > MAX_PROCESSING_SEC;
 
   if (status === "ready") return (
     <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
@@ -37,6 +44,11 @@ function ProgressBadge({ status, createdAt }: { status: string; createdAt: strin
   if (status === "failed") return (
     <span className="flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-600">
       <XCircle size={12} /> Fejlede
+    </span>
+  );
+  if (status === "processing" && timedOut) return (
+    <span className="flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+      <AlertTriangle size={12} /> Tager for lang tid
     </span>
   );
   if (status === "processing") return (
@@ -51,26 +63,50 @@ function ProgressBadge({ status, createdAt }: { status: string; createdAt: strin
   );
 }
 
-function ProgressBar({ status, createdAt }: { status: string; createdAt: string }) {
-  const [pct, setPct] = useState(0);
-  const [elapsed, setElapsed] = useState(0);
-
-  useEffect(() => {
-    if (status !== "processing") return;
-    const tick = () => {
-      const sec = (Date.now() - new Date(createdAt).getTime()) / 1000;
-      setElapsed(Math.floor(sec));
-      setPct(Math.min(92, Math.round((sec / 900) * 100)));
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [status, createdAt]);
+function ProgressSection({
+  status, createdAt, orderId, onRefresh,
+}: {
+  status: string; createdAt: string; orderId: string; onRefresh: () => void;
+}) {
+  const elapsed = useElapsed(createdAt, status === "processing");
+  const pct = Math.min(92, Math.round((elapsed / 900) * 100));
+  const timedOut = elapsed > MAX_PROCESSING_SEC;
+  const [checking, setChecking] = useState(false);
 
   if (status !== "processing") return null;
 
   const mins = Math.floor(elapsed / 60);
   const secs = elapsed % 60;
+
+  async function forceCheck() {
+    setChecking(true);
+    await fetch("/api/poll-video-status", { method: "POST" });
+    onRefresh();
+    setTimeout(() => setChecking(false), 3000);
+  }
+
+  if (timedOut) {
+    return (
+      <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+        <p className="text-sm font-medium text-amber-800">
+          Genereringen tager længere end forventet ({mins} min).
+        </p>
+        <p className="mt-1 text-xs text-amber-700">
+          Higgsfield AI kan sommetider bruge ekstra tid. Tjek status manuelt eller slet ordren og prøv igen.
+        </p>
+        <div className="mt-3 flex gap-2">
+          <button
+            onClick={forceCheck}
+            disabled={checking}
+            className="flex items-center gap-1.5 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50 disabled:opacity-50 transition-colors"
+          >
+            {checking ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+            {checking ? "Tjekker..." : "Tjek status nu"}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-3">
@@ -80,9 +116,17 @@ function ProgressBar({ status, createdAt }: { status: string; createdAt: string 
           style={{ width: `${pct}%` }}
         />
       </div>
-      <div className="mt-1 flex justify-between text-[10px] text-blue-400">
-        <span>{mins}:{String(secs).padStart(2, "0")} forløbet</span>
-        <span>{pct}% — typisk klar inden 15 min</span>
+      <div className="mt-1 flex items-center justify-between">
+        <span className="text-[10px] text-blue-400">{mins}:{String(secs).padStart(2, "0")} forløbet</span>
+        <button
+          onClick={forceCheck}
+          disabled={checking}
+          className="flex items-center gap-1 text-[10px] text-blue-400 hover:text-blue-600 disabled:opacity-50 transition-colors"
+        >
+          {checking ? <Loader2 size={9} className="animate-spin" /> : <RefreshCw size={9} />}
+          {checking ? "Tjekker..." : "Tjek nu"}
+        </button>
+        <span className="text-[10px] text-blue-400">{pct}% — typisk klar inden 15 min</span>
       </div>
     </div>
   );
@@ -96,6 +140,10 @@ export function VideoOrderCard({ order }: { order: Order }) {
   async function handleDelete() {
     setDeleting(true);
     await deleteVideoOrder(order.id);
+    router.refresh();
+  }
+
+  function handleRefresh() {
     router.refresh();
   }
 
@@ -142,7 +190,12 @@ export function VideoOrderCard({ order }: { order: Order }) {
         </div>
       </div>
 
-      <ProgressBar status={order.status} createdAt={order.created_at} />
+      <ProgressSection
+        status={order.status}
+        createdAt={order.created_at}
+        orderId={order.id}
+        onRefresh={handleRefresh}
+      />
 
       {order.status === "ready" && order.video_url && (
         <div className="mt-4">
