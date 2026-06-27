@@ -4,8 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Topbar } from "@/components/layout/topbar";
 import { createVideoOrderCheckout } from "@/services/billing";
-import { Upload, Link as LinkIcon, X, Loader2, Sparkles, CheckCircle2, Clock, Star, ChevronLeft, ChevronRight, Plus, Search, AlertCircle } from "lucide-react";
-import { scrapePropertyUrl } from "@/services/scrape-property";
+import { Upload, Link as LinkIcon, X, Loader2, Sparkles, CheckCircle2, Clock, Star, ChevronLeft, ChevronRight, Plus, Search, AlertCircle, MapPin, Tag, Maximize2 } from "lucide-react";
+import { scrapePropertyUrl, type ScrapedProperty } from "@/services/scrape-property";
 import { ScreenshotImporter } from "@/components/screenshot-importer";
 
 const ROOM_LABELS = [
@@ -174,6 +174,7 @@ export default function NewVideoPage() {
   const searchParams = useSearchParams();
   const [title, setTitle] = useState("");
   const [bookingUrl, setBookingUrl] = useState("");
+  const [propertyInfo, setPropertyInfo] = useState<Pick<ScrapedProperty, "description" | "location" | "price" | "size"> | null>(null);
 
   useEffect(() => {
     const urlParam = searchParams.get("booking_url");
@@ -198,6 +199,10 @@ export default function NewVideoPage() {
     if (result.error) { setImportError(result.error); return; }
     if (result.data) {
       if (result.data.title && !title) setTitle(result.data.title);
+      const { description, location, price, size } = result.data;
+      if (description || location || price || size) {
+        setPropertyInfo({ description, location, price, size });
+      }
       if (result.data.imageUrls.length > 0) {
         setImageUrls((prev) => [...prev, ...result.data!.imageUrls.slice(0, 20 - prev.length)]);
       } else {
@@ -389,6 +394,42 @@ export default function NewVideoPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Property info card — shown after URL import */}
+                {propertyInfo && (
+                  <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold uppercase tracking-wider text-blue-700">Hentet fra link</p>
+                      <button
+                        type="button"
+                        onClick={() => setPropertyInfo(null)}
+                        className="text-blue-300 hover:text-blue-500 transition-colors"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      {propertyInfo.location && (
+                        <span className="flex items-center gap-1.5 rounded-lg bg-white border border-blue-100 px-3 py-1.5 text-xs font-medium text-slate-700">
+                          <MapPin size={11} className="text-blue-400 shrink-0" /> {propertyInfo.location}
+                        </span>
+                      )}
+                      {propertyInfo.price && (
+                        <span className="flex items-center gap-1.5 rounded-lg bg-white border border-blue-100 px-3 py-1.5 text-xs font-medium text-slate-700">
+                          <Tag size={11} className="text-blue-400 shrink-0" /> {propertyInfo.price}
+                        </span>
+                      )}
+                      {propertyInfo.size && (
+                        <span className="flex items-center gap-1.5 rounded-lg bg-white border border-blue-100 px-3 py-1.5 text-xs font-medium text-slate-700">
+                          <Maximize2 size={11} className="text-blue-400 shrink-0" /> {propertyInfo.size}
+                        </span>
+                      )}
+                    </div>
+                    {propertyInfo.description && (
+                      <p className="text-sm text-slate-600 leading-relaxed line-clamp-4">{propertyInfo.description}</p>
+                    )}
+                  </div>
+                )}
 
                 {/* Photo tour or upload CTA */}
                 {imageUrls.length > 0 ? (
