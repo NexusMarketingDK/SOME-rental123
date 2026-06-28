@@ -242,9 +242,13 @@ export default function EnLandingPage() {
                 <div className="relative mx-auto w-[220px] overflow-hidden rounded-[2.5rem] border-4 border-white/10 bg-black shadow-2xl">
                   <div className="absolute left-1/2 top-3 z-10 h-5 w-24 -translate-x-1/2 rounded-full bg-black" />
                   <div className="relative aspect-[9/16] overflow-hidden" style={{ background: "linear-gradient(160deg, #1a2540 0%, #0d1520 100%)" }}>
-                    <div className="absolute inset-0 flex flex-col">
-                      <div className="h-1/2 w-full" style={{ background: "linear-gradient(180deg, #2d6a9f 0%, #1a3f5c 100%)" }} />
-                      <div className="h-1/2 w-full" style={{ background: "linear-gradient(0deg, #1a3020 0%, #2d5a3a 100%)" }} />
+                    {/* Danish rental property background */}
+                    <div className="absolute inset-0">
+                      <img
+                        src="https://d8j0ntlcm91z4.cloudfront.net/user_3FimRw5snqnWCSryULAZQYDRUt3/hf_20260628_010551_53f64722-cfad-4a28-a4b6-b6f9e903fc1b.png"
+                        alt="Danish summer house"
+                        className="h-full w-full object-cover"
+                      />
                     </div>
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/30">
                       <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-sm">

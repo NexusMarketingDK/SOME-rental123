@@ -377,10 +377,13 @@ export default function LandingPage() {
                   <div className="absolute left-1/2 top-3 z-10 h-5 w-24 -translate-x-1/2 rounded-full bg-black" />
                   {/* Video preview — animated gradient blocks */}
                   <div className="relative aspect-[9/16] overflow-hidden" style={{ background: "linear-gradient(160deg, #1a2540 0%, #0d1520 100%)" }}>
-                    {/* Animated scene */}
-                    <div className="absolute inset-0 flex flex-col">
-                      <div className="h-1/2 w-full" style={{ background: "linear-gradient(180deg, #2d6a9f 0%, #1a3f5c 100%)" }} />
-                      <div className="h-1/2 w-full" style={{ background: "linear-gradient(0deg, #1a3020 0%, #2d5a3a 100%)" }} />
+                    {/* Danish rental property background */}
+                    <div className="absolute inset-0">
+                      <img
+                        src="https://d8j0ntlcm91z4.cloudfront.net/user_3FimRw5snqnWCSryULAZQYDRUt3/hf_20260628_010551_53f64722-cfad-4a28-a4b6-b6f9e903fc1b.png"
+                        alt="Dansk sommerhus"
+                        className="h-full w-full object-cover"
+                      />
                     </div>
                     {/* Overlay content */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/30">
