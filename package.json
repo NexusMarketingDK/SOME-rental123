@@ -12,11 +12,13 @@
     "@anthropic-ai/sdk": "^0.106.0",
     "@google/generative-ai": "^0.24.1",
     "@higgsfield/client": "^0.2.1",
+    "@sparticuz/chromium-min": "^149.0.0",
     "@stripe/stripe-js": "^9.8.0",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.108.2",
     "lucide-react": "^1.21.0",
     "next": "16.2.9",
+    "playwright-core": "^1.61.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "stripe": "^22.3.0"

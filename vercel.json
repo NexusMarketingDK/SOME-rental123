@@ -1,0 +1,12 @@
+{
+  "functions": {
+    "src/app/api/scrape-url/route.ts": {
+      "maxDuration": 45,
+      "memory": 1024
+    },
+    "src/services/scrape-property.ts": {
+      "maxDuration": 45,
+      "memory": 1024
+    }
+  }
+}

@@ -149,6 +149,109 @@ function isAirbnb(url: string): boolean {
   return /airbnb\.(com|es|co\.|dk|de|fr|it|nl|se|no)/i.test(url);
 }
 
+function isJsHeavySite(url: string): boolean {
+  return /novasol\.|dansommer\.|solfaktor\.|dancenter\.|feriepartner\.|tripadvisor\.|vrbo\.com/i.test(url);
+}
+
+async function fetchViaPlaywright(url: string): Promise<{ data?: ScrapedProperty }> {
+  try {
+    const { chromium } = await import("playwright-core");
+
+    // Resolve executable: prefer env var, then pre-installed dev Chromium,
+    // then @sparticuz/chromium-min (Vercel Lambda / serverless)
+    let executablePath: string;
+    const devChromium = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
+    const fs = await import("fs");
+    if (process.env.PLAYWRIGHT_CHROMIUM_PATH) {
+      executablePath = process.env.PLAYWRIGHT_CHROMIUM_PATH;
+    } else if (fs.existsSync(devChromium)) {
+      executablePath = devChromium;
+    } else {
+      const chromiumModule = await import("@sparticuz/chromium-min");
+      const sparticuz = chromiumModule.default ?? chromiumModule;
+      executablePath = await (sparticuz as { executablePath: (url?: string) => Promise<string> }).executablePath();
+    }
+    const browser = await chromium.launch({
+      executablePath,
+      headless: true,
+      args: [
+        "--no-sandbox", "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage", "--disable-gpu",
+        "--single-process", "--no-zygote",
+      ],
+    });
+
+    const page = await browser.newPage();
+    await page.setExtraHTTPHeaders({
+      "Accept-Language": "da-DK,da;q=0.9,en-US;q=0.8,en;q=0.7",
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    });
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.route("**/*", (route) => {
+      if (["font", "media", "websocket"].includes(route.request().resourceType())) {
+        route.abort();
+      } else {
+        route.continue();
+      }
+    });
+
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 25_000 });
+    await page.waitForTimeout(3000);
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
+    await page.waitForTimeout(1500);
+
+    const raw = await page.evaluate(() => {
+      const imageSet = new Set<string>();
+
+      document.querySelectorAll('meta[property="og:image"]').forEach((el) => {
+        const u = el.getAttribute("content");
+        if (u?.startsWith("http")) imageSet.add(u);
+      });
+      document.querySelectorAll("img").forEach((img) => {
+        const src = img.getAttribute("data-src") ?? img.getAttribute("src") ?? "";
+        if (src.startsWith("http") && (img.naturalWidth || img.width || 0) > 200) imageSet.add(src);
+      });
+      document.querySelectorAll("source[srcset]").forEach((el) => {
+        const first = (el.getAttribute("srcset") ?? "").split(",")[0]?.trim().split(" ")[0];
+        if (first?.startsWith("http")) imageSet.add(first);
+      });
+      document.querySelectorAll("[style]").forEach((el) => {
+        const m = (el.getAttribute("style") ?? "").match(/url\(["']?(https?:\/\/[^"')]+)["']?\)/);
+        if (m?.[1]) imageSet.add(m[1]);
+      });
+
+      let location: string | undefined;
+      document.querySelectorAll('script[type="application/ld+json"]').forEach((el) => {
+        try {
+          const d = JSON.parse(el.textContent ?? "");
+          const addr = d?.address ?? d?.location;
+          if (typeof addr === "string") location = addr;
+          else if (addr?.addressLocality) location = addr.addressLocality;
+        } catch {}
+      });
+
+      const bodyText = document.body.innerText;
+      const priceM = bodyText.match(/(\d[\d\s.,]{1,8})\s*(kr\.?|DKK)/i);
+      const sizeM = bodyText.match(/(\d+[\.,]?\d*)\s*m[²2]/i);
+
+      return {
+        title: (document.querySelector('meta[property="og:title"]')?.getAttribute("content") ?? document.querySelector("h1")?.textContent?.trim() ?? document.title)?.slice(0, 200),
+        description: (document.querySelector('meta[property="og:description"]')?.getAttribute("content") ?? document.querySelector('meta[name="description"]')?.getAttribute("content"))?.slice(0, 2000),
+        location,
+        price: priceM?.[0]?.trim(),
+        size: sizeM ? `${sizeM[1]} m²` : undefined,
+        imageUrls: Array.from(imageSet).slice(0, 20),
+      };
+    });
+
+    await browser.close();
+    if (!raw.title && !raw.imageUrls.length) return {};
+    return { data: raw as ScrapedProperty };
+  } catch {
+    return {};
+  }
+}
+
 const USER_AGENTS = [
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15",
@@ -255,8 +358,15 @@ export async function scrapePropertyUrl(url: string): Promise<{ data?: ScrapedPr
 
   if (isAirbnb(url)) {
     return {
-      error: "Airbnb blokerer automatisk hentning. Gem billederne manuelt fra Airbnb og upload dem herunder.",
+      error: "Airbnb blokerer automatisk hentning. Brug screenshot-importeren herunder i stedet.",
     };
+  }
+
+  // JS-heavy sites (Novasol, DanSommer etc.): go straight to Playwright
+  if (isJsHeavySite(url)) {
+    const pw = await fetchViaPlaywright(url);
+    if (pw.data) return pw;
+    // Fall through to static fallbacks if Playwright fails (e.g. Vercel serverless)
   }
 
   // 1. Direct fetch — fastest, works on simple sites
@@ -302,6 +412,6 @@ export async function scrapePropertyUrl(url: string): Promise<{ data?: ScrapedPr
   }
 
   return {
-    error: "Siden er beskyttet mod automatisk hentning. Upload billeder manuelt, eller prøv at kopiere billede-URLs direkte fra siden.",
+    error: "Siden er beskyttet mod automatisk hentning. Prøv screenshot-importeren herunder — tag et screenshot af siden og AI finder billederne automatisk.",
   };
 }
