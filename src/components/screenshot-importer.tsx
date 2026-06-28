@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { Camera, Loader2, AlertCircle, CheckCircle2, X } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Camera, Loader2, AlertCircle, CheckCircle2, X, Clipboard } from "lucide-react";
 import { extractImagesFromScreenshot, type DetectedImage } from "@/services/extract-screenshot-images";
 
 type Props = {
@@ -22,7 +22,6 @@ async function cropImageFromCanvas(
       const sy = region.y * screenshotH;
       const sw = region.width * screenshotW;
       const sh = region.height * screenshotH;
-      // Output at max 1200px wide to keep file size reasonable
       const scale = Math.min(1, 1200 / sw);
       canvas.width = Math.round(sw * scale);
       canvas.height = Math.round(sh * scale);
@@ -42,48 +41,83 @@ export function ScreenshotImporter({ onImport }: Props) {
   const [detected, setDetected] = useState<DetectedImage[]>([]);
   const [detectedTitle, setDetectedTitle] = useState("");
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [dragging, setDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setError("");
+  // Global Ctrl+V paste listener
+  useEffect(() => {
+    async function onPaste(e: ClipboardEvent) {
+      if (step !== "idle") return;
+      const item = Array.from(e.clipboardData?.items ?? []).find((i) => i.type.startsWith("image/"));
+      if (!item) return;
+      const file = item.getAsFile();
+      if (file) await processFile(file);
+    }
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
-    // Read as data URL for display + cropping
+  async function processFile(file: File) {
+    setError("");
     const dataUrl = await new Promise<string>((res) => {
       const reader = new FileReader();
       reader.onload = () => res(reader.result as string);
       reader.readAsDataURL(file);
     });
-
-    // Get natural dimensions
     const { w, h } = await new Promise<{ w: number; h: number }>((res) => {
       const img = new Image();
       img.onload = () => res({ w: img.naturalWidth, h: img.naturalHeight });
       img.src = dataUrl;
     });
-
     setScreenshotUrl(dataUrl);
     setScreenshotSize({ w, h });
     setStep("analyzing");
-
-    // Extract base64 without data: prefix
     const base64 = dataUrl.split(",")[1];
     const mime = (file.type === "image/png" ? "image/png" : file.type === "image/webp" ? "image/webp" : "image/jpeg") as "image/jpeg" | "image/png" | "image/webp";
-
     const result = await extractImagesFromScreenshot(base64, mime);
-
     if (result.error || !result.images?.length) {
       setError(result.error ?? "Ingen billeder fundet.");
       setStep("idle");
       return;
     }
-
     setDetected(result.images);
     setDetectedTitle(result.title ?? "");
     setSelected(new Set(result.images.map((_, i) => i)));
     setStep("preview");
+  }
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await processFile(file);
     if (e.target) e.target.value = "";
+  }
+
+  async function handleClipboardButton() {
+    try {
+      const items = await navigator.clipboard.read();
+      for (const item of items) {
+        const imgType = item.types.find((t) => t.startsWith("image/"));
+        if (imgType) {
+          const blob = await item.getType(imgType);
+          await processFile(new File([blob], "clipboard.png", { type: imgType }));
+          return;
+        }
+      }
+      setError("Ingen billede i udklipsholderen. Tag et screenshot (Ctrl+Shift+S / Cmd+Shift+4) og tryk Ctrl+V eller klik her igen.");
+    } catch {
+      setError("Adgang til udklipsholder nægtet. Brug fil-upload eller tryk Ctrl+V efter at have taget et screenshot.");
+    }
+  }
+
+  function onDragOver(e: React.DragEvent) { e.preventDefault(); setDragging(true); }
+  function onDragLeave() { setDragging(false); }
+  async function onDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file?.type.startsWith("image/")) await processFile(file);
   }
 
   async function handleConfirm() {
@@ -92,8 +126,7 @@ export function ScreenshotImporter({ onImport }: Props) {
     const crops = await Promise.all(
       toProcess.map((region) => cropImageFromCanvas(screenshotUrl, region, screenshotSize.w, screenshotSize.h))
     );
-    const title = detectedTitle || undefined;
-    onImport(crops, title);
+    onImport(crops, detectedTitle || undefined);
     setStep("done");
   }
 
@@ -138,7 +171,6 @@ export function ScreenshotImporter({ onImport }: Props) {
         {/* Screenshot with overlay boxes */}
         <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
           <img src={screenshotUrl} alt="Screenshot" className="w-full object-contain max-h-72" />
-          {/* Overlay bounding boxes */}
           {detected.map((img, i) => (
             <button
               key={i}
@@ -201,30 +233,60 @@ export function ScreenshotImporter({ onImport }: Props) {
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <p className="text-sm font-bold text-slate-900 mb-1">Upload screenshot af billedgalleri</p>
-      <p className="text-xs text-slate-400 mb-3">
-        Tag et screenshot af f.eks. Airbnb eller Booking.com — AI finder og udskærer automatisk hvert enkelt rum-billede.
+    <div
+      ref={undefined}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+      className={`rounded-2xl border-2 border-dashed p-5 transition-colors ${
+        dragging
+          ? "border-[#FF6B4A] bg-orange-50/40"
+          : "border-slate-200 bg-white"
+      }`}
+    >
+      <p className="text-sm font-bold text-slate-900 mb-0.5">Screenshot-import</p>
+      <p className="text-xs text-slate-400 mb-4">
+        Virker med alle sider — Novasol, Airbnb, Booking.com osv. Tag et screenshot og importer herunder.
       </p>
 
-      <button
-        type="button"
-        onClick={() => fileRef.current?.click()}
-        disabled={step === "analyzing"}
-        className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 py-6 text-sm text-slate-500 hover:border-[#FF6B4A]/40 hover:bg-orange-50/30 transition-colors disabled:opacity-50"
-      >
-        {step === "analyzing" ? (
-          <>
-            <Loader2 size={18} className="animate-spin text-[#FF6B4A]" />
-            <span>AI analyserer screenshot...</span>
-          </>
-        ) : (
-          <>
-            <Camera size={18} className="text-[#FF6B4A]" />
-            <span>Vælg screenshot (PNG, JPG)</span>
-          </>
-        )}
-      </button>
+      <div className="flex flex-col gap-2">
+        {/* Paste from clipboard */}
+        <button
+          type="button"
+          onClick={handleClipboardButton}
+          disabled={step === "analyzing"}
+          className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 hover:bg-orange-50 hover:border-[#FF6B4A]/40 transition-colors disabled:opacity-50 w-full"
+        >
+          <Clipboard size={16} className="text-[#FF6B4A] shrink-0" />
+          <span className="font-medium">Indsæt screenshot</span>
+          <span className="ml-auto text-xs text-slate-400">Ctrl+V</span>
+        </button>
+
+        {/* File upload */}
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={step === "analyzing"}
+          className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 hover:bg-orange-50 hover:border-[#FF6B4A]/40 transition-colors disabled:opacity-50 w-full"
+        >
+          {step === "analyzing" ? (
+            <>
+              <Loader2 size={16} className="animate-spin text-[#FF6B4A] shrink-0" />
+              <span className="font-medium">AI analyserer screenshot...</span>
+            </>
+          ) : (
+            <>
+              <Camera size={16} className="text-[#FF6B4A] shrink-0" />
+              <span className="font-medium">Vælg fil</span>
+              <span className="ml-auto text-xs text-slate-400">PNG / JPG</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      <p className="mt-3 text-center text-[11px] text-slate-400">
+        Eller træk et billede hertil
+      </p>
 
       {error && (
         <div className="mt-3 flex items-start gap-2 text-xs text-red-600">
