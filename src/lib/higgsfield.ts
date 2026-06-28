@@ -239,6 +239,19 @@ type V2StatusResponse = {
   images?: { url: string }[];
 };
 
+function normalizeStatus(raw: string): "queued" | "in_progress" | "completed" | "failed" {
+  const s = raw.toLowerCase();
+  if (s === "completed" || s === "succeeded" || s === "success" || s === "done") return "completed";
+  if (s === "failed" || s === "nsfw" || s === "error" || s === "cancelled" || s === "canceled") return "failed";
+  if (
+    s === "in_progress" || s === "processing" || s === "running" ||
+    s === "generating" || s === "finishing" || s === "rendering" ||
+    s === "pending_execution" || s === "started"
+  ) return "in_progress";
+  // "queued", "pending", "waiting", or unknown
+  return "queued";
+}
+
 export async function getVideoJobsStatus(jobSetIds: string[]): Promise<{
   status: "queued" | "in_progress" | "completed" | "failed";
   videoUrls?: string[];
@@ -266,7 +279,7 @@ export async function getVideoJobsStatus(jobSetIds: string[]): Promise<{
         const data = res.data;
         if (data.status) {
           const videoUrl = data.video?.url ?? data.images?.[0]?.url;
-          return { status: data.status, videoUrl };
+          return { status: normalizeStatus(data.status), videoUrl };
         }
       } catch {
         // fall through to v1
@@ -277,13 +290,13 @@ export async function getVideoJobsStatus(jobSetIds: string[]): Promise<{
       const v1Data = res.data as JobSetData;
       const jobs: JobResult[] = v1Data.jobs ?? [];
       const job = jobs[0];
-      const s = job?.status ?? "queued";
+      const s = normalizeStatus(job?.status ?? "queued");
       const videoUrl = job?.results?.raw?.url ?? job?.results?.min?.url;
       return { status: s, videoUrl };
     })
   );
 
-  const anyFailed = results.some((r) => r.status === "failed" || r.status === "nsfw");
+  const anyFailed = results.some((r) => r.status === "failed");
   if (anyFailed) return { status: "failed" };
 
   const allDone = results.every((r) => r.status === "completed");

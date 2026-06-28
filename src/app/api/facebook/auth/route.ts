@@ -15,6 +15,7 @@ export async function GET() {
     "instagram_basic",
     "instagram_content_publish",
     "pages_show_list",
+    "publish_to_groups",
   ].join(",");
 
   const url = new URL("https://www.facebook.com/v19.0/dialog/oauth");

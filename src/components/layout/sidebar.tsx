@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   LogOut, Plus, ExternalLink, BarChart2, Users, CalendarDays,
   Video, Home, Settings, CreditCard, Building2, Menu, X,
@@ -41,9 +41,31 @@ const PRIMARY_NAV = [
   { href: "/properties", icon: Building2, label: "Boliger" },
 ];
 
+type Locale = "da" | "en";
+
+const NAV_LABELS: Record<Locale, {
+  home: string; create: string; schedule: string; channels: string;
+  videos: string; properties: string; analytics: string; billing: string;
+  settings: string; newPost: string; connectChannel: string; freePlan: string; logOut: string;
+}> = {
+  da: {
+    home: "Hjem", create: "Opret", schedule: "Planlæg", channels: "Kanaler",
+    videos: "Videoer", properties: "Boliger", analytics: "Analytics",
+    billing: "Fakturering", settings: "Indstillinger", newPost: "Nyt opslag",
+    connectChannel: "Tilslut kanal", freePlan: "Free Plan", logOut: "Log ud",
+  },
+  en: {
+    home: "Home", create: "Create", schedule: "Schedule", channels: "Channels",
+    videos: "Videos", properties: "Properties", analytics: "Analytics",
+    billing: "Billing", settings: "Settings", newPost: "New post",
+    connectChannel: "Connect channel", freePlan: "Free Plan", logOut: "Log out",
+  },
+};
+
 interface SidebarProps {
   accounts?: SocialAccount[];
   userEmail?: string;
+  locale?: Locale;
 }
 
 function NavItem({
@@ -97,7 +119,8 @@ function NavItem({
   );
 }
 
-function SidebarContent({ accounts, userEmail, onNav }: SidebarProps & { onNav?: () => void }) {
+function SidebarContent({ accounts, userEmail, locale = "da", onNav }: SidebarProps & { onNav?: () => void }) {
+  const t = NAV_LABELS[locale];
   const firstName = userEmail?.split("@")[0] ?? "";
   const maxChannels = 3;
   const connectedCount = accounts?.length ?? 0;
@@ -123,24 +146,24 @@ function SidebarContent({ accounts, userEmail, onNav }: SidebarProps & { onNav?:
           className="flex w-full items-center justify-center gap-2 rounded-lg py-2 text-sm font-bold text-white transition-opacity hover:opacity-90"
           style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
         >
-          <Plus size={16} strokeWidth={2.5} /> Nyt opslag
+          <Plus size={16} strokeWidth={2.5} /> {t.newPost}
         </Link>
       </div>
 
       {/* Primary nav */}
       <nav className="relative flex flex-col gap-0.5 px-2">
-        <NavItem href="/dashboard" icon={Home} label="Hjem" onClick={onNav} />
-        <NavItem href="/posts/new" icon={Plus} label="Opret" onClick={onNav} />
-        <NavItem href="/posts" icon={CalendarDays} label="Planlæg" badge={0} onClick={onNav} />
-        <NavItem href="/accounts" icon={Users} label="Kanaler" onClick={onNav} />
-        <NavItem href="/videos" icon={Video} label="Videoer" onClick={onNav} />
-        <NavItem href="/properties" icon={Building2} label="Boliger" onClick={onNav} />
+        <NavItem href="/dashboard" icon={Home} label={t.home} onClick={onNav} />
+        <NavItem href="/posts/new" icon={Plus} label={t.create} onClick={onNav} />
+        <NavItem href="/posts" icon={CalendarDays} label={t.schedule} badge={0} onClick={onNav} />
+        <NavItem href="/accounts" icon={Users} label={t.channels} onClick={onNav} />
+        <NavItem href="/videos" icon={Video} label={t.videos} onClick={onNav} />
+        <NavItem href="/properties" icon={Building2} label={t.properties} onClick={onNav} />
       </nav>
 
       <div className="my-3 h-px bg-white/10 mx-3" />
 
       <nav className="relative flex flex-col gap-0.5 px-2">
-        <NavItem href="/analytics" icon={BarChart2} label="Analytics" onClick={onNav} />
+        <NavItem href="/analytics" icon={BarChart2} label={t.analytics} onClick={onNav} />
       </nav>
 
       {/* Connected channels */}
@@ -169,7 +192,7 @@ function SidebarContent({ accounts, userEmail, onNav }: SidebarProps & { onNav?:
 
       {/* Connect channels suggestions */}
       <div className="mt-2 px-3">
-        <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500 px-1">Tilslut kanal</p>
+        <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500 px-1">{t.connectChannel}</p>
         {SUGGESTED_PLATFORMS.map((p) => (
           <Link
             key={p.label}
@@ -211,8 +234,8 @@ function SidebarContent({ accounts, userEmail, onNav }: SidebarProps & { onNav?:
       <div className="mt-auto">
         <div className="mx-3 mb-2 h-px bg-white/10" />
         <nav className="relative flex flex-col gap-0.5 px-2">
-          <NavItem href="/billing" icon={CreditCard} label="Fakturering" onClick={onNav} />
-          <NavItem href="/settings" icon={Settings} label="Indstillinger" onClick={onNav} />
+          <NavItem href="/billing" icon={CreditCard} label={t.billing} onClick={onNav} />
+          <NavItem href="/settings" icon={Settings} label={t.settings} onClick={onNav} />
         </nav>
 
         <div className="mx-3 mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2.5">
@@ -225,7 +248,7 @@ function SidebarContent({ accounts, userEmail, onNav }: SidebarProps & { onNav?:
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-white truncate capitalize">{firstName}</p>
-              <p className="text-[10px] text-slate-400">Free Plan</p>
+              <p className="text-[10px] text-slate-400">{t.freePlan}</p>
             </div>
             <form action={signOutAction}>
               <button type="submit" title="Log ud" className="text-slate-400 hover:text-white transition-colors">
@@ -293,9 +316,11 @@ function BottomTabBar() {
   );
 }
 
-export function Sidebar({ accounts = [], userEmail }: SidebarProps) {
+export function Sidebar({ accounts = [], userEmail, locale = "da" }: SidebarProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const pathname = usePathname();
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   // Close drawer on route change
   useEffect(() => { setDrawerOpen(false); }, [pathname]);
@@ -306,11 +331,36 @@ export function Sidebar({ accounts = [], userEmail }: SidebarProps) {
     return () => { document.body.style.overflow = ""; };
   }, [drawerOpen]);
 
+  // Swipe-to-open: rightward swipe starting from left edge (<32px)
+  // Swipe-to-close: leftward swipe anywhere when drawer is open
+  useEffect(() => {
+    function onTouchStart(e: TouchEvent) {
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+    }
+    function onTouchEnd(e: TouchEvent) {
+      if (touchStartX.current === null || touchStartY.current === null) return;
+      const dx = e.changedTouches[0].clientX - touchStartX.current;
+      const dy = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
+      if (Math.abs(dx) < 40 || dy > Math.abs(dx)) return;
+      if (dx > 0 && touchStartX.current < 32) setDrawerOpen(true);
+      if (dx < 0) setDrawerOpen(false);
+      touchStartX.current = null;
+      touchStartY.current = null;
+    }
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
+  }, []);
+
   return (
     <>
       {/* ── Desktop sidebar ── */}
       <aside className="hidden md:flex h-full w-60 shrink-0">
-        <SidebarContent accounts={accounts} userEmail={userEmail} />
+        <SidebarContent accounts={accounts} userEmail={userEmail} locale={locale} />
       </aside>
 
       {/* ── Mobile top header ── */}
@@ -369,6 +419,7 @@ export function Sidebar({ accounts = [], userEmail }: SidebarProps) {
         <SidebarContent
           accounts={accounts}
           userEmail={userEmail}
+          locale={locale}
           onNav={() => setDrawerOpen(false)}
         />
       </aside>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Fraunces } from "next/font/google";
+import { cookies } from "next/headers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -25,16 +26,26 @@ export const metadata: Metadata = {
       "Spar timer hver uge. Post på alle sociale medier på én gang, synkroniser din bookingkalender og lad AI generere dine opslag automatisk.",
     type: "website",
   },
+  alternates: {
+    canonical: "https://vakanza.dk",
+    languages: {
+      "da": "https://vakanza.dk",
+      "en": "https://vakanza.dk/en",
+    },
+  },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const locale = cookieStore.get("locale")?.value === "en" ? "en" : "da";
+
   return (
     <html
-      lang="da"
+      lang={locale}
       className={`${geistSans.variable} ${fraunces.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white">

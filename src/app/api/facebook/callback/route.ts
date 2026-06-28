@@ -23,62 +23,79 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${appUrl}/accounts/connect?error=facebook_token`);
   }
 
-  // Exchange for long-lived token
+  // Exchange for long-lived user token
   const longRes = await fetch(
     `https://graph.facebook.com/v19.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${clientId}&client_secret=${clientSecret}&fb_exchange_token=${tokenData.access_token}`
   );
   const longData = await longRes.json();
   const userToken = longData.access_token ?? tokenData.access_token;
 
-  // Get user's pages
-  const pagesRes = await fetch(
-    `https://graph.facebook.com/v19.0/me/accounts?access_token=${userToken}&fields=id,name,access_token,instagram_business_account`
-  );
-  const pagesData = await pagesRes.json();
-
+  // Verify user is logged in
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.redirect(`${appUrl}/login`);
 
+  // Fetch pages the user manages
+  const pagesRes = await fetch(
+    `https://graph.facebook.com/v19.0/me/accounts?access_token=${userToken}&fields=id,name,access_token,instagram_business_account,fan_count,picture`
+  );
+  const pagesData = await pagesRes.json();
+
   const pages: Array<{
-    id: string; name: string; access_token: string;
+    id: string;
+    name: string;
+    access_token: string;
+    fan_count?: number;
+    picture?: { data?: { url?: string } };
     instagram_business_account?: { id: string };
   }> = pagesData.data ?? [];
 
-  for (const page of pages) {
-    // Upsert Facebook page
-    await supabase.from("social_accounts").upsert(
-      {
-        user_id: user.id,
-        platform: "facebook",
-        account_id: page.id,
-        account_name: page.name,
-        access_token: page.access_token,
-      },
-      { onConflict: "user_id,account_id" }
+  // Fetch groups the user is admin of
+  let groups: Array<{ id: string; name: string; privacy?: string }> = [];
+  try {
+    const groupsRes = await fetch(
+      `https://graph.facebook.com/v19.0/me/groups?fields=id,name,privacy&filter=owner&access_token=${userToken}`
     );
-
-    // If page has linked Instagram business account
-    if (page.instagram_business_account?.id) {
-      const igId = page.instagram_business_account.id;
-      const igRes = await fetch(
-        `https://graph.facebook.com/v19.0/${igId}?fields=username&access_token=${page.access_token}`
-      );
-      const igData = await igRes.json();
-
-      await supabase.from("social_accounts").upsert(
-        {
-          user_id: user.id,
-          platform: "instagram",
-          account_id: igId,
-          account_name: igData.username ?? page.name,
-          access_token: page.access_token,
-          meta: { page_id: page.id },
-        },
-        { onConflict: "user_id,account_id" }
-      );
-    }
+    const groupsData = await groupsRes.json();
+    groups = groupsData.data ?? [];
+  } catch {
+    // groups permission not granted — continue without
   }
 
-  return NextResponse.redirect(`${appUrl}/accounts?connected=facebook`);
+  // Fetch Instagram usernames for linked accounts
+  const pagesWithIg = await Promise.all(
+    pages.map(async (page) => {
+      let igUsername: string | null = null;
+      if (page.instagram_business_account?.id) {
+        try {
+          const igRes = await fetch(
+            `https://graph.facebook.com/v19.0/${page.instagram_business_account.id}?fields=username&access_token=${page.access_token}`
+          );
+          const igData = await igRes.json();
+          igUsername = igData.username ?? null;
+        } catch {
+          // ignore
+        }
+      }
+      return { ...page, igUsername };
+    })
+  );
+
+  // Store data in a short-lived cookie for the selection page
+  const payload = {
+    userToken,
+    pages: pagesWithIg,
+    groups,
+  };
+  const encoded = Buffer.from(JSON.stringify(payload)).toString("base64");
+
+  const res = NextResponse.redirect(`${appUrl}/accounts/facebook-select`);
+  res.cookies.set("fb_connect", encoded, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 300, // 5 minutes
+    path: "/",
+  });
+  return res;
 }

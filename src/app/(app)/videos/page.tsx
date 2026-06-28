@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Sparkles, Share2, TrendingUp, Star, Zap, Play, Clapperboard } from "lucide-react";
+import { Plus, Sparkles, Share2, TrendingUp, Star, Zap, Play, Clapperboard, Download, Users, ChevronDown } from "lucide-react";
 import { Topbar } from "@/components/layout/topbar";
 import { createClient } from "@/lib/supabase/server";
 import type { VideoOrder } from "@/types/database";
@@ -46,6 +46,98 @@ function PhoneMockup() {
       {/* Glow */}
       <div className="absolute -inset-4 -z-10 rounded-[3rem] opacity-30 blur-2xl" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }} />
     </div>
+  );
+}
+
+function PracticalInfo() {
+  return (
+    <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5">
+      <h2 className="mb-3 text-sm font-bold text-slate-900">Praktisk info om dine videoer</h2>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="flex items-start gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-100">
+            <Share2 size={18} className="text-[#1B3F7A]" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-slate-800">Del på din Facebook-side</p>
+            <p className="mt-0.5 text-xs text-slate-500 leading-relaxed">Download videoen og upload den direkte til din Facebook-side — eller kopier linket og indsæt det i et opslag.</p>
+          </div>
+        </div>
+        <div className="flex items-start gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-100">
+            <Users size={18} className="text-[#FF6B4A]" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-slate-800">Del i Facebook-grupper</p>
+            <p className="mt-0.5 text-xs text-slate-500 leading-relaxed">Del videoen direkte i udlejningsgrupper på Facebook for at nå lejere, der aktivt søger bolig.</p>
+          </div>
+        </div>
+        <div className="flex items-start gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-green-100">
+            <Download size={18} className="text-green-700" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-slate-800">Download til din enhed</p>
+            <p className="mt-0.5 text-xs text-slate-500 leading-relaxed">Klik på download-ikonet på din video for at gemme den lokalt og del den på Instagram, TikTok eller YouTube.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const FAQ_ITEMS = [
+  {
+    q: "Hvordan deler jeg videoen på min Facebook-side?",
+    a: "Download videoen ved at klikke på download-ikonet. Gå derefter til din Facebook-side, opret et nyt opslag og upload videoen direkte. Du kan også kopiere videolinket og indsætte det i et Facebook-opslag.",
+  },
+  {
+    q: "Kan jeg dele videoen i Facebook-grupper?",
+    a: "Ja! Download videoen og gå ind i en udlejningsgruppe på Facebook. Opret et nyt opslag i gruppen og upload videoen — det er en effektiv måde at nå lejere, der aktivt søger bolig.",
+  },
+  {
+    q: "Hvilke platforme kan jeg dele på?",
+    a: "Du kan dele din video på Facebook (side og grupper), Instagram (Reels og feed), TikTok, YouTube Shorts og LinkedIn. Download videoen og upload den til den ønskede platform.",
+  },
+  {
+    q: "Hvad er videoens format og opløsning?",
+    a: "Videoerne leveres i 9:16 format (lodret) og egner sig perfekt til Instagram Reels, TikTok og Facebook Stories. Opløsningen er HD-kvalitet klar til deling på alle platforme.",
+  },
+  {
+    q: "Hvor lang tid tager det at generere en video?",
+    a: "De fleste videoer er klar inden for 5-15 minutter. Du modtager en notifikation i appen, så snart din video er klar til download og deling.",
+  },
+  {
+    q: "Kan jeg bestille flere videoer til samme bolig?",
+    a: "Ja, du kan bestille så mange videoer du ønsker. Hver video koster 499 kr og produceres uafhængigt — perfekt til at fremhæve forskellige rum eller årstider.",
+  },
+  {
+    q: "Hvad hvis jeg ikke er tilfreds med videoen?",
+    a: "Kontakt os på support@vakanza.dk inden for 14 dage, hvis du ikke er tilfreds, og vi finder en løsning. Vi ønsker, at du er 100% glad for resultatet.",
+  },
+];
+
+function FAQSection() {
+  return (
+    <section className="bg-white px-8 py-14">
+      <div className="mx-auto max-w-3xl">
+        <div className="mb-8 text-center">
+          <span className="text-xs font-bold uppercase tracking-widest text-[#FF6B4A]">FAQ</span>
+          <h2 className="mt-2 text-2xl font-bold text-slate-900">Ofte stillede spørgsmål</h2>
+        </div>
+        <div className="divide-y divide-slate-100 rounded-2xl border border-slate-200 overflow-hidden">
+          {FAQ_ITEMS.map((item) => (
+            <details key={item.q} className="group bg-white">
+              <summary className="flex cursor-pointer items-center justify-between gap-4 px-6 py-4 text-sm font-semibold text-slate-900 hover:bg-slate-50 transition-colors list-none">
+                {item.q}
+                <ChevronDown size={16} className="shrink-0 text-slate-400 transition-transform group-open:rotate-180" />
+              </summary>
+              <p className="px-6 pb-5 pt-1 text-sm text-slate-500 leading-relaxed">{item.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -264,6 +356,9 @@ export default async function VideosPage() {
               </div>
             </section>
 
+            {/* ── FAQ ── */}
+            <FAQSection />
+
             {/* ── Final CTA ── */}
             <section className="px-8 py-14" style={{ background: "linear-gradient(135deg, #1B3F7A 0%, #2a5298 100%)" }}>
               <div className="mx-auto max-w-2xl text-center">
@@ -281,11 +376,15 @@ export default async function VideosPage() {
 
           </div>
         ) : (
-          <div className="px-8 py-6 flex flex-col gap-4">
-            <VideoListPoller hasProcessing={orders.some((o) => o.status === "processing")} />
-            {orders.map((order) => (
-              <VideoOrderCard key={order.id} order={order as VideoOrder} />
-            ))}
+          <div className="flex flex-col">
+            <div className="px-8 py-6 flex flex-col gap-4">
+              <PracticalInfo />
+              <VideoListPoller hasProcessing={orders.some((o) => o.status === "processing")} />
+              {orders.map((order) => (
+                <VideoOrderCard key={order.id} order={order as VideoOrder} />
+              ))}
+            </div>
+            <FAQSection />
           </div>
         )}
       </div>
