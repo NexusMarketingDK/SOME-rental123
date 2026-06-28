@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Topbar } from "@/components/layout/topbar";
 import { createVideoOrderCheckout } from "@/services/billing";
-import { Upload, Link as LinkIcon, X, Loader2, Sparkles, CheckCircle2, Clock, Star, ChevronLeft, ChevronRight, Plus, Search, AlertCircle, MapPin, Tag, Maximize2 } from "lucide-react";
+import { Upload, Link as LinkIcon, X, Loader2, Sparkles, CheckCircle2, Clock, Star, ChevronLeft, ChevronRight, Plus, Search, AlertCircle, MapPin, Tag, Maximize2, Download, Share2, Users } from "lucide-react";
 import { scrapePropertyUrl, type ScrapedProperty } from "@/services/scrape-property";
 import { ScreenshotImporter } from "@/components/screenshot-importer";
 
@@ -254,6 +254,25 @@ export default function NewVideoPage() {
         title="Bestil præsentationsvideo"
         description="AI-genereret video af din bolig — klar på minutter."
       />
+
+      {/* Practical info banner */}
+      <div className="border-b border-blue-100 bg-blue-50 px-8 py-3">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-2">
+          <span className="text-xs font-semibold text-slate-700">Når videoen er klar:</span>
+          <span className="flex items-center gap-1.5 text-xs text-slate-600">
+            <Download size={13} className="text-[#1B3F7A]" /> Download direkte i appen
+          </span>
+          <span className="flex items-center gap-1.5 text-xs text-slate-600">
+            <Share2 size={13} className="text-[#FF6B4A]" /> Del på din Facebook-side
+          </span>
+          <span className="flex items-center gap-1.5 text-xs text-slate-600">
+            <Users size={13} className="text-emerald-600" /> Del i Facebook-grupper
+          </span>
+          <span className="flex items-center gap-1.5 text-xs text-slate-600">
+            <Sparkles size={13} className="text-purple-500" /> Instagram, TikTok, YouTube og mere
+          </span>
+        </div>
+      </div>
 
       <div className="flex-1 px-8 py-8">
         <div className="mx-auto max-w-5xl">
