@@ -243,17 +243,27 @@ export async function getVideoJobsStatus(jobSetIds: string[]): Promise<{
   status: "queued" | "in_progress" | "completed" | "failed";
   videoUrls?: string[];
 }> {
+  // v1 client for fallback (uses hf-api-key / hf-secret headers)
   const client = getClient();
   type JobResult = { status: string; results?: { raw?: { url: string }; min?: { url: string } } };
   type JobSetData = { jobs?: JobResult[] };
-  const axiosClient = (client as unknown as { client: { get: (url: string) => Promise<{ data: JobSetData | V2StatusResponse }> } }).client;
+  const v1AxiosClient = (client as unknown as { client: { get: (url: string) => Promise<{ data: JobSetData | V2StatusResponse }> } }).client;
+
+  // v2 uses Authorization: Key header (different from v1's hf-api-key / hf-secret)
+  // We call the v2 status endpoint directly with axios using the correct auth header
+  const apiKey = process.env.HIGGSFIELD_API_KEY_ID ?? "";
+  const apiSecret = process.env.HIGGSFIELD_API_SECRET ?? "";
 
   const results = await Promise.all(
     jobSetIds.map(async (id) => {
-      // Try v2 endpoint first (/requests/{id}/status)
+      // Try v2 endpoint first — must use v2 auth header (Authorization: Key)
       try {
-        const res = await axiosClient.get(`/requests/${id}/status`);
-        const data = res.data as V2StatusResponse;
+        const { default: axios } = await import("axios");
+        const res = await axios.get<V2StatusResponse>(
+          `https://platform.higgsfield.ai/requests/${id}/status`,
+          { headers: { Authorization: `Key ${apiKey}:${apiSecret}`, "Content-Type": "application/json" } }
+        );
+        const data = res.data;
         if (data.status) {
           const videoUrl = data.video?.url ?? data.images?.[0]?.url;
           return { status: data.status, videoUrl };
@@ -262,8 +272,8 @@ export async function getVideoJobsStatus(jobSetIds: string[]): Promise<{
         // fall through to v1
       }
 
-      // Fallback: v1 job-sets endpoint
-      const res = await axiosClient.get(`/v1/job-sets/${id}`);
+      // Fallback: v1 job-sets endpoint (uses hf-api-key / hf-secret via v1 axios client)
+      const res = await v1AxiosClient.get(`/v1/job-sets/${id}`);
       const v1Data = res.data as JobSetData;
       const jobs: JobResult[] = v1Data.jobs ?? [];
       const job = jobs[0];
