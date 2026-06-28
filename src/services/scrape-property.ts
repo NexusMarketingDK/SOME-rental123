@@ -1,5 +1,7 @@
 "use server";
 
+import { existsSync } from "fs";
+
 export type ScrapedProperty = {
   title?: string;
   description?: string;
@@ -161,10 +163,9 @@ async function fetchViaPlaywright(url: string): Promise<{ data?: ScrapedProperty
     // then @sparticuz/chromium-min (Vercel Lambda / serverless)
     let executablePath: string;
     const devChromium = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
-    const fs = await import("fs");
     if (process.env.PLAYWRIGHT_CHROMIUM_PATH) {
       executablePath = process.env.PLAYWRIGHT_CHROMIUM_PATH;
-    } else if (fs.existsSync(devChromium)) {
+    } else if (existsSync(devChromium)) {
       executablePath = devChromium;
     } else {
       const chromiumModule = await import("@sparticuz/chromium-min");
