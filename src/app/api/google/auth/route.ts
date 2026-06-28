@@ -4,13 +4,18 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.redirect(new URL("/auth/login", process.env.NEXT_PUBLIC_APP_URL!));
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://some-rental123.vercel.app";
+  if (!user) return NextResponse.redirect(`${appUrl}/login`);
 
-  const clientId = process.env.GOOGLE_CLIENT_ID!;
-  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/google/callback`;
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  if (!clientId) {
+    return NextResponse.redirect(`${appUrl}/analytics?error=google_not_configured`);
+  }
+
+  const redirectUri = `${appUrl}/api/google/callback`;
 
   const params = new URLSearchParams({
-    client_id: clientId,
+    client_id: clientId!,
     redirect_uri: redirectUri,
     response_type: "code",
     scope: "https://www.googleapis.com/auth/analytics.readonly",
