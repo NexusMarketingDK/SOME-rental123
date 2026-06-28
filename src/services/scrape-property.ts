@@ -159,19 +159,11 @@ async function fetchViaPlaywright(url: string): Promise<{ data?: ScrapedProperty
   try {
     const { chromium } = await import("playwright-core");
 
-    // Resolve executable: prefer env var, then pre-installed dev Chromium,
-    // then @sparticuz/chromium-min (Vercel Lambda / serverless)
-    let executablePath: string;
+    // Resolve Chromium executable — only available in environments that have it installed.
+    // On Vercel production, this path won't exist and fetchViaPlaywright returns {} gracefully.
     const devChromium = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
-    if (process.env.PLAYWRIGHT_CHROMIUM_PATH) {
-      executablePath = process.env.PLAYWRIGHT_CHROMIUM_PATH;
-    } else if (existsSync(devChromium)) {
-      executablePath = devChromium;
-    } else {
-      const chromiumModule = await import("@sparticuz/chromium-min");
-      const sparticuz = chromiumModule.default ?? chromiumModule;
-      executablePath = await (sparticuz as { executablePath: (url?: string) => Promise<string> }).executablePath();
-    }
+    const executablePath = process.env.PLAYWRIGHT_CHROMIUM_PATH ?? devChromium;
+    if (!existsSync(executablePath)) return {};
     const browser = await chromium.launch({
       executablePath,
       headless: true,

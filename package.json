@@ -12,7 +12,6 @@
     "@anthropic-ai/sdk": "^0.106.0",
     "@google/generative-ai": "^0.24.1",
     "@higgsfield/client": "^0.2.1",
-    "@sparticuz/chromium-min": "^149.0.0",
     "@stripe/stripe-js": "^9.8.0",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.108.2",
