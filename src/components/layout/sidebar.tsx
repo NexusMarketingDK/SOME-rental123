@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut, Plus, ExternalLink, BarChart2, Users, CalendarDays, Video, Home, Settings, CreditCard, Building2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  LogOut, Plus, ExternalLink, BarChart2, Users, CalendarDays,
+  Video, Home, Settings, CreditCard, Building2, Menu, X,
+} from "lucide-react";
 import { signOutAction } from "@/services/auth";
 import type { SocialAccount } from "@/types/database";
 
@@ -29,6 +33,14 @@ const SUGGESTED_PLATFORMS = [
   { label: "Mere kanaler", icon: Plus, color: "#64748b", bg: "#F1F5F9" },
 ];
 
+const PRIMARY_NAV = [
+  { href: "/dashboard", icon: Home, label: "Hjem" },
+  { href: "/posts/new", icon: Plus, label: "Opret" },
+  { href: "/posts", icon: CalendarDays, label: "Planlæg" },
+  { href: "/videos", icon: Video, label: "Videoer" },
+  { href: "/properties", icon: Building2, label: "Boliger" },
+];
+
 interface SidebarProps {
   accounts?: SocialAccount[];
   userEmail?: string;
@@ -40,12 +52,14 @@ function NavItem({
   label,
   badge,
   external,
+  onClick,
 }: {
   href: string;
   icon: React.ElementType;
   label: string;
   badge?: number;
   external?: boolean;
+  onClick?: () => void;
 }) {
   const pathname = usePathname();
   const isActive =
@@ -57,7 +71,8 @@ function NavItem({
       href={href}
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
-      className={`group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+      onClick={onClick}
+      className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
         isActive
           ? "bg-white/10 text-white"
           : "text-slate-300/80 hover:bg-white/5 hover:text-white"
@@ -82,14 +97,13 @@ function NavItem({
   );
 }
 
-export function Sidebar({ accounts = [], userEmail }: SidebarProps) {
+function SidebarContent({ accounts, userEmail, onNav }: SidebarProps & { onNav?: () => void }) {
   const firstName = userEmail?.split("@")[0] ?? "";
   const maxChannels = 3;
-  const connectedCount = accounts.length;
+  const connectedCount = accounts?.length ?? 0;
 
   return (
-    <aside className="relative flex h-full w-60 shrink-0 flex-col bg-[#14213D] py-4">
-
+    <div className="relative flex h-full flex-col bg-[#14213D] py-4">
       {/* Logo */}
       <div className="mb-4 flex items-center gap-2 px-4">
         <span
@@ -105,6 +119,7 @@ export function Sidebar({ accounts = [], userEmail }: SidebarProps) {
       <div className="px-3 mb-4">
         <Link
           href="/posts/new"
+          onClick={onNav}
           className="flex w-full items-center justify-center gap-2 rounded-lg py-2 text-sm font-bold text-white transition-opacity hover:opacity-90"
           style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
         >
@@ -114,30 +129,29 @@ export function Sidebar({ accounts = [], userEmail }: SidebarProps) {
 
       {/* Primary nav */}
       <nav className="relative flex flex-col gap-0.5 px-2">
-        <NavItem href="/dashboard" icon={Home} label="Hjem" />
-        <NavItem href="/posts/new" icon={Plus} label="Opret" />
-        <NavItem href="/posts" icon={CalendarDays} label="Planlæg" badge={0} />
-        <NavItem href="/accounts" icon={Users} label="Kanaler" />
-        <NavItem href="/videos" icon={Video} label="Videoer" />
-        <NavItem href="/properties" icon={Building2} label="Boliger" />
+        <NavItem href="/dashboard" icon={Home} label="Hjem" onClick={onNav} />
+        <NavItem href="/posts/new" icon={Plus} label="Opret" onClick={onNav} />
+        <NavItem href="/posts" icon={CalendarDays} label="Planlæg" badge={0} onClick={onNav} />
+        <NavItem href="/accounts" icon={Users} label="Kanaler" onClick={onNav} />
+        <NavItem href="/videos" icon={Video} label="Videoer" onClick={onNav} />
+        <NavItem href="/properties" icon={Building2} label="Boliger" onClick={onNav} />
       </nav>
 
       <div className="my-3 h-px bg-white/10 mx-3" />
 
-      {/* Analytics */}
       <nav className="relative flex flex-col gap-0.5 px-2">
-        <NavItem href="/analytics" icon={BarChart2} label="Analytics" />
+        <NavItem href="/analytics" icon={BarChart2} label="Analytics" onClick={onNav} />
       </nav>
 
       {/* Connected channels */}
       <div className="mt-3 px-2">
-        {accounts.map((a) => {
+        {(accounts ?? []).map((a) => {
           const color = PLATFORM_COLORS[a.platform] ?? "#64748b";
-          const bg = PLATFORM_BG[a.platform] ?? "#F1F5F9";
           return (
             <Link
               key={a.id}
               href={`/accounts/${a.id}`}
+              onClick={onNav}
               className="flex items-center gap-2.5 rounded-lg px-3 py-2 hover:bg-white/5 transition-colors group"
             >
               <div
@@ -160,6 +174,7 @@ export function Sidebar({ accounts = [], userEmail }: SidebarProps) {
           <Link
             key={p.label}
             href="/accounts/connect"
+            onClick={onNav}
             className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-white/5 transition-colors group"
           >
             <div
@@ -180,18 +195,13 @@ export function Sidebar({ accounts = [], userEmail }: SidebarProps) {
             <span className="text-[11px] font-medium text-slate-300">
               {connectedCount}/{maxChannels} kanaler tilkoblet
             </span>
-            <button className="text-slate-500 hover:text-white">
-              <span className="text-[11px]">×</span>
-            </button>
           </div>
           <div className="flex gap-1">
             {Array.from({ length: maxChannels }).map((_, i) => (
               <div
                 key={i}
                 className="h-1.5 flex-1 rounded-full"
-                style={{
-                  backgroundColor: i < connectedCount ? "#22c55e" : "rgba(255,255,255,0.1)",
-                }}
+                style={{ backgroundColor: i < connectedCount ? "#22c55e" : "rgba(255,255,255,0.1)" }}
               />
             ))}
           </div>
@@ -200,14 +210,11 @@ export function Sidebar({ accounts = [], userEmail }: SidebarProps) {
 
       <div className="mt-auto">
         <div className="mx-3 mb-2 h-px bg-white/10" />
-
-        {/* Secondary nav */}
         <nav className="relative flex flex-col gap-0.5 px-2">
-          <NavItem href="/billing" icon={CreditCard} label="Fakturering" />
-          <NavItem href="/settings" icon={Settings} label="Indstillinger" />
+          <NavItem href="/billing" icon={CreditCard} label="Fakturering" onClick={onNav} />
+          <NavItem href="/settings" icon={Settings} label="Indstillinger" onClick={onNav} />
         </nav>
 
-        {/* User / org footer */}
         <div className="mx-3 mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2.5">
           <div className="flex items-center gap-2.5">
             <div
@@ -221,17 +228,153 @@ export function Sidebar({ accounts = [], userEmail }: SidebarProps) {
               <p className="text-[10px] text-slate-400">Free Plan</p>
             </div>
             <form action={signOutAction}>
-              <button
-                type="submit"
-                title="Log ud"
-                className="text-slate-400 hover:text-white transition-colors"
-              >
+              <button type="submit" title="Log ud" className="text-slate-400 hover:text-white transition-colors">
                 <LogOut size={14} />
               </button>
             </form>
           </div>
         </div>
       </div>
-    </aside>
+    </div>
+  );
+}
+
+/** Mobile bottom tab bar — shown only on small screens */
+function BottomTabBar() {
+  const pathname = usePathname();
+  const tabs = [
+    { href: "/dashboard", icon: Home, label: "Hjem" },
+    { href: "/posts", icon: CalendarDays, label: "Planlæg" },
+    { href: "/posts/new", icon: Plus, label: "Opret" },
+    { href: "/videos", icon: Video, label: "Videoer" },
+    { href: "/properties", icon: Building2, label: "Boliger" },
+  ];
+
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center border-t border-slate-200 bg-white md:hidden"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+      {tabs.map(({ href, icon: Icon, label }) => {
+        const isNew = href === "/posts/new";
+        const isActive =
+          pathname === href || (!isNew && href !== "/dashboard" && pathname.startsWith(href));
+
+        return (
+          <Link
+            key={href}
+            href={href}
+            className="flex flex-1 flex-col items-center justify-center py-2 gap-0.5"
+          >
+            {isNew ? (
+              <span
+                className="flex h-10 w-10 items-center justify-center rounded-full"
+                style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
+              >
+                <Icon size={20} strokeWidth={2.5} color="white" />
+              </span>
+            ) : (
+              <>
+                <Icon
+                  size={20}
+                  strokeWidth={isActive ? 2.5 : 1.8}
+                  style={{ color: isActive ? "#FF6B4A" : "#94a3b8" }}
+                />
+                <span
+                  className="text-[10px] font-medium"
+                  style={{ color: isActive ? "#FF6B4A" : "#94a3b8" }}
+                >
+                  {label}
+                </span>
+              </>
+            )}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+export function Sidebar({ accounts = [], userEmail }: SidebarProps) {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Close drawer on route change
+  useEffect(() => { setDrawerOpen(false); }, [pathname]);
+
+  // Prevent body scroll when drawer is open
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [drawerOpen]);
+
+  return (
+    <>
+      {/* ── Desktop sidebar ── */}
+      <aside className="hidden md:flex h-full w-60 shrink-0">
+        <SidebarContent accounts={accounts} userEmail={userEmail} />
+      </aside>
+
+      {/* ── Mobile top header ── */}
+      <header className="fixed top-0 left-0 right-0 z-40 flex h-14 items-center gap-3 border-b border-slate-200 bg-white px-4 md:hidden">
+        <button
+          type="button"
+          aria-label="Åbn menu"
+          onClick={() => setDrawerOpen(true)}
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+        >
+          <Menu size={20} />
+        </button>
+        <div className="flex items-center gap-2">
+          <span
+            className="flex h-6 w-6 items-center justify-center rounded-md text-white font-bold text-xs shrink-0"
+            style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
+          >
+            V
+          </span>
+          <span className="text-sm font-bold text-slate-900 tracking-tight">Vakanza</span>
+        </div>
+        <div className="ml-auto">
+          <Link
+            href="/posts/new"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-white"
+            style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
+          >
+            <Plus size={13} strokeWidth={2.5} /> Nyt opslag
+          </Link>
+        </div>
+      </header>
+
+      {/* ── Mobile drawer backdrop ── */}
+      {drawerOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 md:hidden"
+          onClick={() => setDrawerOpen(false)}
+          aria-hidden
+        />
+      )}
+
+      {/* ── Mobile drawer ── */}
+      <aside
+        className={`fixed top-0 left-0 z-50 h-full w-72 shadow-2xl transition-transform duration-300 ease-in-out md:hidden ${
+          drawerOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <button
+          type="button"
+          aria-label="Luk menu"
+          onClick={() => setDrawerOpen(false)}
+          className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+        >
+          <X size={16} />
+        </button>
+        <SidebarContent
+          accounts={accounts}
+          userEmail={userEmail}
+          onNav={() => setDrawerOpen(false)}
+        />
+      </aside>
+
+      {/* ── Mobile bottom tab bar ── */}
+      <BottomTabBar />
+    </>
   );
 }

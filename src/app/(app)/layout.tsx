@@ -20,7 +20,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         accounts={(accounts ?? []) as SocialAccount[]}
         userEmail={data.user.email}
       />
-      <div className="flex flex-1 flex-col overflow-y-auto bg-[#FAF7F2]">
+      <div className="flex flex-1 flex-col overflow-y-auto bg-[#FAF7F2] pt-14 pb-16 md:pt-0 md:pb-0">
         {children}
       </div>
     </div>
