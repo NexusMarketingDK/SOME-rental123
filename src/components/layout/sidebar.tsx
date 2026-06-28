@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   LogOut, Plus, ExternalLink, BarChart2, Users, CalendarDays,
   Video, Home, Settings, CreditCard, Building2, Menu, X,
@@ -296,6 +296,8 @@ function BottomTabBar() {
 export function Sidebar({ accounts = [], userEmail }: SidebarProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const pathname = usePathname();
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   // Close drawer on route change
   useEffect(() => { setDrawerOpen(false); }, [pathname]);
@@ -305,6 +307,31 @@ export function Sidebar({ accounts = [], userEmail }: SidebarProps) {
     document.body.style.overflow = drawerOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [drawerOpen]);
+
+  // Swipe-to-open: rightward swipe starting from left edge (<32px)
+  // Swipe-to-close: leftward swipe anywhere when drawer is open
+  useEffect(() => {
+    function onTouchStart(e: TouchEvent) {
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+    }
+    function onTouchEnd(e: TouchEvent) {
+      if (touchStartX.current === null || touchStartY.current === null) return;
+      const dx = e.changedTouches[0].clientX - touchStartX.current;
+      const dy = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
+      if (Math.abs(dx) < 40 || dy > Math.abs(dx)) return;
+      if (dx > 0 && touchStartX.current < 32) setDrawerOpen(true);
+      if (dx < 0) setDrawerOpen(false);
+      touchStartX.current = null;
+      touchStartY.current = null;
+    }
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
+  }, []);
 
   return (
     <>
