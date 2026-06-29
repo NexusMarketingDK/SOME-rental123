@@ -235,9 +235,37 @@ async function uploadBase64ToHiggsfield(client: HiggsfieldClient, dataUrl: strin
 type V2StatusResponse = {
   status: string;
   request_id?: string;
+  // Various URL fields Higgsfield may use across API versions
   video?: { url: string };
   images?: { url: string }[];
+  outputs?: { url: string }[] | string[];
+  output?: { url: string } | string;
+  result?: { url: string } | string;
+  results?: { url: string }[] | string[];
+  url?: string;
 };
+
+function extractVideoUrl(data: V2StatusResponse): string | undefined {
+  // Try every field Higgsfield may use for the output URL
+  if (data.video?.url) return data.video.url;
+  if (data.url) return data.url;
+  if (typeof data.output === "string") return data.output;
+  if (typeof data.output === "object" && data.output?.url) return data.output.url;
+  if (typeof data.result === "string") return data.result;
+  if (typeof data.result === "object" && data.result?.url) return data.result.url;
+  const outputs = data.outputs;
+  if (Array.isArray(outputs) && outputs.length > 0) {
+    const first = outputs[0];
+    return typeof first === "string" ? first : first?.url;
+  }
+  const results = data.results;
+  if (Array.isArray(results) && results.length > 0) {
+    const first = results[0];
+    return typeof first === "string" ? first : first?.url;
+  }
+  if (data.images?.[0]?.url) return data.images[0].url;
+  return undefined;
+}
 
 function normalizeStatus(raw: string): "queued" | "in_progress" | "completed" | "failed" {
   const s = raw.toLowerCase();
@@ -278,7 +306,7 @@ export async function getVideoJobsStatus(jobSetIds: string[]): Promise<{
         );
         const data = res.data;
         if (data.status) {
-          const videoUrl = data.video?.url ?? data.images?.[0]?.url;
+          const videoUrl = extractVideoUrl(data);
           return { status: normalizeStatus(data.status), videoUrl };
         }
       } catch {

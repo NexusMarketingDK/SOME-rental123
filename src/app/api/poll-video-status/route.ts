@@ -41,11 +41,13 @@ export async function POST() {
 
       try {
         const result = await getVideoJobsStatus(jobIds);
-        if (result.status === "completed" && result.videoUrls?.length) {
+        if (result.status === "completed") {
           await supabase.from("video_orders").update({
             status: "ready",
-            video_url: result.videoUrls[0],
-            video_urls: result.videoUrls,
+            ...(result.videoUrls?.length && {
+              video_url: result.videoUrls[0],
+              video_urls: result.videoUrls,
+            }),
           }).eq("id", order.id);
           updated++;
         } else if (result.status === "failed") {
