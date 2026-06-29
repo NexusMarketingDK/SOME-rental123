@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getVideoJobsStatus } from "@/lib/higgsfield";
 
-const MAX_PROCESSING_MS = 30 * 60 * 1000; // auto-fail after 30 minutes
+const MAX_PROCESSING_MS = 6 * 60 * 60 * 1000; // auto-fail after 6 hours
 
 export async function POST() {
   const supabase = await createClient();
@@ -54,7 +54,7 @@ export async function POST() {
           await supabase.from("video_orders").update({ status: "failed" }).eq("id", order.id);
           updated++;
         } else if (age > MAX_PROCESSING_MS) {
-          // Still in_progress/queued after 30 min — mark failed
+          // Still in_progress/queued after 6 hours — mark failed
           await supabase.from("video_orders").update({ status: "failed" }).eq("id", order.id);
           updated++;
         }

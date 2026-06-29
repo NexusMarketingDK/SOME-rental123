@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { CheckCircle2, Loader2, Clock, XCircle, Trash2, ArrowRight, Download, Share2, RefreshCw, AlertTriangle } from "lucide-react";
 import { deleteVideoOrder } from "@/services/video-orders";
 
-const MAX_PROCESSING_SEC = 20 * 60; // 20 minutes before showing timeout warning
+const MAX_PROCESSING_SEC = 60 * 60; // 60 minutes before showing timeout warning
 
 type Order = {
   id: string;
@@ -33,7 +33,7 @@ function useElapsed(createdAt: string, active: boolean) {
 
 function ProgressBadge({ status, createdAt }: { status: string; createdAt: string }) {
   const elapsed = useElapsed(createdAt, status === "processing");
-  const pct = Math.min(92, Math.round((elapsed / 900) * 100));
+  const pct = Math.min(92, Math.round((elapsed / 1800) * 100));
   const timedOut = elapsed > MAX_PROCESSING_SEC;
 
   if (status === "ready") return (
@@ -69,7 +69,7 @@ function ProgressSection({
   status: string; createdAt: string; orderId: string; onRefresh: () => void;
 }) {
   const elapsed = useElapsed(createdAt, status === "processing");
-  const pct = Math.min(92, Math.round((elapsed / 900) * 100));
+  const pct = Math.min(92, Math.round((elapsed / 1800) * 100));
   const timedOut = elapsed > MAX_PROCESSING_SEC;
   const [checking, setChecking] = useState(false);
 
@@ -92,7 +92,7 @@ function ProgressSection({
           Genereringen tager længere end forventet ({mins} min).
         </p>
         <p className="mt-1 text-xs text-amber-700">
-          Higgsfield AI kan sommetider bruge ekstra tid. Tjek status manuelt eller slet ordren og prøv igen.
+          Higgsfield AI kan sommetider bruge ekstra tid. Tjek status manuelt — videoen er muligvis stadig ved at blive genereret.
         </p>
         <div className="mt-3 flex gap-2">
           <button
