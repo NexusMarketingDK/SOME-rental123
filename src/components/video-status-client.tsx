@@ -238,9 +238,9 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, ini
     );
   }
 
-  // Max expected duration: 15 min = 900s. Cap visible progress at 92% until done.
-  const progressPct = Math.min(92, Math.round((elapsedSec / 900) * 100));
-  const isDelayed = elapsedSec > 600; // >10 min → show extra message
+  // Cap visible progress at 92% until done.
+  const progressPct = Math.min(92, Math.round((elapsedSec / 1800) * 100));
+  const isDelayed = elapsedSec > 2400; // >40 min → show extra message
 
   return (
     <div className="space-y-6">
