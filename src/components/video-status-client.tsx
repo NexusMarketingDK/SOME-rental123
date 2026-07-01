@@ -22,6 +22,7 @@ type Props = {
   title: string;
   imageUrls: string[];
   accounts: SocialAccount[];
+  createdAt: string;
 };
 
 const STEPS = [
@@ -162,7 +163,7 @@ function SharePanel({ videoUrl, accounts }: { videoUrl: string; accounts: Social
   );
 }
 
-export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, initialVideoUrls, title, imageUrls, accounts }: Props) {
+export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, initialVideoUrls, title, imageUrls, accounts, createdAt }: Props) {
   const [status, setStatus] = useState<Status>(initialStatus);
   const [videoUrl, setVideoUrl] = useState<string | undefined>(initialVideoUrl);
   const [videoUrls, setVideoUrls] = useState<string[]>(initialVideoUrls ?? (initialVideoUrl ? [initialVideoUrl] : []));
@@ -198,6 +199,30 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, ini
             </p>
             <p className="text-sm text-emerald-700">AI-genereret cinematisk præsentationsvideo</p>
           </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Om videoen</p>
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-4">
+            <div>
+              <dt className="text-xs text-slate-400">Bolig</dt>
+              <dd className="font-medium text-slate-900 truncate">{title || "Bolig fremvisning"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-slate-400">Genereret</dt>
+              <dd className="font-medium text-slate-900">
+                {new Date(createdAt).toLocaleDateString("da-DK", { day: "numeric", month: "long", year: "numeric" })}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs text-slate-400">Klip</dt>
+              <dd className="font-medium text-slate-900">{clips.length}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-slate-400">Kildebilleder</dt>
+              <dd className="font-medium text-slate-900">{imageUrls.length}</dd>
+            </div>
+          </dl>
         </div>
 
         {clips.map((url, i) => (
