@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Fraunces } from "next/font/google";
 import { cookies } from "next/headers";
+import { LanguageTranslator } from "@/components/language-translator";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -50,6 +51,7 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-white">
         {children}
+        <LanguageTranslator />
       </body>
     </html>
   );
