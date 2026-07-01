@@ -116,17 +116,20 @@ export async function createVideoOrderCheckout(formData: FormData): Promise<void
     status: "processing",
   }).select("id").single();
 
-  // Start one Higgsfield job per image with cinematic per-room prompt
+  // Start one Veo job per image with cinematic per-room prompt
   if (imageUrls.length >= 1 && order?.id) {
     try {
-      const { startVideoGeneration } = await import("@/lib/higgsfield");
+      const { startVideoGeneration } = await import("@/lib/veo");
       const jobIds = await startVideoGeneration(imageUrls, title, roomLabels.length ? roomLabels : undefined);
       await supabase.from("video_orders").update({
-        higgsfield_job_id: jobIds[0] ?? null,
-        higgsfield_job_ids: jobIds,
+        video_job_id: jobIds[0] ?? null,
+        video_job_ids: jobIds,
       }).eq("id", order.id);
-    } catch (_e) {
-      // Generation start failed — order remains in processing state for retry
+    } catch (e) {
+      await supabase.from("video_orders").update({
+        status: "failed",
+        error_message: e instanceof Error ? e.message : String(e),
+      }).eq("id", order.id);
     }
   }
 

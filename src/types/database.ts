@@ -78,11 +78,12 @@ export type VideoOrder = {
   user_id: string;
   property_id: string | null;
   stripe_payment_id: string | null;
-  higgsfield_job_id: string | null;
+  video_job_id: string | null;
   status: VideoOrderStatus;
   image_urls: string[];
   title: string | null;
   video_url: string | null;
+  error_message: string | null;
   created_at: string;
 };
 

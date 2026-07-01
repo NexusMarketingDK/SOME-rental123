@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useTransition, useRef } from "react";
 import { CheckCircle2, Loader2, XCircle, Download, Share2, Send } from "lucide-react";
 import { pollVideoOrder } from "@/services/video-orders";
 import { shareVideoToSocial } from "@/services/share-video";
+import { VideoPlayer } from "@/components/video-player";
 import type { SocialAccount } from "@/types/database";
 
 const PLATFORM_COLORS: Record<string, string> = {
@@ -21,6 +22,8 @@ type Props = {
   title: string;
   imageUrls: string[];
   accounts: SocialAccount[];
+  createdAt: string;
+  initialErrorMessage?: string;
 };
 
 const STEPS = [
@@ -161,10 +164,11 @@ function SharePanel({ videoUrl, accounts }: { videoUrl: string; accounts: Social
   );
 }
 
-export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, initialVideoUrls, title, imageUrls, accounts }: Props) {
+export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, initialVideoUrls, title, imageUrls, accounts, createdAt, initialErrorMessage }: Props) {
   const [status, setStatus] = useState<Status>(initialStatus);
   const [videoUrl, setVideoUrl] = useState<string | undefined>(initialVideoUrl);
   const [videoUrls, setVideoUrls] = useState<string[]>(initialVideoUrls ?? (initialVideoUrl ? [initialVideoUrl] : []));
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(initialErrorMessage);
   const [stepIdx, setStepIdx] = useState(0);
   const [elapsedSec, setElapsedSec] = useState(0);
   const startRef = useRef<number>(Date.now());
@@ -174,6 +178,7 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, ini
     setStatus(result.status as Status);
     if (result.videoUrl) setVideoUrl(result.videoUrl);
     if (result.videoUrls?.length) setVideoUrls(result.videoUrls);
+    if (result.error) setErrorMessage(result.error);
   }, [orderId]);
 
   useEffect(() => {
@@ -199,6 +204,30 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, ini
           </div>
         </div>
 
+        <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Om videoen</p>
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-4">
+            <div>
+              <dt className="text-xs text-slate-400">Bolig</dt>
+              <dd className="font-medium text-slate-900 truncate">{title || "Bolig fremvisning"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-slate-400">Genereret</dt>
+              <dd className="font-medium text-slate-900">
+                {new Date(createdAt).toLocaleDateString("da-DK", { day: "numeric", month: "long", year: "numeric" })}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs text-slate-400">Klip</dt>
+              <dd className="font-medium text-slate-900">{clips.length}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-slate-400">Kildebilleder</dt>
+              <dd className="font-medium text-slate-900">{imageUrls.length}</dd>
+            </div>
+          </dl>
+        </div>
+
         {clips.map((url, i) => (
           <div key={i} className="space-y-2">
             {clips.length > 1 && (
@@ -207,7 +236,7 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, ini
               </p>
             )}
             <div className="rounded-2xl overflow-hidden border border-slate-200 bg-black shadow-lg">
-              <video src={url} controls autoPlay={i === 0} loop className="w-full" style={{ maxHeight: "480px" }} />
+              <VideoPlayer url={url} poster={imageUrls[i]} />
             </div>
             <a
               href={url}
@@ -228,11 +257,14 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, ini
 
   if (status === "failed") {
     return (
-      <div className="flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
-        <XCircle size={20} className="text-red-500 shrink-0" />
+      <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
+        <XCircle size={20} className="text-red-500 shrink-0 mt-0.5" />
         <div>
           <p className="font-semibold text-red-900">Video generering fejlede</p>
           <p className="text-sm text-red-700">Prøv igen eller kontakt support.</p>
+          {errorMessage && (
+            <p className="mt-2 rounded-lg bg-red-100/60 px-2.5 py-1.5 font-mono text-xs text-red-800 break-all">{errorMessage}</p>
+          )}
         </div>
       </div>
     );

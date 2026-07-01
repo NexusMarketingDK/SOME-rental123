@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Loader2, Clock, XCircle, Trash2, ArrowRight, Download, Share2, RefreshCw, AlertTriangle } from "lucide-react";
 import { deleteVideoOrder } from "@/services/video-orders";
+import { VideoPlayer } from "@/components/video-player";
 
 const MAX_PROCESSING_SEC = 60 * 60; // 60 minutes before showing timeout warning
 
@@ -15,6 +16,7 @@ type Order = {
   created_at: string;
   video_url: string | null;
   image_urls: string[] | null;
+  error_message?: string | null;
 };
 
 function useElapsed(createdAt: string, active: boolean) {
@@ -92,7 +94,7 @@ function ProgressSection({
           Genereringen tager længere end forventet ({mins} min).
         </p>
         <p className="mt-1 text-xs text-amber-700">
-          Higgsfield AI kan sommetider bruge ekstra tid. Tjek status manuelt — videoen er muligvis stadig ved at blive genereret.
+          AI-videogenereringen kan sommetider bruge ekstra tid. Tjek status manuelt — videoen er muligvis stadig ved at blive genereret.
         </p>
         <div className="mt-3 flex gap-2">
           <button
@@ -197,9 +199,17 @@ export function VideoOrderCard({ order }: { order: Order }) {
         onRefresh={handleRefresh}
       />
 
+      {order.status === "failed" && order.error_message && (
+        <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 font-mono text-xs text-red-700 break-all">
+          {order.error_message}
+        </p>
+      )}
+
       {order.status === "ready" && order.video_url && (
         <div className="mt-4">
-          <video src={order.video_url} controls className="w-full max-w-sm rounded-lg border border-slate-100" />
+          <div className="w-full max-w-sm overflow-hidden rounded-lg border border-slate-100">
+            <VideoPlayer url={order.video_url} poster={order.image_urls?.[0] ?? undefined} />
+          </div>
           <div className="mt-3 flex gap-3">
             <a
               href={order.video_url}

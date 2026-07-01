@@ -36,6 +36,8 @@ export default async function VideoDetailPage({
           title={order.title ?? ""}
           imageUrls={order.image_urls ?? []}
           accounts={(accounts ?? []) as SocialAccount[]}
+          createdAt={order.created_at}
+          initialErrorMessage={(order as any).error_message ?? undefined}
         />
       </div>
     </>
