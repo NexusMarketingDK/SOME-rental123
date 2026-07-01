@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useTransition, useRef } from "react";
-import { CheckCircle2, Loader2, XCircle, Download, Share2, Send } from "lucide-react";
+import { CheckCircle2, Loader2, XCircle, Download, Share2, Send, Play } from "lucide-react";
 import { pollVideoOrder } from "@/services/video-orders";
 import { shareVideoToSocial } from "@/services/share-video";
 import type { SocialAccount } from "@/types/database";
@@ -161,6 +161,34 @@ function SharePanel({ videoUrl, accounts }: { videoUrl: string; accounts: Social
   );
 }
 
+function VideoPlayer({ url, poster }: { url: string; poster?: string }) {
+  const [playing, setPlaying] = useState(false);
+
+  if (!playing) {
+    return (
+      <button
+        type="button"
+        onClick={() => setPlaying(true)}
+        aria-label="Afspil video"
+        className="group relative block w-full aspect-video overflow-hidden bg-black cursor-pointer"
+      >
+        {poster ? (
+          <img src={poster} alt="" className="h-full w-full object-cover opacity-90 transition-opacity group-hover:opacity-100" />
+        ) : (
+          <div className="h-full w-full bg-slate-800" />
+        )}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors group-hover:bg-black/30">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 shadow-lg transition-transform group-hover:scale-110">
+            <Play size={28} className="ml-1 text-slate-900" fill="currentColor" />
+          </div>
+        </div>
+      </button>
+    );
+  }
+
+  return <video src={url} controls autoPlay loop className="w-full" style={{ maxHeight: "480px" }} />;
+}
+
 export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, initialVideoUrls, title, imageUrls, accounts }: Props) {
   const [status, setStatus] = useState<Status>(initialStatus);
   const [videoUrl, setVideoUrl] = useState<string | undefined>(initialVideoUrl);
@@ -207,7 +235,7 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, ini
               </p>
             )}
             <div className="rounded-2xl overflow-hidden border border-slate-200 bg-black shadow-lg">
-              <video src={url} controls autoPlay={i === 0} loop className="w-full" style={{ maxHeight: "480px" }} />
+              <VideoPlayer url={url} poster={imageUrls[i]} />
             </div>
             <a
               href={url}
