@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getVideoJobsStatus } from "@/lib/higgsfield";
+import { getVideoJobsStatus } from "@/lib/veo";
 
 const MAX_PROCESSING_MS = 6 * 60 * 60 * 1000; // auto-fail after 6 hours
 
@@ -11,7 +11,7 @@ export async function POST() {
 
   const { data: orders } = await supabase
     .from("video_orders")
-    .select("id, higgsfield_job_id, higgsfield_job_ids, status, created_at")
+    .select("id, video_job_id, video_job_ids, status, created_at")
     .eq("user_id", user.id)
     .eq("status", "processing");
 
@@ -25,10 +25,10 @@ export async function POST() {
       // Auto-fail orders stuck for more than 30 minutes with no job IDs
       const age = Date.now() - new Date(order.created_at).getTime();
 
-      const jobIds: string[] = (order as any).higgsfield_job_ids?.length
-        ? (order as any).higgsfield_job_ids
-        : order.higgsfield_job_id
-        ? [order.higgsfield_job_id]
+      const jobIds: string[] = (order as any).video_job_ids?.length
+        ? (order as any).video_job_ids
+        : order.video_job_id
+        ? [order.video_job_id]
         : [];
 
       if (!jobIds.length) {

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getVideoJobsStatus } from "@/lib/higgsfield";
+import { getVideoJobsStatus } from "@/lib/veo";
 
 export async function deleteVideoOrder(orderId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
@@ -43,10 +43,10 @@ export async function pollVideoOrder(orderId: string): Promise<{
   }
 
   // Use multi-job IDs if available, else fall back to single job
-  const jobIds: string[] = order.higgsfield_job_ids?.length
-    ? order.higgsfield_job_ids
-    : order.higgsfield_job_id
-    ? [order.higgsfield_job_id]
+  const jobIds: string[] = order.video_job_ids?.length
+    ? order.video_job_ids
+    : order.video_job_id
+    ? [order.video_job_id]
     : [];
 
   if (!jobIds.length) return { status: order.status };

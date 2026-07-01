@@ -1,28 +1,21 @@
-import { HiggsfieldClient } from "@higgsfield/client";
-import { createHiggsfieldClient } from "@higgsfield/client/v2";
+import { GoogleGenAI, type GenerateVideosOperation } from "@google/genai";
+import { readFile, unlink } from "fs/promises";
+import { tmpdir } from "os";
+import path from "path";
+import { randomUUID } from "crypto";
+import { createAdminClient } from "@/lib/supabase/admin";
 
-let _client: HiggsfieldClient | null = null;
-let _v2: ReturnType<typeof createHiggsfieldClient> | null = null;
+let _client: GoogleGenAI | null = null;
 
-function getClient(): HiggsfieldClient {
+function getClient(): GoogleGenAI {
   if (!_client) {
-    _client = new HiggsfieldClient({
-      apiKey: process.env.HIGGSFIELD_API_KEY_ID,
-      apiSecret: process.env.HIGGSFIELD_API_SECRET,
-    });
+    _client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   }
   return _client;
 }
 
-function getV2Client() {
-  if (!_v2) {
-    _v2 = createHiggsfieldClient({
-      apiKey: process.env.HIGGSFIELD_API_KEY_ID,
-      apiSecret: process.env.HIGGSFIELD_API_SECRET,
-    });
-  }
-  return _v2;
-}
+// Google AI Studio (aistudio.google.com) Veo model used for image-to-video generation.
+const VEO_MODEL = process.env.VEO_MODEL ?? "veo-3.0-generate-001";
 
 type RoomPromptDef = {
   camera: string;
@@ -192,137 +185,111 @@ function buildCinematicPrompt(roomLabel: string, title: string, index: number): 
   );
 }
 
+function parseDurationSeconds(def: RoomPromptDef): number {
+  const match = def.duration.match(/(\d+)/);
+  const seconds = match ? parseInt(match[1], 10) : 6;
+  return Math.min(8, Math.max(4, seconds));
+}
+
+async function toInlineImage(url: string): Promise<{ imageBytes: string; mimeType: string }> {
+  if (url.startsWith("data:")) {
+    const [header, base64] = url.split(",");
+    const mimeMatch = header.match(/:(.*?);/);
+    return { imageBytes: base64, mimeType: mimeMatch?.[1] ?? "image/jpeg" };
+  }
+  const res = await fetch(url);
+  const buffer = Buffer.from(await res.arrayBuffer());
+  return { imageBytes: buffer.toString("base64"), mimeType: res.headers.get("content-type") ?? "image/jpeg" };
+}
+
 export async function startVideoGeneration(
   imageUrls: string[],
   title: string,
   roomLabels?: string[]
 ): Promise<string[]> {
-  const client = getClient();
+  const ai = getClient();
 
-  const jobIds = await Promise.all(
+  const operationNames = await Promise.all(
     imageUrls.map(async (url, i) => {
       const room = roomLabels?.[i] ?? `Image ${i + 1}`;
+      const def = getRoomDef(room);
       const prompt = buildCinematicPrompt(room, title, i);
+      const image = await toInlineImage(url);
 
-      const imageUrl = url.startsWith("data:")
-        ? await uploadBase64ToHiggsfield(client, url)
-        : url;
+      const operation = await ai.models.generateVideos({
+        model: VEO_MODEL,
+        prompt,
+        image,
+        config: {
+          numberOfVideos: 1,
+          aspectRatio: "16:9",
+          durationSeconds: parseDurationSeconds(def),
+        },
+      });
 
-      const inputImage = { type: "image_url" as const, image_url: imageUrl };
-
-      const v2 = getV2Client();
-      const response = await v2.subscribe("/v1/image2video/dop", {
-        input: { model: "dop-turbo", prompt, input_images: [inputImage] },
-        withPolling: false,
-      }) as { request_id?: string; id?: string };
-
-      return response.request_id ?? response.id ?? "";
+      return operation.name ?? "";
     })
   );
 
-  return jobIds;
+  return operationNames;
 }
 
-async function uploadBase64ToHiggsfield(client: HiggsfieldClient, dataUrl: string): Promise<string> {
-  const [header, base64] = dataUrl.split(",");
-  const mimeMatch = header.match(/:(.*?);/);
-  const mime = mimeMatch?.[1] ?? "image/jpeg";
-  const buffer = Buffer.from(base64, "base64");
-  const format = mime.includes("png") ? "png" : mime.includes("webp") ? "webp" : "jpeg";
-  return client.uploadImage(buffer, format);
-}
+type JobStatusResult = { status: "in_progress" | "completed" | "failed"; videoUrl?: string };
 
-type V2StatusResponse = {
-  status: string;
-  request_id?: string;
-  // Various URL fields Higgsfield may use across API versions
-  video?: { url: string };
-  images?: { url: string }[];
-  outputs?: { url: string }[] | string[];
-  output?: { url: string } | string;
-  result?: { url: string } | string;
-  results?: { url: string }[] | string[];
-  url?: string;
-};
+// Veo-hosted video files expire ~2 days after generation, so we download and
+// re-host the result in our own storage as soon as the operation completes.
+async function persistVideo(operationName: string, video: { uri?: string }): Promise<string | undefined> {
+  const ai = getClient();
+  const tmpPath = path.join(tmpdir(), `${randomUUID()}.mp4`);
+  try {
+    await ai.files.download({ file: video, downloadPath: tmpPath });
+    const buffer = await readFile(tmpPath);
 
-function extractVideoUrl(data: V2StatusResponse): string | undefined {
-  // Try every field Higgsfield may use for the output URL
-  if (data.video?.url) return data.video.url;
-  if (data.url) return data.url;
-  if (typeof data.output === "string") return data.output;
-  if (typeof data.output === "object" && data.output?.url) return data.output.url;
-  if (typeof data.result === "string") return data.result;
-  if (typeof data.result === "object" && data.result?.url) return data.result.url;
-  const outputs = data.outputs;
-  if (Array.isArray(outputs) && outputs.length > 0) {
-    const first = outputs[0];
-    return typeof first === "string" ? first : first?.url;
+    const supabase = createAdminClient();
+    const objectPath = `${operationName.replace(/[^a-zA-Z0-9]/g, "_")}.mp4`;
+    const { error } = await supabase.storage
+      .from("video-outputs")
+      .upload(objectPath, buffer, { contentType: "video/mp4", upsert: true });
+    if (error) return undefined;
+
+    const { data } = supabase.storage.from("video-outputs").getPublicUrl(objectPath);
+    return data.publicUrl;
+  } catch {
+    return undefined;
+  } finally {
+    await unlink(tmpPath).catch(() => {});
   }
-  const results = data.results;
-  if (Array.isArray(results) && results.length > 0) {
-    const first = results[0];
-    return typeof first === "string" ? first : first?.url;
-  }
-  if (data.images?.[0]?.url) return data.images[0].url;
-  return undefined;
 }
 
-function normalizeStatus(raw: string): "queued" | "in_progress" | "completed" | "failed" {
-  const s = raw.toLowerCase();
-  if (s === "completed" || s === "succeeded" || s === "success" || s === "done") return "completed";
-  if (s === "failed" || s === "nsfw" || s === "error" || s === "cancelled" || s === "canceled") return "failed";
-  if (
-    s === "in_progress" || s === "processing" || s === "running" ||
-    s === "generating" || s === "finishing" || s === "rendering" ||
-    s === "pending_execution" || s === "started"
-  ) return "in_progress";
-  // "queued", "pending", "waiting", or unknown
-  return "queued";
+async function checkOperation(name: string): Promise<JobStatusResult> {
+  const ai = getClient();
+
+  let operation: GenerateVideosOperation;
+  try {
+    operation = await ai.operations.getVideosOperation({
+      operation: { name } as GenerateVideosOperation,
+    });
+  } catch {
+    // Transient error — treat as still running so the caller retries later.
+    return { status: "in_progress" };
+  }
+
+  if (!operation.done) return { status: "in_progress" };
+  if (operation.error) return { status: "failed" };
+
+  const video = operation.response?.generatedVideos?.[0]?.video;
+  if (!video) return { status: "failed" };
+
+  const videoUrl = await persistVideo(name, video);
+  // Persisting failed transiently (e.g. network hiccup) — retry on next poll.
+  return videoUrl ? { status: "completed", videoUrl } : { status: "in_progress" };
 }
 
 export async function getVideoJobsStatus(jobSetIds: string[]): Promise<{
   status: "queued" | "in_progress" | "completed" | "failed";
   videoUrls?: string[];
 }> {
-  // v1 client for fallback (uses hf-api-key / hf-secret headers)
-  const client = getClient();
-  type JobResult = { status: string; results?: { raw?: { url: string }; min?: { url: string } } };
-  type JobSetData = { jobs?: JobResult[] };
-  const v1AxiosClient = (client as unknown as { client: { get: (url: string) => Promise<{ data: JobSetData | V2StatusResponse }> } }).client;
-
-  // v2 uses Authorization: Key header (different from v1's hf-api-key / hf-secret)
-  // We call the v2 status endpoint directly with axios using the correct auth header
-  const apiKey = process.env.HIGGSFIELD_API_KEY_ID ?? "";
-  const apiSecret = process.env.HIGGSFIELD_API_SECRET ?? "";
-
-  const results = await Promise.all(
-    jobSetIds.map(async (id) => {
-      // Try v2 endpoint first — must use v2 auth header (Authorization: Key)
-      try {
-        const { default: axios } = await import("axios");
-        const res = await axios.get<V2StatusResponse>(
-          `https://platform.higgsfield.ai/requests/${id}/status`,
-          { headers: { Authorization: `Key ${apiKey}:${apiSecret}`, "Content-Type": "application/json" } }
-        );
-        const data = res.data;
-        if (data.status) {
-          const videoUrl = extractVideoUrl(data);
-          return { status: normalizeStatus(data.status), videoUrl };
-        }
-      } catch {
-        // fall through to v1
-      }
-
-      // Fallback: v1 job-sets endpoint (uses hf-api-key / hf-secret via v1 axios client)
-      const res = await v1AxiosClient.get(`/v1/job-sets/${id}`);
-      const v1Data = res.data as JobSetData;
-      const jobs: JobResult[] = v1Data.jobs ?? [];
-      const job = jobs[0];
-      const s = normalizeStatus(job?.status ?? "queued");
-      const videoUrl = job?.results?.raw?.url ?? job?.results?.min?.url;
-      return { status: s, videoUrl };
-    })
-  );
+  const results = await Promise.all(jobSetIds.map(checkOperation));
 
   const anyFailed = results.some((r) => r.status === "failed");
   if (anyFailed) return { status: "failed" };
@@ -335,8 +302,7 @@ export async function getVideoJobsStatus(jobSetIds: string[]): Promise<{
     };
   }
 
-  const anyInProgress = results.some((r) => r.status === "in_progress" || r.status === "completed");
-  return { status: anyInProgress ? "in_progress" : "queued" };
+  return { status: "in_progress" };
 }
 
 // Legacy single-job fallback

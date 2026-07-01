@@ -92,7 +92,7 @@ function ProgressSection({
           Genereringen tager længere end forventet ({mins} min).
         </p>
         <p className="mt-1 text-xs text-amber-700">
-          Higgsfield AI kan sommetider bruge ekstra tid. Tjek status manuelt — videoen er muligvis stadig ved at blive genereret.
+          AI-videogenereringen kan sommetider bruge ekstra tid. Tjek status manuelt — videoen er muligvis stadig ved at blive genereret.
         </p>
         <div className="mt-3 flex gap-2">
           <button
