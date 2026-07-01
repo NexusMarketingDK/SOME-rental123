@@ -31,6 +31,8 @@ export const metadata: Metadata = {
     languages: {
       "da": "https://vakanza.dk",
       "en": "https://vakanza.dk/en",
+      "es": "https://vakanza.dk/es",
+      "de": "https://vakanza.dk/de",
     },
   },
 };
@@ -41,7 +43,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookieStore = await cookies();
-  const locale = cookieStore.get("locale")?.value === "en" ? "en" : "da";
+  const rawLocale = cookieStore.get("locale")?.value;
+  const locale = (["da","en","es","de"].includes(rawLocale ?? "") ? rawLocale : "da") as string;
 
   return (
     <html

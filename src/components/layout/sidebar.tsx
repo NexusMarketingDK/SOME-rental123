@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { signOutAction } from "@/services/auth";
 import type { SocialAccount } from "@/types/database";
+import { APP_LABELS, LOCALE_FLAGS, LOCALE_LABELS, LOCALE_PATHS, LOCALES, type Locale as I18nLocale } from "@/lib/i18n";
 
 const PLATFORM_COLORS: Record<string, string> = {
   facebook: "#1877F2",
@@ -41,31 +42,43 @@ const PRIMARY_NAV = [
   { href: "/properties", icon: Building2, label: "Boliger" },
 ];
 
-type Locale = "da" | "en";
-
-const NAV_LABELS: Record<Locale, {
-  home: string; create: string; schedule: string; channels: string;
-  videos: string; properties: string; analytics: string; billing: string;
-  settings: string; newPost: string; connectChannel: string; freePlan: string; logOut: string;
-}> = {
-  da: {
-    home: "Hjem", create: "Opret", schedule: "Planlæg", channels: "Kanaler",
-    videos: "Videoer", properties: "Boliger", analytics: "Analytics",
-    billing: "Fakturering", settings: "Indstillinger", newPost: "Nyt opslag",
-    connectChannel: "Tilslut kanal", freePlan: "Free Plan", logOut: "Log ud",
-  },
-  en: {
-    home: "Home", create: "Create", schedule: "Schedule", channels: "Channels",
-    videos: "Videos", properties: "Properties", analytics: "Analytics",
-    billing: "Billing", settings: "Settings", newPost: "New post",
-    connectChannel: "Connect channel", freePlan: "Free Plan", logOut: "Log out",
-  },
-};
+type Locale = I18nLocale;
 
 interface SidebarProps {
   accounts?: SocialAccount[];
   userEmail?: string;
   locale?: Locale;
+}
+
+function LangSwitcher({ current }: { current: Locale }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-slate-400 hover:bg-white/5 hover:text-white transition-colors"
+      >
+        <span>{LOCALE_FLAGS[current]}</span>
+        <span>{LOCALE_LABELS[current]}</span>
+        <span className="ml-auto text-slate-500">▾</span>
+      </button>
+      {open && (
+        <div className="absolute bottom-full left-0 mb-1 w-full rounded-xl border border-white/10 bg-[#1a2d52] py-1 shadow-xl z-50">
+          {LOCALES.map((loc) => (
+            <a
+              key={loc}
+              href={LOCALE_PATHS[loc]}
+              className={`flex items-center gap-2 px-3 py-2 text-xs transition-colors hover:bg-white/10 ${loc === current ? "text-white font-semibold" : "text-slate-400"}`}
+            >
+              <span>{LOCALE_FLAGS[loc]}</span>
+              <span>{LOCALE_LABELS[loc]}</span>
+              {loc === current && <span className="ml-auto text-[#FF6B4A]">✓</span>}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function NavItem({
@@ -120,7 +133,7 @@ function NavItem({
 }
 
 function SidebarContent({ accounts, userEmail, locale = "da", onNav }: SidebarProps & { onNav?: () => void }) {
-  const t = NAV_LABELS[locale];
+  const t = APP_LABELS[locale];
   const firstName = userEmail?.split("@")[0] ?? "";
   const maxChannels = 3;
   const connectedCount = accounts?.length ?? 0;
@@ -237,6 +250,9 @@ function SidebarContent({ accounts, userEmail, locale = "da", onNav }: SidebarPr
           <NavItem href="/billing" icon={CreditCard} label={t.billing} onClick={onNav} />
           <NavItem href="/settings" icon={Settings} label={t.settings} onClick={onNav} />
         </nav>
+        <div className="mx-2 mt-1">
+          <LangSwitcher current={locale} />
+        </div>
 
         <div className="mx-3 mt-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2.5">
           <div className="flex items-center gap-2.5">
