@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { Sidebar } from "@/components/layout/sidebar";
 import { createClient } from "@/lib/supabase/server";
 import type { SocialAccount } from "@/types/database";
+import type { Locale } from "@/lib/i18n";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient();
@@ -11,7 +12,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   if (!data.user) redirect("/login");
 
   const cookieStore = await cookies();
-  const locale = cookieStore.get("locale")?.value === "en" ? "en" : "da";
+  const rawLocale = cookieStore.get("locale")?.value;
+  const locale = (["da","en","es","de"].includes(rawLocale ?? "") ? rawLocale : "da") as Locale;
 
   const { data: accounts } = await supabase
     .from("social_accounts")

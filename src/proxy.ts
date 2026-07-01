@@ -2,46 +2,62 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-type Locale = "da" | "en";
+type Locale = "da" | "en" | "es" | "de";
+
+const LOCALE_PATHS: Record<Locale, string> = {
+  da: "/",
+  en: "/en",
+  es: "/es",
+  de: "/de",
+};
 
 function detectLocale(request: NextRequest): Locale {
-  const cookieLocale = request.cookies.get("locale")?.value;
-  if (cookieLocale === "en" || cookieLocale === "da") return cookieLocale;
+  const cookieLocale = request.cookies.get("locale")?.value as Locale | undefined;
+  if (cookieLocale && cookieLocale in LOCALE_PATHS) return cookieLocale;
+
   const acceptLang = request.headers.get("accept-language") ?? "";
   for (const part of acceptLang.split(",")) {
     const tag = part.split(";")[0].trim().toLowerCase();
     if (tag === "da" || tag.startsWith("da-")) return "da";
     if (tag.startsWith("en")) return "en";
+    if (tag === "es" || tag.startsWith("es-")) return "es";
+    if (tag === "de" || tag.startsWith("de-")) return "de";
   }
   return "da";
+}
+
+function setLocaleCookie(res: NextResponse, locale: Locale) {
+  res.cookies.set("locale", locale, { path: "/", maxAge: 31536000, sameSite: "lax" });
 }
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // /en/* routes are explicit English — just persist cookie and continue
-  if (pathname === "/en" || pathname.startsWith("/en/")) {
-    const res = await updateSession(request);
-    res.cookies.set("locale", "en", { path: "/", maxAge: 31536000, sameSite: "lax" });
-    return res;
+  // Explicit locale routes — persist cookie and continue
+  for (const [locale, prefix] of Object.entries(LOCALE_PATHS) as [Locale, string][]) {
+    if (prefix !== "/" && (pathname === prefix || pathname.startsWith(prefix + "/"))) {
+      const res = await updateSession(request);
+      setLocaleCookie(res, locale);
+      return res;
+    }
   }
 
   const locale = detectLocale(request);
 
-  // Redirect English-detected users to /en equivalent (only for public pages)
+  // Redirect non-Danish users to their locale path on public pages
   const isPublicPage =
     pathname === "/" || pathname.startsWith("/login") || pathname.startsWith("/signup");
 
-  if (locale === "en" && isPublicPage) {
+  if (locale !== "da" && isPublicPage) {
     const url = request.nextUrl.clone();
-    url.pathname = `/en${pathname === "/" ? "" : pathname}`;
+    url.pathname = `${LOCALE_PATHS[locale]}${pathname === "/" ? "" : pathname}`;
     const redirect = NextResponse.redirect(url);
-    redirect.cookies.set("locale", "en", { path: "/", maxAge: 31536000, sameSite: "lax" });
+    setLocaleCookie(redirect, locale);
     return redirect;
   }
 
   const res = await updateSession(request);
-  res.cookies.set("locale", locale, { path: "/", maxAge: 31536000, sameSite: "lax" });
+  setLocaleCookie(res, locale);
   return res;
 }
 
