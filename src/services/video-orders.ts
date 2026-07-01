@@ -23,6 +23,7 @@ export async function pollVideoOrder(orderId: string): Promise<{
   status: string;
   videoUrl?: string;
   videoUrls?: string[];
+  error?: string;
 }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -40,6 +41,10 @@ export async function pollVideoOrder(orderId: string): Promise<{
   if (order.status === "ready") {
     const urls: string[] = order.video_urls?.length ? order.video_urls : order.video_url ? [order.video_url] : [];
     return { status: "ready", videoUrl: urls[0], videoUrls: urls };
+  }
+
+  if (order.status === "failed") {
+    return { status: "failed", error: order.error_message ?? undefined };
   }
 
   // Use multi-job IDs if available, else fall back to single job
@@ -63,8 +68,11 @@ export async function pollVideoOrder(orderId: string): Promise<{
   }
 
   if (result.status === "failed") {
-    await supabase.from("video_orders").update({ status: "failed" }).eq("id", orderId);
-    return { status: "failed" };
+    await supabase.from("video_orders").update({
+      status: "failed",
+      error_message: result.error ?? null,
+    }).eq("id", orderId);
+    return { status: "failed", error: result.error };
   }
 
   return { status: "processing" };

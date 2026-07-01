@@ -234,7 +234,7 @@ export async function startVideoGeneration(
   return operationNames;
 }
 
-type JobStatusResult = { status: "in_progress" | "completed" | "failed"; videoUrl?: string };
+type JobStatusResult = { status: "in_progress" | "completed" | "failed"; videoUrl?: string; error?: string };
 
 // Veo-hosted video files expire ~2 days after generation, so we download and
 // re-host the result in our own storage as soon as the operation completes.
@@ -275,10 +275,13 @@ async function checkOperation(name: string): Promise<JobStatusResult> {
   }
 
   if (!operation.done) return { status: "in_progress" };
-  if (operation.error) return { status: "failed" };
+  if (operation.error) {
+    const message = typeof operation.error.message === "string" ? operation.error.message : JSON.stringify(operation.error);
+    return { status: "failed", error: message };
+  }
 
   const video = operation.response?.generatedVideos?.[0]?.video;
-  if (!video) return { status: "failed" };
+  if (!video) return { status: "failed", error: "Veo returned no video in the completed operation." };
 
   const videoUrl = await persistVideo(name, video);
   // Persisting failed transiently (e.g. network hiccup) — retry on next poll.
@@ -288,11 +291,12 @@ async function checkOperation(name: string): Promise<JobStatusResult> {
 export async function getVideoJobsStatus(jobSetIds: string[]): Promise<{
   status: "queued" | "in_progress" | "completed" | "failed";
   videoUrls?: string[];
+  error?: string;
 }> {
   const results = await Promise.all(jobSetIds.map(checkOperation));
 
-  const anyFailed = results.some((r) => r.status === "failed");
-  if (anyFailed) return { status: "failed" };
+  const failedResult = results.find((r) => r.status === "failed");
+  if (failedResult) return { status: "failed", error: failedResult.error };
 
   const allDone = results.every((r) => r.status === "completed");
   if (allDone) {

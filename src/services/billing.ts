@@ -125,8 +125,11 @@ export async function createVideoOrderCheckout(formData: FormData): Promise<void
         video_job_id: jobIds[0] ?? null,
         video_job_ids: jobIds,
       }).eq("id", order.id);
-    } catch (_e) {
-      // Generation start failed — order remains in processing state for retry
+    } catch (e) {
+      await supabase.from("video_orders").update({
+        status: "failed",
+        error_message: e instanceof Error ? e.message : String(e),
+      }).eq("id", order.id);
     }
   }
 

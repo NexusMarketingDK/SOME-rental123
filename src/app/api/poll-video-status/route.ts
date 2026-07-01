@@ -51,7 +51,10 @@ export async function POST() {
           }).eq("id", order.id);
           updated++;
         } else if (result.status === "failed") {
-          await supabase.from("video_orders").update({ status: "failed" }).eq("id", order.id);
+          await supabase.from("video_orders").update({
+            status: "failed",
+            error_message: result.error ?? null,
+          }).eq("id", order.id);
           updated++;
         } else if (age > MAX_PROCESSING_MS) {
           // Still in_progress/queued after 6 hours — mark failed

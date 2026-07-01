@@ -23,6 +23,7 @@ type Props = {
   imageUrls: string[];
   accounts: SocialAccount[];
   createdAt: string;
+  initialErrorMessage?: string;
 };
 
 const STEPS = [
@@ -163,10 +164,11 @@ function SharePanel({ videoUrl, accounts }: { videoUrl: string; accounts: Social
   );
 }
 
-export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, initialVideoUrls, title, imageUrls, accounts, createdAt }: Props) {
+export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, initialVideoUrls, title, imageUrls, accounts, createdAt, initialErrorMessage }: Props) {
   const [status, setStatus] = useState<Status>(initialStatus);
   const [videoUrl, setVideoUrl] = useState<string | undefined>(initialVideoUrl);
   const [videoUrls, setVideoUrls] = useState<string[]>(initialVideoUrls ?? (initialVideoUrl ? [initialVideoUrl] : []));
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(initialErrorMessage);
   const [stepIdx, setStepIdx] = useState(0);
   const [elapsedSec, setElapsedSec] = useState(0);
   const startRef = useRef<number>(Date.now());
@@ -176,6 +178,7 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, ini
     setStatus(result.status as Status);
     if (result.videoUrl) setVideoUrl(result.videoUrl);
     if (result.videoUrls?.length) setVideoUrls(result.videoUrls);
+    if (result.error) setErrorMessage(result.error);
   }, [orderId]);
 
   useEffect(() => {
@@ -254,11 +257,14 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, ini
 
   if (status === "failed") {
     return (
-      <div className="flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
-        <XCircle size={20} className="text-red-500 shrink-0" />
+      <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
+        <XCircle size={20} className="text-red-500 shrink-0 mt-0.5" />
         <div>
           <p className="font-semibold text-red-900">Video generering fejlede</p>
           <p className="text-sm text-red-700">Prøv igen eller kontakt support.</p>
+          {errorMessage && (
+            <p className="mt-2 rounded-lg bg-red-100/60 px-2.5 py-1.5 font-mono text-xs text-red-800 break-all">{errorMessage}</p>
+          )}
         </div>
       </div>
     );

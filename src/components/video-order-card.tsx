@@ -16,6 +16,7 @@ type Order = {
   created_at: string;
   video_url: string | null;
   image_urls: string[] | null;
+  error_message?: string | null;
 };
 
 function useElapsed(createdAt: string, active: boolean) {
@@ -197,6 +198,12 @@ export function VideoOrderCard({ order }: { order: Order }) {
         orderId={order.id}
         onRefresh={handleRefresh}
       />
+
+      {order.status === "failed" && order.error_message && (
+        <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 font-mono text-xs text-red-700 break-all">
+          {order.error_message}
+        </p>
+      )}
 
       {order.status === "ready" && order.video_url && (
         <div className="mt-4">

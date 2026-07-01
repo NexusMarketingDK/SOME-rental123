@@ -87,7 +87,10 @@ export async function POST(req: NextRequest) {
             console.error("Veo video generation error:", err);
             await supabase
               .from("video_orders")
-              .update({ status: "failed" })
+              .update({
+                status: "failed",
+                error_message: err instanceof Error ? err.message : String(err),
+              })
               .eq("id", order.id);
           }
         }
