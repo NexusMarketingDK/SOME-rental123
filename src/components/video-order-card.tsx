@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Loader2, Clock, XCircle, Trash2, ArrowRight, Download, Share2, RefreshCw, AlertTriangle } from "lucide-react";
 import { deleteVideoOrder } from "@/services/video-orders";
+import { VideoPlayer } from "@/components/video-player";
 
 const MAX_PROCESSING_SEC = 60 * 60; // 60 minutes before showing timeout warning
 
@@ -199,7 +200,9 @@ export function VideoOrderCard({ order }: { order: Order }) {
 
       {order.status === "ready" && order.video_url && (
         <div className="mt-4">
-          <video src={order.video_url} controls className="w-full max-w-sm rounded-lg border border-slate-100" />
+          <div className="w-full max-w-sm overflow-hidden rounded-lg border border-slate-100">
+            <VideoPlayer url={order.video_url} poster={order.image_urls?.[0] ?? undefined} />
+          </div>
           <div className="mt-3 flex gap-3">
             <a
               href={order.video_url}
