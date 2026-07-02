@@ -58,7 +58,7 @@ const BENEFITS = [
   "AI-genereret tekst tilpasset platformen",
   "Henter billeder direkte fra annoncen",
   "Henter titel, pris, størrelse og beliggenhed",
-  "1. opslag er altid gratis",
+  "De første 5 opslag er gratis",
 ];
 
 type Account = Awaited<ReturnType<typeof getSocialAccounts>>[number];
@@ -141,14 +141,8 @@ export default function GeneratePostPage() {
     const json = await res.json() as { text?: string; error?: string; wasFree?: boolean };
 
     setGenerating(false);
-    if (json.error === "no_credits") {
-      setNoCredits(true);
-      return;
-    }
-    if (json.error || !json.text) {
-      setGenerateError(json.error ?? "Generering fejlede.");
-      return;
-    }
+    if (json.error === "no_credits") { setNoCredits(true); return; }
+    if (json.error || !json.text) { setGenerateError(json.error ?? "Generering fejlede."); return; }
     setGeneratedText(json.text);
     setWasFree(json.wasFree ?? false);
   }
@@ -161,9 +155,7 @@ export default function GeneratePostPage() {
     formData.append("content", generatedText);
     for (const id of selectedAccounts) formData.append("account_ids[]", id);
     if (scheduledAt) formData.append("scheduled_at", scheduledAt);
-    if (selectedImage) {
-      formData.append("image_url", selectedImage);
-    }
+    if (selectedImage) formData.append("image_url", selectedImage);
     await createPostAction(formData);
   }
 
@@ -186,7 +178,6 @@ export default function GeneratePostPage() {
 
             {/* ── Left sidebar ── */}
             <div className="col-span-2 flex flex-col gap-4">
-              {/* Marketing card */}
               <div
                 className="relative overflow-hidden rounded-2xl p-6 text-white"
                 style={{ background: "linear-gradient(160deg,#1B3F7A 0%,#14306b 100%)" }}
@@ -216,7 +207,6 @@ export default function GeneratePostPage() {
                 </ul>
               </div>
 
-              {/* Pricing card */}
               <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Priser</p>
                 <div className="space-y-2">
@@ -240,7 +230,6 @@ export default function GeneratePostPage() {
                 </Link>
               </div>
 
-              {/* Clock card */}
               <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50">
                   <Clock size={17} className="text-blue-600" />
@@ -255,13 +244,12 @@ export default function GeneratePostPage() {
             {/* ── Right form area ── */}
             <div className="col-span-3 flex flex-col gap-4">
 
-              {/* URL import */}
+              {/* 1. URL import */}
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h3 className="mb-1 text-base font-bold text-slate-900">Indsæt link til annonce</h3>
+                <h3 className="mb-1 text-base font-bold text-slate-900">1. Indsæt link til annonce</h3>
                 <p className="mb-4 text-sm text-slate-500">
                   Fx Airbnb, Booking.com, Novasol eller din egen hjemmeside.
                 </p>
-
                 <div className="flex gap-2">
                   <div className="relative flex-1">
                     <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -284,13 +272,11 @@ export default function GeneratePostPage() {
                     {scraping ? "Henter…" : "Hent"}
                   </button>
                 </div>
-
                 {scrapeError && (
                   <p className="mt-3 flex items-start gap-2 text-sm text-red-600">
                     <AlertCircle size={14} className="mt-0.5 shrink-0" /> {scrapeError}
                   </p>
                 )}
-
                 {scraped && (
                   <div className="mt-4 flex flex-wrap gap-2">
                     {scraped.location && (
@@ -315,7 +301,6 @@ export default function GeneratePostPage() {
                     )}
                   </div>
                 )}
-
                 {scraped && (
                   <div className="mt-3">
                     <label className="mb-1 block text-xs font-medium text-slate-600">Link i opslaget (kan ændres)</label>
@@ -329,40 +314,21 @@ export default function GeneratePostPage() {
                 )}
               </div>
 
-              {/* Platform picker + generate text */}
+              {/* 2. Generate text */}
               {scraped && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                  <h3 className="mb-1 text-base font-bold text-slate-900">Vælg platform</h3>
-                  <p className="mb-4 text-sm text-slate-500">AI tilpasser tone, emojis og længde til platformen.</p>
-
-                  <div className="mb-5 grid grid-cols-3 gap-3">
-                    {PLATFORMS.map((p) => (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => setPlatform(p.id)}
-                        className={`flex flex-col items-center gap-2 rounded-xl border-2 px-3 py-4 text-center transition ${
-                          platform === p.id ? "border-current shadow-sm" : "border-slate-200 hover:border-slate-300"
-                        }`}
-                        style={platform === p.id ? { borderColor: p.color, background: `${p.color}0d` } : {}}
-                      >
-                        {p.icon}
-                        <span className="text-xs font-semibold text-slate-800">{p.label}</span>
-                        <span className="text-[10px] text-slate-400 leading-tight">{p.desc}</span>
-                      </button>
-                    ))}
-                  </div>
+                  <h3 className="mb-1 text-base font-bold text-slate-900">2. Generer opslag</h3>
+                  <p className="mb-4 text-sm text-slate-500">AI genererer en sælgende tekst baseret på annoncen.</p>
 
                   {noCredits && (
                     <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
                       <p className="text-sm font-semibold text-amber-800">Ingen credits tilbage</p>
-                      <p className="mt-0.5 text-xs text-amber-700">Køb credits for at generere flere opslag. 10 opslag koster 50 kr.</p>
+                      <p className="mt-0.5 text-xs text-amber-700">Køb credits for at generere flere opslag.</p>
                       <Link href="/billing" className="mt-3 inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50">
                         <ShoppingCart size={12} /> Køb credits
                       </Link>
                     </div>
                   )}
-
                   {generateError && (
                     <p className="mb-3 flex items-start gap-2 text-sm text-red-600">
                       <AlertCircle size={14} className="mt-0.5 shrink-0" /> {generateError}
@@ -382,47 +348,12 @@ export default function GeneratePostPage() {
                 </div>
               )}
 
-              {/* Listing images */}
-              {scraped && images.length > 0 && (
-                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                  <h3 className="mb-1 text-base font-bold text-slate-900">Vælg opslagsbillede</h3>
-                  <p className="mb-4 text-sm text-slate-500">
-                    Billeder hentet fra annoncen. Klik for at vælge ét som medfølger opslaget.
-                  </p>
-                  <div className="grid grid-cols-5 gap-2">
-                    {images.map((src, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setSelectedImage(selectedImage === src ? null : src)}
-                        className={`group relative aspect-square overflow-hidden rounded-xl border-2 transition ${
-                          selectedImage === src
-                            ? "border-blue-500 shadow-md"
-                            : "border-transparent hover:border-slate-300"
-                        }`}
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={src} alt={`Billede ${i + 1}`} className="h-full w-full object-cover" />
-                        {selectedImage === src && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-blue-600/20">
-                            <CheckCircle2 size={20} className="text-white drop-shadow" />
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                  <p className="mt-3 text-xs text-slate-400">
-                    {selectedImage ? "✓ Billede valgt — følger med i opslaget" : "Klik et billede for at vælge det (valgfrit)"}
-                  </p>
-                </div>
-              )}
-
-              {/* Edit + publish */}
+              {/* 3. Generated text */}
               {generatedText && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                   <div className="mb-4 flex items-center justify-between">
                     <div>
-                      <h3 className="text-base font-bold text-slate-900">Rediger og udgiv</h3>
+                      <h3 className="text-base font-bold text-slate-900">3. Rediger tekst</h3>
                       {wasFree && (
                         <span className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-emerald-700">
                           <CheckCircle2 size={11} /> Dette opslag var gratis
@@ -436,19 +367,74 @@ export default function GeneratePostPage() {
                       className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
                     >
                       {generating ? <Loader2 size={11} className="animate-spin" /> : <RefreshCw size={11} />}
-                      Regenerer (1 credit)
+                      Regenerer
                     </button>
                   </div>
+                  <textarea
+                    value={generatedText}
+                    onChange={(e) => setGeneratedText(e.target.value)}
+                    rows={10}
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  />
+                  <p className="mt-1 text-right text-xs text-slate-400">{generatedText.length} tegn</p>
+                </div>
+              )}
 
-                  <div className="mb-4">
-                    <label className="mb-1.5 block text-xs font-medium text-slate-600">Opslag tekst</label>
-                    <textarea
-                      value={generatedText}
-                      onChange={(e) => setGeneratedText(e.target.value)}
-                      rows={10}
-                      className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                    />
-                    <p className="mt-1 text-right text-xs text-slate-400">{generatedText.length} tegn</p>
+              {/* 4. Image selection */}
+              {scraped && images.length > 0 && (
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <h3 className="mb-1 text-base font-bold text-slate-900">4. Vælg opslagsbillede</h3>
+                  <p className="mb-4 text-sm text-slate-500">
+                    Billeder hentet fra annoncen. Klik for at vælge ét (valgfrit).
+                  </p>
+                  <div className="grid grid-cols-5 gap-2">
+                    {images.map((src, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setSelectedImage(selectedImage === src ? null : src)}
+                        className={`group relative aspect-square overflow-hidden rounded-xl border-2 transition ${
+                          selectedImage === src ? "border-blue-500 shadow-md" : "border-transparent hover:border-slate-300"
+                        }`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={src} alt={`Billede ${i + 1}`} className="h-full w-full object-cover" />
+                        {selectedImage === src && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-blue-600/20">
+                            <CheckCircle2 size={20} className="text-white drop-shadow" />
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-xs text-slate-400">
+                    {selectedImage ? "✓ Billede valgt — følger med i opslaget" : "Klik et billede for at vælge det"}
+                  </p>
+                </div>
+              )}
+
+              {/* 5. Platform + publish */}
+              {generatedText && (
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <h3 className="mb-1 text-base font-bold text-slate-900">5. Vælg platform og udgiv</h3>
+                  <p className="mb-4 text-sm text-slate-500">Vælg platform for at tilpasse tonen — eller gem som kladde.</p>
+
+                  <div className="mb-5 grid grid-cols-3 gap-3">
+                    {PLATFORMS.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setPlatform(p.id)}
+                        className={`flex flex-col items-center gap-2 rounded-xl border-2 px-3 py-4 text-center transition ${
+                          platform === p.id ? "border-current shadow-sm" : "border-slate-200 hover:border-slate-300"
+                        }`}
+                        style={platform === p.id ? { borderColor: p.color, background: `${p.color}0d` } : {}}
+                      >
+                        {p.icon}
+                        <span className="text-xs font-semibold text-slate-800">{p.label}</span>
+                        <span className="text-[10px] text-slate-400 leading-tight">{p.desc}</span>
+                      </button>
+                    ))}
                   </div>
 
                   {/* Selected image preview */}
@@ -460,13 +446,7 @@ export default function GeneratePostPage() {
                         <p className="text-xs font-semibold text-blue-800">Opslagsbillede valgt</p>
                         <p className="text-xs text-blue-600">Følger med opslaget ved deling</p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedImage(null)}
-                        className="rounded-lg p-1.5 text-blue-400 hover:bg-blue-100"
-                      >
-                        ✕
-                      </button>
+                      <button type="button" onClick={() => setSelectedImage(null)} className="rounded-lg p-1.5 text-blue-400 hover:bg-blue-100">✕</button>
                     </div>
                   )}
 
@@ -517,10 +497,7 @@ export default function GeneratePostPage() {
                   </div>
 
                   <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
-                    <Link
-                      href="/posts"
-                      className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                    >
+                    <Link href="/posts" className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
                       Annuller
                     </Link>
                     <button
