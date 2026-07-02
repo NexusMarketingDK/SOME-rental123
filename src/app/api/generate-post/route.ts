@@ -26,19 +26,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "ANTHROPIC_API_KEY er ikke konfigureret på serveren." }, { status: 500 });
   }
 
-  // Check free post / credits
-  const { data: credits } = await supabase
-    .from("ai_credits")
-    .select("balance, free_post_used")
-    .eq("user_id", user.id)
-    .single();
-
-  const freePostUsed = credits?.free_post_used ?? false;
-
-  if (freePostUsed && (!credits || credits.balance < 1)) {
-    return NextResponse.json({ error: "no_credits" }, { status: 402 });
-  }
-
   const body = await req.json() as {
     platform: string;
     title?: string;
@@ -83,19 +70,7 @@ Returner KUN den færdige tekst — ingen forklaringer, ingen overskrifter, inge
     if (content.type !== "text") throw new Error("Unexpected response type");
     const text = content.text.trim();
 
-    if (freePostUsed) {
-      await supabase
-        .from("ai_credits")
-        .update({ balance: credits!.balance - 1 })
-        .eq("user_id", user.id);
-    } else {
-      await supabase
-        .from("ai_credits")
-        .upsert({ user_id: user.id, balance: credits?.balance ?? 0, free_post_used: true })
-        .eq("user_id", user.id);
-    }
-
-    return NextResponse.json({ text, wasFree: !freePostUsed });
+    return NextResponse.json({ text, wasFree: true });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
