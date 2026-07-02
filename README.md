@@ -54,19 +54,6 @@ Del indholdet direkte til dine tilsluttede kanaler — med det samme eller planl
 
 ---
 
-## Priser
-
-| Produkt | Pris |
-|---|---|
-| Første AI-opslag | **Gratis** |
-| Ekstra AI-opslag (tekst) | 5 kr. pr. stk. |
-| AI-opslagsbillede | 5 kr. pr. stk. |
-| AI-præsentationsvideo | Afhænger af pakke |
-
-Ingen binding. Betal kun for det du bruger.
-
----
-
 ## Hvad siger brugerne?
 
 > *"Jeg brugte tidligere 2-3 timer om ugen på at lave opslag til Facebook. Nu tager det mig 5 minutter."*
