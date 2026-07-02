@@ -135,8 +135,6 @@ const PLATFORMS = [
   },
 ];
 
-const OAUTH_PLATFORMS = new Set(["facebook", "instagram"]);
-
 export default function ConnectAccountPage() {
   const [step, setStep] = useState<"pick" | "details">("pick");
   const [selected, setSelected] = useState<typeof PLATFORMS[0] | null>(null);
@@ -152,11 +150,6 @@ export default function ConnectAccountPage() {
   }
 
   function handlePickPlatform(p: typeof PLATFORMS[0]) {
-    if (OAUTH_PLATFORMS.has(p.value)) {
-      // Redirect to real OAuth — Facebook handles both FB + Instagram pages
-      window.location.href = "/api/facebook/auth";
-      return;
-    }
     setSelected(p);
     setStep("details");
   }
@@ -197,10 +190,7 @@ export default function ConnectAccountPage() {
                     </div>
                     <div>
                       <span className="text-sm font-semibold text-slate-800 group-hover:text-slate-900">{p.label}</span>
-                      {OAUTH_PLATFORMS.has(p.value) && (
-                        <p className="text-[10px] text-emerald-600 font-medium">OAuth tilslutning</p>
-                      )}
-                    </div>
+                      </div>
                   </button>
                 ))}
               </div>
