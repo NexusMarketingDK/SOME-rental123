@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? "");
+import Anthropic from "@anthropic-ai/sdk";
 
 const PLATFORM_INSTRUCTIONS: Record<string, string> = {
   facebook: `
@@ -24,6 +22,10 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json({ error: "ANTHROPIC_API_KEY er ikke konfigureret på serveren." }, { status: 500 });
+  }
+
   // Check free post / credits
   const { data: credits } = await supabase
     .from("ai_credits")
@@ -33,11 +35,8 @@ export async function POST(req: NextRequest) {
 
   const freePostUsed = credits?.free_post_used ?? false;
 
-  if (freePostUsed) {
-    // Paid path — check balance
-    if (!credits || credits.balance < 1) {
-      return NextResponse.json({ error: "no_credits" }, { status: 402 });
-    }
+  if (freePostUsed && (!credits || credits.balance < 1)) {
+    return NextResponse.json({ error: "no_credits" }, { status: 402 });
   }
 
   const body = await req.json() as {
@@ -62,8 +61,7 @@ export async function POST(req: NextRequest) {
     listingUrl ? `Link til annonce: ${listingUrl}` : null,
   ].filter(Boolean).join("\n");
 
-  const prompt = `
-Du er en ekspert i ejendomsmarkedsføring og sociale medier. Skriv et sælgende opslag til en ferielejlighed/bolig.
+  const prompt = `Du er en ekspert i ejendomsmarkedsføring og sociale medier. Skriv et sælgende opslag til en ferielejlighed/bolig.
 
 Ejendomsoplysninger:
 ${propertyInfo || "Ingen yderligere oplysninger tilgængelige."}
@@ -71,26 +69,26 @@ ${propertyInfo || "Ingen yderligere oplysninger tilgængelige."}
 Platform-specifikke instruktioner:
 ${platformInstructions}
 
-Returner KUN den færdige tekst — ingen forklaringer, ingen overskrifter, ingen citationstegn omkring teksten.
-`;
-
-  if (!process.env.GEMINI_API_KEY) {
-    return NextResponse.json({ error: "GEMINI_API_KEY er ikke konfigureret på serveren." }, { status: 500 });
-  }
+Returner KUN den færdige tekst — ingen forklaringer, ingen overskrifter, ingen citationstegn omkring teksten.`;
 
   try {
-    const model = new GoogleGenerativeAI(process.env.GEMINI_API_KEY).getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().trim();
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const message = await anthropic.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 1024,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    const content = message.content[0];
+    if (content.type !== "text") throw new Error("Unexpected response type");
+    const text = content.text.trim();
 
     if (freePostUsed) {
-      // Deduct 1 credit
       await supabase
         .from("ai_credits")
         .update({ balance: credits!.balance - 1 })
         .eq("user_id", user.id);
     } else {
-      // Mark free post as used (upsert in case row doesn't exist yet)
       await supabase
         .from("ai_credits")
         .upsert({ user_id: user.id, balance: credits?.balance ?? 0, free_post_used: true })
