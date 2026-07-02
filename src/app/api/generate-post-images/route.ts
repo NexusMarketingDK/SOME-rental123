@@ -35,6 +35,10 @@ export async function POST(req: NextRequest) {
     description ? description.slice(0, 300) : null,
   ].filter(Boolean).join(". ");
 
+  if (!process.env.GEMINI_API_KEY) {
+    return NextResponse.json({ error: "GEMINI_API_KEY er ikke konfigureret på serveren." }, { status: 500 });
+  }
+
   // Generate 5 images with different styles in parallel
   const imagePromises = STYLES.map(async (style, i) => {
     const prompt = `Professional real estate listing photo for a Scandinavian holiday property or rental home. ${propertyDesc}. Style: ${style}. Photo ${i + 1} of 5. High resolution, photorealistic, suitable for social media marketing. No text or watermarks.`;
