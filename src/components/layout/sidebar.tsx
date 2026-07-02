@@ -224,13 +224,13 @@ function SidebarContent({ accounts, userEmail, locale = "da", onNav }: SidebarPr
         ))}
       </div>
 
-      {/* Channel progress bar */}
-      {connectedCount > 0 && (
-        <div className="mx-3 mt-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2.5">
+      {/* Channel progress + credits */}
+      <div className="mx-3 mt-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 space-y-2.5">
+        {/* Connected SOME channels */}
+        <div>
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[11px] font-medium text-slate-300">
-              {connectedCount}/{maxChannels} kanaler tilkoblet
-            </span>
+            <span className="text-[11px] font-medium text-slate-300">Tilkoblet SOME kanaler</span>
+            <span className="text-[11px] text-slate-400">{connectedCount}/{maxChannels}</span>
           </div>
           <div className="flex gap-1">
             {Array.from({ length: maxChannels }).map((_, i) => (
@@ -242,7 +242,24 @@ function SidebarContent({ accounts, userEmail, locale = "da", onNav }: SidebarPr
             ))}
           </div>
         </div>
-      )}
+        {/* Credits */}
+        <div className="border-t border-white/10 pt-2.5">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[11px] font-medium text-slate-300">Credits</span>
+            <span className="text-[11px] font-bold text-orange-400">0 / 10</span>
+          </div>
+          <div className="flex gap-1">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-1.5 flex-1 rounded-full"
+                style={{ backgroundColor: "rgba(255,255,255,0.1)" }}
+              />
+            ))}
+          </div>
+          <p className="mt-1.5 text-[10px] text-slate-500">1 credit = 1 opslag eller video</p>
+        </div>
+      </div>
 
       <div className="mt-auto">
         <div className="mx-3 mb-2 h-px bg-white/10" />
