@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getVideoJobsStatus } from "@/lib/higgsfield";
+import { getVideoJobsStatus } from "@/lib/google-video";
 
 export async function deleteVideoOrder(orderId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
@@ -51,7 +51,7 @@ export async function pollVideoOrder(orderId: string): Promise<{
 
   if (!jobIds.length) return { status: order.status };
 
-  const result = await getVideoJobsStatus(jobIds);
+  const result = await getVideoJobsStatus(jobIds, orderId);
 
   if (result.status === "completed" && result.videoUrls?.length) {
     await supabase.from("video_orders").update({

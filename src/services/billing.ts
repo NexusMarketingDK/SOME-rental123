@@ -116,10 +116,10 @@ export async function createVideoOrderCheckout(formData: FormData): Promise<void
     status: "processing",
   }).select("id").single();
 
-  // Start one Higgsfield job per image with cinematic per-room prompt
+  // Start one Google Veo 2 job per image with cinematic per-room prompt
   if (imageUrls.length >= 1 && order?.id) {
     try {
-      const { startVideoGeneration } = await import("@/lib/higgsfield");
+      const { startVideoGeneration } = await import("@/lib/google-video");
       const jobIds = await startVideoGeneration(imageUrls, title, roomLabels.length ? roomLabels : undefined);
       await supabase.from("video_orders").update({
         higgsfield_job_id: jobIds[0] ?? null,

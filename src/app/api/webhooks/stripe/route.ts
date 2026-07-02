@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
-import { startVideoGeneration } from "@/lib/higgsfield";
+import { startVideoGeneration } from "@/lib/google-video";
 import { createClient } from "@/lib/supabase/server";
 import type Stripe from "stripe";
 
@@ -74,17 +74,17 @@ export async function POST(req: NextRequest) {
           .select()
           .single();
 
-        // Trigger Higgsfield video generation
+        // Trigger Google Veo 2 video generation
         if (order && imageUrls.length > 0) {
           try {
-            const jobSetId = await startVideoGeneration(imageUrls, title);
+            const jobIds = await startVideoGeneration(imageUrls, title);
 
             await supabase
               .from("video_orders")
-              .update({ higgsfield_job_id: jobSetId })
+              .update({ higgsfield_job_id: jobIds[0] ?? null, higgsfield_job_ids: jobIds })
               .eq("id", order.id);
           } catch (err) {
-            console.error("Higgsfield error:", err);
+            console.error("Video generation error:", err);
             await supabase
               .from("video_orders")
               .update({ status: "failed" })

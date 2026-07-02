@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getVideoJobsStatus } from "@/lib/higgsfield";
+import { getVideoJobsStatus } from "@/lib/google-video";
 
 const MAX_PROCESSING_MS = 6 * 60 * 60 * 1000; // auto-fail after 6 hours
 
@@ -40,7 +40,7 @@ export async function POST() {
       }
 
       try {
-        const result = await getVideoJobsStatus(jobIds);
+        const result = await getVideoJobsStatus(jobIds, order.id);
         if (result.status === "completed") {
           await supabase.from("video_orders").update({
             status: "ready",
