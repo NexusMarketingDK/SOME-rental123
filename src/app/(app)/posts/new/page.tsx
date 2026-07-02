@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Link as LinkIcon, Loader2, Sparkles, CheckCircle2, Clock, Star,
-  RefreshCw, AlertCircle, MapPin, Tag, Maximize2, Search,
+  RefreshCw, AlertCircle, MapPin, Tag, Maximize2, Search, Image as ImageIcon, ShoppingCart,
 } from "lucide-react";
 import { Topbar } from "@/components/layout/topbar";
 import { scrapePropertyUrl, type ScrapedProperty } from "@/services/scrape-property";
@@ -25,7 +25,7 @@ function IconInstagram() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+        <linearGradient id="ig-grad2" x1="0%" y1="100%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="#f09433"/>
           <stop offset="25%" stopColor="#e6683c"/>
           <stop offset="50%" stopColor="#dc2743"/>
@@ -33,7 +33,7 @@ function IconInstagram() {
           <stop offset="100%" stopColor="#bc1888"/>
         </linearGradient>
       </defs>
-      <path fill="url(#ig-grad)" d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.974.975 1.246 2.242 1.308 3.608.058 1.265.07 1.645.07 4.849s-.012 3.584-.07 4.849c-.062 1.366-.334 2.633-1.308 3.608-.975.974-2.242 1.246-3.608 1.308-1.265.058-1.645.07-4.849.07s-3.584-.012-4.849-.07c-1.366-.062-2.633-.334-3.608-1.308-.974-.975-1.246-2.242-1.308-3.608C2.175 15.584 2.163 15.204 2.163 12s.012-3.584.07-4.849c.062-1.366.334-2.633 1.308-3.608C4.516 2.497 5.783 2.225 7.149 2.163 8.414 2.105 8.796 2.163 12 2.163zm0-2.163C8.741 0 8.332.013 7.052.072 5.197.157 3.355.673 1.955 2.073.555 3.473.039 5.315-.045 7.17-.104 8.45-.117 8.858-.117 12c0 3.141.013 3.55.072 4.83.085 1.854.6 3.697 2 5.097 1.4 1.4 3.242 1.916 5.097 2 1.28.06 1.689.073 4.83.073s3.55-.013 4.83-.072c1.854-.085 3.697-.6 5.097-2 1.4-1.4 1.916-3.243 2-5.097.06-1.28.073-1.689.073-4.83s-.013-3.55-.072-4.83c-.085-1.854-.6-3.697-2-5.097C20.43.555 18.587.039 16.733-.045 15.452-.104 15.044-.117 12-.117zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
+      <path fill="url(#ig-grad2)" d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.974.975 1.246 2.242 1.308 3.608.058 1.265.07 1.645.07 4.849s-.012 3.584-.07 4.849c-.062 1.366-.334 2.633-1.308 3.608-.975.974-2.242 1.246-3.608 1.308-1.265.058-1.645.07-4.849.07s-3.584-.012-4.849-.07c-1.366-.062-2.633-.334-3.608-1.308-.974-.975-1.246-2.242-1.308-3.608C2.175 15.584 2.163 15.204 2.163 12s.012-3.584.07-4.849c.062-1.366.334-2.633 1.308-3.608C4.516 2.497 5.783 2.225 7.149 2.163 8.414 2.105 8.796 2.163 12 2.163zm0-2.163C8.741 0 8.332.013 7.052.072 5.197.157 3.355.673 1.955 2.073.555 3.473.039 5.315-.045 7.17-.104 8.45-.117 8.858-.117 12c0 3.141.013 3.55.072 4.83.085 1.854.6 3.697 2 5.097 1.4 1.4 3.242 1.916 5.097 2 1.28.06 1.689.073 4.83.073s3.55-.013 4.83-.072c1.854-.085 3.697-.6 5.097-2 1.4-1.4 1.916-3.243 2-5.097.06-1.28.073-1.689.073-4.83s-.013-3.55-.072-4.83c-.085-1.854-.6-3.697-2-5.097C20.43.555 18.587.039 16.733-.045 15.452-.104 15.044-.117 12-.117zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
     </svg>
   );
 }
@@ -49,34 +49,16 @@ function IconLinkedin() {
 // ── Data ──────────────────────────────────────────────────────────────────────
 
 const PLATFORMS = [
-  {
-    id: "facebook" as const,
-    label: "Facebook",
-    desc: "Varm tone, emojis, 1500 tegn",
-    color: "#1877F2",
-    icon: <IconFacebook />,
-  },
-  {
-    id: "instagram" as const,
-    label: "Instagram",
-    desc: "Kort, visuelt, 15-20 hashtags",
-    color: "#E1306C",
-    icon: <IconInstagram />,
-  },
-  {
-    id: "linkedin" as const,
-    label: "LinkedIn",
-    desc: "Professionel, investorfokus",
-    color: "#0A66C2",
-    icon: <IconLinkedin />,
-  },
+  { id: "facebook" as const, label: "Facebook", desc: "Varm tone, emojis, 1500 tegn", color: "#1877F2", icon: <IconFacebook /> },
+  { id: "instagram" as const, label: "Instagram", desc: "Kort, visuelt, 15-20 hashtags", color: "#E1306C", icon: <IconInstagram /> },
+  { id: "linkedin" as const, label: "LinkedIn", desc: "Professionel, investorfokus", color: "#0A66C2", icon: <IconLinkedin /> },
 ];
 
 const BENEFITS = [
   "AI-genereret tekst tilpasset platformen",
+  "5 AI-genererede opslagsbilleder at vælge imellem",
   "Henter titel, pris, størrelse og beliggenhed",
-  "Rediger teksten før du udgiver",
-  "Del direkte til dine tilsluttede konti",
+  "1. opslag er altid gratis",
 ];
 
 type Account = Awaited<ReturnType<typeof getSocialAccounts>>[number];
@@ -84,17 +66,28 @@ type Account = Awaited<ReturnType<typeof getSocialAccounts>>[number];
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function GeneratePostPage() {
+  // URL + scrape
   const [url, setUrl] = useState("");
   const [scraping, setScraping] = useState(false);
   const [scrapeError, setScrapeError] = useState("");
   const [scraped, setScraped] = useState<ScrapedProperty | null>(null);
   const [listingUrl, setListingUrl] = useState("");
 
+  // Text generation
   const [platform, setPlatform] = useState<"facebook" | "instagram" | "linkedin">("facebook");
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState("");
   const [generatedText, setGeneratedText] = useState("");
+  const [noCredits, setNoCredits] = useState(false);
+  const [wasFree, setWasFree] = useState(false);
 
+  // Image generation
+  const [generatingImages, setGeneratingImages] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [imageError, setImageError] = useState("");
+
+  // Publish
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
   const [scheduledAt, setScheduledAt] = useState("");
@@ -108,6 +101,8 @@ export default function GeneratePostPage() {
     setScrapeError("");
     setScraped(null);
     setGeneratedText("");
+    setImages([]);
+    setSelectedImage(null);
 
     const result = await scrapePropertyUrl(url.trim());
     setScraping(false);
@@ -123,11 +118,12 @@ export default function GeneratePostPage() {
     setAccounts(accs);
   }
 
-  // ── Generate ───────────────────────────────────────────────────────────────
+  // ── Generate text ──────────────────────────────────────────────────────────
 
   async function handleGenerate() {
     setGenerating(true);
     setGenerateError("");
+    setNoCredits(false);
 
     const res = await fetch("/api/generate-post", {
       method: "POST",
@@ -142,14 +138,48 @@ export default function GeneratePostPage() {
         listingUrl,
       }),
     });
-    const json = await res.json() as { text?: string; error?: string };
+    const json = await res.json() as { text?: string; error?: string; wasFree?: boolean };
 
     setGenerating(false);
+    if (json.error === "no_credits") {
+      setNoCredits(true);
+      return;
+    }
     if (json.error || !json.text) {
       setGenerateError(json.error ?? "Generering fejlede.");
       return;
     }
     setGeneratedText(json.text);
+    setWasFree(json.wasFree ?? false);
+  }
+
+  // ── Generate images ────────────────────────────────────────────────────────
+
+  async function handleGenerateImages() {
+    setGeneratingImages(true);
+    setImageError("");
+    setImages([]);
+    setSelectedImage(null);
+
+    const res = await fetch("/api/generate-post-images", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: scraped?.title,
+        location: scraped?.location,
+        price: scraped?.price,
+        size: scraped?.size,
+        description: scraped?.description,
+      }),
+    });
+    const json = await res.json() as { images?: string[]; error?: string };
+
+    setGeneratingImages(false);
+    if (json.error || !json.images?.length) {
+      setImageError("Kunne ikke generere billeder. Prøv igen.");
+      return;
+    }
+    setImages(json.images);
   }
 
   // ── Save ───────────────────────────────────────────────────────────────────
@@ -160,6 +190,12 @@ export default function GeneratePostPage() {
     formData.append("content", generatedText);
     for (const id of selectedAccounts) formData.append("account_ids[]", id);
     if (scheduledAt) formData.append("scheduled_at", scheduledAt);
+    if (selectedImage) {
+      // Strip data URL prefix to get base64 only
+      const mimeMatch = selectedImage.match(/^data:([^;]+);base64,/);
+      formData.append("image_data", selectedImage);
+      formData.append("image_mime", mimeMatch?.[1] ?? "image/png");
+    }
     await createPostAction(formData);
   }
 
@@ -172,7 +208,7 @@ export default function GeneratePostPage() {
       {/* Info banner */}
       <div className="border-b border-orange-100 bg-orange-50 px-8 py-3">
         <p className="text-sm text-orange-800">
-          <span className="font-semibold">Beta:</span> Indsæt et link til din boligannonce og AI genererer et sælgende opslag tilpasset Facebook, Instagram eller LinkedIn.
+          <span className="font-semibold">Dit første opslag er gratis.</span> Derefter koster tekst 1 credit (5 kr.) og et AI-billede 1 credit (5 kr.).
         </p>
       </div>
 
@@ -182,33 +218,26 @@ export default function GeneratePostPage() {
 
             {/* ── Left sidebar ── */}
             <div className="col-span-2 flex flex-col gap-4">
-
               {/* Marketing card */}
               <div
                 className="relative overflow-hidden rounded-2xl p-6 text-white"
                 style={{ background: "linear-gradient(160deg,#1B3F7A 0%,#14306b 100%)" }}
               >
-                {/* AI badge */}
                 <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold">
                   <Sparkles size={11} /> AI-drevet
                 </div>
-
                 <h2 className="mb-1 text-xl font-bold leading-snug">
                   Generer SOME<br />opslag med AI
                 </h2>
                 <p className="mb-5 text-sm text-blue-200">
                   Fra boliglink til færdigt opslag på få sekunder
                 </p>
-
-                {/* Star rating */}
                 <div className="mb-5 flex items-center gap-1">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} size={13} className="fill-yellow-400 text-yellow-400" />
                   ))}
                   <span className="ml-2 text-xs text-blue-200">Brugt af mæglere</span>
                 </div>
-
-                {/* Benefits */}
                 <ul className="space-y-2.5">
                   {BENEFITS.map((b) => (
                     <li key={b} className="flex items-start gap-2 text-sm text-blue-100">
@@ -217,6 +246,29 @@ export default function GeneratePostPage() {
                     </li>
                   ))}
                 </ul>
+              </div>
+
+              {/* Pricing card */}
+              <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Priser</p>
+                <div className="space-y-2">
+                  {[
+                    { label: "1. opslag tekst", price: "Gratis" },
+                    { label: "Ekstra opslag tekst", price: "1 credit (5 kr.)" },
+                    { label: "AI-opslagsbillede", price: "1 credit (5 kr.)" },
+                  ].map((row) => (
+                    <div key={row.label} className="flex items-center justify-between text-sm">
+                      <span className="text-slate-600">{row.label}</span>
+                      <span className="font-semibold text-slate-900">{row.price}</span>
+                    </div>
+                  ))}
+                </div>
+                <Link
+                  href="/billing"
+                  className="mt-4 flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:underline"
+                >
+                  <ShoppingCart size={11} /> Køb credits
+                </Link>
               </div>
 
               {/* Clock card */}
@@ -229,7 +281,6 @@ export default function GeneratePostPage() {
                   <p className="text-xs text-slate-500">AI genererer og tilpasser teksten øjeblikkeligt</p>
                 </div>
               </div>
-
             </div>
 
             {/* ── Right form area ── */}
@@ -271,7 +322,6 @@ export default function GeneratePostPage() {
                   </p>
                 )}
 
-                {/* Property info chips */}
                 {scraped && (
                   <div className="mt-4 flex flex-wrap gap-2">
                     {scraped.location && (
@@ -297,7 +347,6 @@ export default function GeneratePostPage() {
                   </div>
                 )}
 
-                {/* Editable listing URL */}
                 {scraped && (
                   <div className="mt-3">
                     <label className="mb-1 block text-xs font-medium text-slate-600">Link i opslaget (kan ændres)</label>
@@ -311,7 +360,7 @@ export default function GeneratePostPage() {
                 )}
               </div>
 
-              {/* Platform picker + generate */}
+              {/* Platform picker + generate text */}
               {scraped && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                   <h3 className="mb-1 text-base font-bold text-slate-900">Vælg platform</h3>
@@ -324,9 +373,7 @@ export default function GeneratePostPage() {
                         type="button"
                         onClick={() => setPlatform(p.id)}
                         className={`flex flex-col items-center gap-2 rounded-xl border-2 px-3 py-4 text-center transition ${
-                          platform === p.id
-                            ? "border-current shadow-sm"
-                            : "border-slate-200 hover:border-slate-300"
+                          platform === p.id ? "border-current shadow-sm" : "border-slate-200 hover:border-slate-300"
                         }`}
                         style={platform === p.id ? { borderColor: p.color, background: `${p.color}0d` } : {}}
                       >
@@ -336,6 +383,16 @@ export default function GeneratePostPage() {
                       </button>
                     ))}
                   </div>
+
+                  {noCredits && (
+                    <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                      <p className="text-sm font-semibold text-amber-800">Ingen credits tilbage</p>
+                      <p className="mt-0.5 text-xs text-amber-700">Køb credits for at generere flere opslag. 10 opslag koster 50 kr.</p>
+                      <Link href="/billing" className="mt-3 inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50">
+                        <ShoppingCart size={12} /> Køb credits
+                      </Link>
+                    </div>
+                  )}
 
                   {generateError && (
                     <p className="mb-3 flex items-start gap-2 text-sm text-red-600">
@@ -356,11 +413,92 @@ export default function GeneratePostPage() {
                 </div>
               )}
 
+              {/* AI Image generation */}
+              {scraped && (
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="mb-1 flex items-center justify-between">
+                    <h3 className="text-base font-bold text-slate-900">AI-opslagsbillede</h3>
+                    <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">1 credit at vælge</span>
+                  </div>
+                  <p className="mb-4 text-sm text-slate-500">
+                    Generer 5 AI-billeder baseret på boligen. Vælg ét som opslagsbillede (koster 1 credit).
+                  </p>
+
+                  {!images.length && (
+                    <button
+                      type="button"
+                      onClick={handleGenerateImages}
+                      disabled={generatingImages}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 py-5 text-sm font-semibold text-slate-600 transition hover:border-blue-400 hover:text-blue-700 disabled:opacity-50"
+                    >
+                      {generatingImages
+                        ? <><Loader2 size={15} className="animate-spin" /> Genererer 5 billeder…</>
+                        : <><ImageIcon size={15} /> Generer 5 AI-billeder (gratis forhåndsvisning)</>
+                      }
+                    </button>
+                  )}
+
+                  {imageError && (
+                    <p className="mt-3 flex items-start gap-2 text-sm text-red-600">
+                      <AlertCircle size={14} className="mt-0.5 shrink-0" /> {imageError}
+                    </p>
+                  )}
+
+                  {images.length > 0 && (
+                    <>
+                      <div className="grid grid-cols-5 gap-2">
+                        {images.map((src, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => setSelectedImage(selectedImage === src ? null : src)}
+                            className={`group relative aspect-square overflow-hidden rounded-xl border-2 transition ${
+                              selectedImage === src
+                                ? "border-blue-500 shadow-md"
+                                : "border-transparent hover:border-slate-300"
+                            }`}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={src} alt={`AI billede ${i + 1}`} className="h-full w-full object-cover" />
+                            {selectedImage === src && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-blue-600/20">
+                                <CheckCircle2 size={20} className="text-white drop-shadow" />
+                              </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="mt-3 flex items-center justify-between">
+                        <p className="text-xs text-slate-500">
+                          {selectedImage ? "✓ 1 billede valgt — 1 credit trækkes ved gem" : "Klik et billede for at vælge det"}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={handleGenerateImages}
+                          disabled={generatingImages}
+                          className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                        >
+                          {generatingImages ? <Loader2 size={11} className="animate-spin" /> : <RefreshCw size={11} />}
+                          Nye billeder
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
               {/* Edit + publish */}
               {generatedText && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                   <div className="mb-4 flex items-center justify-between">
-                    <h3 className="text-base font-bold text-slate-900">Rediger og udgiv</h3>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900">Rediger og udgiv</h3>
+                      {wasFree && (
+                        <span className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-emerald-700">
+                          <CheckCircle2 size={11} /> Dette opslag var gratis
+                        </span>
+                      )}
+                    </div>
                     <button
                       type="button"
                       onClick={handleGenerate}
@@ -368,7 +506,7 @@ export default function GeneratePostPage() {
                       className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
                     >
                       {generating ? <Loader2 size={11} className="animate-spin" /> : <RefreshCw size={11} />}
-                      Regenerer
+                      Regenerer (1 credit)
                     </button>
                   </div>
 
@@ -382,6 +520,25 @@ export default function GeneratePostPage() {
                     />
                     <p className="mt-1 text-right text-xs text-slate-400">{generatedText.length} tegn</p>
                   </div>
+
+                  {/* Selected image preview */}
+                  {selectedImage && (
+                    <div className="mb-4 flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 p-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={selectedImage} alt="Valgt billede" className="h-16 w-16 rounded-lg object-cover" />
+                      <div className="flex-1">
+                        <p className="text-xs font-semibold text-blue-800">Opslagsbillede valgt</p>
+                        <p className="text-xs text-blue-600">1 credit trækkes ved gem</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedImage(null)}
+                        className="rounded-lg p-1.5 text-blue-400 hover:bg-blue-100"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
 
                   {/* Accounts */}
                   <div className="mb-4">
