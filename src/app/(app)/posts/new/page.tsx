@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Link as LinkIcon, Loader2, Sparkles, CheckCircle2, Clock, Star,
-  RefreshCw, AlertCircle, MapPin, Tag, Maximize2, Search, ShoppingCart, Pencil,
+  RefreshCw, AlertCircle, MapPin, Tag, Maximize2, Search, ShoppingCart,
+  Pencil, ChevronRight, ChevronLeft, Image as ImageIcon,
 } from "lucide-react";
 import { Topbar } from "@/components/layout/topbar";
 import { scrapePropertyUrl, type ScrapedProperty } from "@/services/scrape-property";
@@ -61,6 +62,14 @@ const BENEFITS = [
   "De første 5 opslag er gratis",
 ];
 
+const MOBILE_STEPS = [
+  { id: 1, label: "Link" },
+  { id: 2, label: "Generer" },
+  { id: 3, label: "Tekst" },
+  { id: 4, label: "Billede" },
+  { id: 5, label: "Udgiv" },
+];
+
 type Account = Awaited<ReturnType<typeof getSocialAccounts>>[number];
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -93,6 +102,9 @@ export default function GeneratePostPage() {
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
   const [scheduledAt, setScheduledAt] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Mobile wizard step (1-5)
+  const [mobileStep, setMobileStep] = useState(1);
 
   // ── Scrape ─────────────────────────────────────────────────────────────────
 
@@ -163,6 +175,329 @@ export default function GeneratePostPage() {
     await createPostAction(formData);
   }
 
+  // ── Shared section content ─────────────────────────────────────────────────
+
+  function SectionLink() {
+    return (
+      <div className="flex flex-col gap-4">
+        <div>
+          <h3 className="mb-1 text-base font-bold text-slate-900">Indsæt link til annonce</h3>
+          <p className="text-sm text-slate-500">Fx Airbnb, Booking.com, Novasol eller din egen hjemmeside.</p>
+        </div>
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleScrape()}
+              placeholder="https://www.airbnb.dk/rooms/…"
+              className="w-full rounded-xl border border-slate-200 py-3 pl-9 pr-3 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={handleScrape}
+            disabled={scraping || !url.trim()}
+            className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-50"
+          >
+            {scraping ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+            {scraping ? "Henter…" : "Hent"}
+          </button>
+        </div>
+        {scrapeError && (
+          <p className="flex items-start gap-2 text-sm text-red-600">
+            <AlertCircle size={14} className="mt-0.5 shrink-0" /> {scrapeError}
+          </p>
+        )}
+        {scraped && (
+          <div className="flex flex-wrap gap-2">
+            {scraped.location && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800">
+                <MapPin size={11} /> {scraped.location}
+              </span>
+            )}
+            {scraped.price && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800">
+                <Tag size={11} /> {scraped.price}
+              </span>
+            )}
+            {scraped.size && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800">
+                <Maximize2 size={11} /> {scraped.size}
+              </span>
+            )}
+            {scraped.title && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
+                <CheckCircle2 size={11} /> {scraped.title.slice(0, 40)}{scraped.title.length > 40 ? "…" : ""}
+              </span>
+            )}
+          </div>
+        )}
+        {scraped && (
+          <div>
+            <label className="mb-1 block text-xs font-medium text-slate-600">Link i opslaget (kan ændres)</label>
+            <input
+              type="url"
+              value={listingUrl}
+              onChange={(e) => setListingUrl(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  function SectionGenerate() {
+    return (
+      <div className="flex flex-col gap-4">
+        <div>
+          <h3 className="mb-1 text-base font-bold text-slate-900">Generer opslag</h3>
+          <p className="text-sm text-slate-500">AI genererer en sælgende tekst baseret på annoncen.</p>
+        </div>
+        {noCredits && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-sm font-semibold text-amber-800">Ingen credits tilbage</p>
+            <p className="mt-0.5 text-xs text-amber-700">Køb credits for at generere flere opslag.</p>
+            <Link href="/billing" className="mt-3 inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50">
+              <ShoppingCart size={12} /> Køb credits
+            </Link>
+          </div>
+        )}
+        {generateError && (
+          <p className="flex items-start gap-2 text-sm text-red-600">
+            <AlertCircle size={14} className="mt-0.5 shrink-0" /> {generateError}
+          </p>
+        )}
+        <button
+          type="button"
+          onClick={handleGenerate}
+          disabled={generating}
+          className="flex w-full items-center justify-center gap-2 rounded-xl py-4 text-base font-semibold text-white transition disabled:opacity-50"
+          style={{ background: "linear-gradient(135deg,#1B3F7A,#3B6DC9)" }}
+        >
+          {generating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+          {generating ? "Genererer opslag…" : "Generer opslag med AI"}
+        </button>
+        {generatedText && (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+            <p className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
+              <CheckCircle2 size={14} /> Opslag genereret!
+            </p>
+            <p className="mt-0.5 text-xs text-emerald-600">Gå til næste trin for at redigere teksten.</p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  function SectionText() {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="text-base font-bold text-slate-900">Rediger tekst</h3>
+            {wasFree && (
+              <span className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-emerald-700">
+                <CheckCircle2 size={11} /> Dette opslag var gratis
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setEditingText((v) => !v)}
+              className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${editingText ? "border-blue-400 bg-blue-50 text-blue-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+            >
+              <Pencil size={11} />
+              {editingText ? "Luk" : "Rediger"}
+            </button>
+            <button
+              type="button"
+              onClick={handleGenerate}
+              disabled={generating}
+              className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+            >
+              {generating ? <Loader2 size={11} className="animate-spin" /> : <RefreshCw size={11} />}
+              Ny
+            </button>
+          </div>
+        </div>
+        {editingText ? (
+          <>
+            <textarea
+              value={generatedText}
+              onChange={(e) => setGeneratedText(e.target.value)}
+              rows={12}
+              autoFocus
+              className="w-full rounded-xl border border-blue-300 px-3 py-3 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            />
+            <p className="text-right text-xs text-slate-400">{generatedText.length} tegn</p>
+          </>
+        ) : (
+          <div
+            className="group relative cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"
+            onClick={() => setEditingText(true)}
+          >
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-800">{generatedText}</p>
+            <div className="absolute right-3 top-3 rounded-lg border border-slate-200 bg-white p-1.5 opacity-0 shadow-sm transition group-hover:opacity-100">
+              <Pencil size={13} className="text-slate-500" />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  function SectionImages() {
+    return (
+      <div className="flex flex-col gap-4">
+        <div>
+          <h3 className="mb-1 text-base font-bold text-slate-900">Vælg opslagsbillede</h3>
+          <p className="text-sm text-slate-500">Billeder hentet fra annoncen. Tap for at vælge (valgfrit).</p>
+        </div>
+        {images.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-200 py-10 text-center">
+            <ImageIcon size={28} className="text-slate-300" />
+            <p className="text-sm text-slate-400">Ingen billeder fundet i annoncen</p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+              {images.map((src, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setSelectedImage(selectedImage === src ? null : src)}
+                  className={`group relative aspect-square overflow-hidden rounded-xl border-2 transition ${
+                    selectedImage === src ? "border-blue-500 shadow-md" : "border-transparent hover:border-slate-300"
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={src} alt={`Billede ${i + 1}`} className="h-full w-full object-cover" />
+                  {selectedImage === src && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-blue-600/20">
+                      <CheckCircle2 size={24} className="text-white drop-shadow" />
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-slate-400">
+              {selectedImage ? "✓ Billede valgt — følger med i opslaget" : "Tap et billede for at vælge det"}
+            </p>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  function SectionPublish() {
+    return (
+      <div className="flex flex-col gap-5">
+        <div>
+          <h3 className="mb-1 text-base font-bold text-slate-900">Vælg platform og udgiv</h3>
+          <p className="text-sm text-slate-500">Tilpas tone — eller gem som kladde.</p>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2">
+          {PLATFORMS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => setPlatform(p.id)}
+              className={`flex flex-col items-center gap-2 rounded-xl border-2 px-2 py-4 text-center transition ${
+                platform === p.id ? "border-current shadow-sm" : "border-slate-200 hover:border-slate-300"
+              }`}
+              style={platform === p.id ? { borderColor: p.color, background: `${p.color}0d` } : {}}
+            >
+              {p.icon}
+              <span className="text-xs font-semibold text-slate-800">{p.label}</span>
+              <span className="hidden text-[10px] text-slate-400 leading-tight sm:block">{p.desc}</span>
+            </button>
+          ))}
+        </div>
+
+        {selectedImage && (
+          <div className="flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 p-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={selectedImage} alt="Valgt billede" className="h-14 w-14 rounded-lg object-cover" />
+            <div className="flex-1">
+              <p className="text-xs font-semibold text-blue-800">Opslagsbillede valgt</p>
+              <p className="text-xs text-blue-600">Følger med opslaget ved deling</p>
+            </div>
+            <button type="button" onClick={() => setSelectedImage(null)} className="rounded-lg p-1.5 text-blue-400 hover:bg-blue-100">✕</button>
+          </div>
+        )}
+
+        <div>
+          <p className="mb-2 text-xs font-medium text-slate-600">Udgiv til konto</p>
+          {accounts.length === 0 ? (
+            <p className="text-sm text-slate-400">
+              Ingen konti tilsluttet.{" "}
+              <Link href="/accounts/connect" className="underline text-blue-600">Tilslut en konto.</Link>
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {accounts.map((a) => (
+                <label
+                  key={a.id}
+                  className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition ${
+                    selectedAccounts.includes(a.id) ? "border-blue-400 bg-blue-50" : "border-slate-200"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedAccounts.includes(a.id)}
+                    onChange={(e) =>
+                      setSelectedAccounts((prev) =>
+                        e.target.checked ? [...prev, a.id] : prev.filter((id) => id !== a.id)
+                      )
+                    }
+                    className="accent-blue-600"
+                  />
+                  <span className="text-sm text-slate-800">{a.account_name}</span>
+                  <span className="ml-auto text-xs capitalize text-slate-400">{a.platform}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-xs font-medium text-slate-600">Planlæg (valgfrit)</label>
+          <input
+            type="datetime-local"
+            value={scheduledAt}
+            onChange={(e) => setScheduledAt(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
+          />
+        </div>
+
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={saving || !generatedText}
+          className="flex w-full items-center justify-center gap-2 rounded-xl py-4 text-base font-semibold text-white transition disabled:opacity-50"
+          style={{ background: "linear-gradient(135deg,#1B3F7A,#3B6DC9)" }}
+        >
+          {saving ? <Loader2 size={16} className="animate-spin" /> : null}
+          {saving ? "Gemmer…" : "Gem og udgiv opslag"}
+        </button>
+      </div>
+    );
+  }
+
+  // ── Mobile step can proceed? ───────────────────────────────────────────────
+
+  function canProceed(step: number) {
+    if (step === 1) return !!scraped;
+    if (step === 2) return !!generatedText;
+    return true;
+  }
+
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
@@ -170,17 +505,97 @@ export default function GeneratePostPage() {
       <Topbar title="Generer SOME opslag" description="AI genererer et sælgende opslag tilpasset dine sociale medier" />
 
       {/* Info banner */}
-      <div className="border-b border-orange-100 bg-orange-50 px-8 py-3">
+      <div className="border-b border-orange-100 bg-orange-50 px-4 py-2.5 md:px-8 md:py-3">
         <p className="text-sm text-orange-800">
-          <span className="font-semibold">De første 5 opslag er gratis.</span> Derefter koster hvert opslag (tekst + billede) 0,5 credit. Credits købes for min. 100 kr.
+          <span className="font-semibold">De første 5 opslag er gratis.</span> Derefter 0,5 credit/opslag. Min. køb 100 kr.
         </p>
       </div>
 
-      <div className="flex-1 px-6 py-8">
-        <div className="mx-auto max-w-6xl">
+      {/* ── MOBILE WIZARD (hidden on md+) ── */}
+      <div className="flex flex-1 flex-col md:hidden">
+
+        {/* Step progress bar */}
+        <div className="sticky top-0 z-10 border-b border-slate-200 bg-white px-4 pt-4 pb-3 shadow-sm">
+          <div className="flex items-center justify-between">
+            {MOBILE_STEPS.map((s, i) => (
+              <div key={s.id} className="flex flex-1 flex-col items-center">
+                <div className="flex w-full items-center">
+                  {i > 0 && (
+                    <div className={`h-0.5 flex-1 transition-colors ${mobileStep > s.id - 1 ? "bg-blue-500" : "bg-slate-200"}`} />
+                  )}
+                  <div
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors ${
+                      mobileStep === s.id
+                        ? "bg-blue-600 text-white"
+                        : mobileStep > s.id
+                        ? "bg-emerald-500 text-white"
+                        : "bg-slate-200 text-slate-500"
+                    }`}
+                  >
+                    {mobileStep > s.id ? <CheckCircle2 size={14} /> : s.id}
+                  </div>
+                  {i < MOBILE_STEPS.length - 1 && (
+                    <div className={`h-0.5 flex-1 transition-colors ${mobileStep > s.id ? "bg-blue-500" : "bg-slate-200"}`} />
+                  )}
+                </div>
+                <span className={`mt-1 text-[10px] font-medium ${mobileStep === s.id ? "text-blue-600" : "text-slate-400"}`}>
+                  {s.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Step content */}
+        <div className="flex-1 px-4 py-6">
+          {mobileStep === 1 && <SectionLink />}
+          {mobileStep === 2 && <SectionGenerate />}
+          {mobileStep === 3 && (generatedText ? <SectionText /> : (
+            <div className="flex flex-col items-center gap-4 py-12 text-center">
+              <Sparkles size={32} className="text-slate-300" />
+              <p className="text-sm text-slate-400">Generer et opslag i trin 2 først.</p>
+              <button type="button" onClick={() => setMobileStep(2)} className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white">
+                Gå til trin 2
+              </button>
+            </div>
+          ))}
+          {mobileStep === 4 && <SectionImages />}
+          {mobileStep === 5 && <SectionPublish />}
+        </div>
+
+        {/* Bottom nav */}
+        <div className="sticky bottom-0 border-t border-slate-200 bg-white px-4 py-3">
+          <div className="flex gap-3">
+            {mobileStep > 1 && (
+              <button
+                type="button"
+                onClick={() => setMobileStep((s) => s - 1)}
+                className="flex items-center gap-1.5 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700"
+              >
+                <ChevronLeft size={16} /> Tilbage
+              </button>
+            )}
+            {mobileStep < 5 && (
+              <button
+                type="button"
+                onClick={() => setMobileStep((s) => s + 1)}
+                disabled={!canProceed(mobileStep)}
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl py-3 text-sm font-semibold text-white transition disabled:opacity-40"
+                style={{ background: "linear-gradient(135deg,#1B3F7A,#3B6DC9)" }}
+              >
+                Næste <ChevronRight size={16} />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── DESKTOP LAYOUT (hidden on mobile) ── */}
+      <div className="hidden flex-1 px-6 py-8 md:flex">
+        <div className="mx-auto w-full max-w-6xl">
           <div className="grid grid-cols-5 gap-6">
 
-            {/* ── Left sidebar ── */}
+            {/* Left sidebar */}
             <div className="col-span-2 flex flex-col gap-4">
               <div
                 className="relative overflow-hidden rounded-2xl p-6 text-white"
@@ -192,9 +607,7 @@ export default function GeneratePostPage() {
                 <h2 className="mb-1 text-xl font-bold leading-snug">
                   Generer SOME<br />opslag med AI
                 </h2>
-                <p className="mb-5 text-sm text-blue-200">
-                  Fra boliglink til færdigt opslag på få sekunder
-                </p>
+                <p className="mb-5 text-sm text-blue-200">Fra boliglink til færdigt opslag på få sekunder</p>
                 <div className="mb-5 flex items-center gap-1">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} size={13} className="fill-yellow-400 text-yellow-400" />
@@ -226,10 +639,7 @@ export default function GeneratePostPage() {
                     </div>
                   ))}
                 </div>
-                <Link
-                  href="/billing"
-                  className="mt-4 flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:underline"
-                >
+                <Link href="/billing" className="mt-4 flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:underline">
                   <ShoppingCart size={11} /> Køb credits
                 </Link>
               </div>
@@ -245,15 +655,13 @@ export default function GeneratePostPage() {
               </div>
             </div>
 
-            {/* ── Right form area ── */}
+            {/* Right form area */}
             <div className="col-span-3 flex flex-col gap-4">
 
-              {/* 1. URL import */}
+              {/* 1. URL */}
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <h3 className="mb-1 text-base font-bold text-slate-900">1. Indsæt link til annonce</h3>
-                <p className="mb-4 text-sm text-slate-500">
-                  Fx Airbnb, Booking.com, Novasol eller din egen hjemmeside.
-                </p>
+                <p className="mb-4 text-sm text-slate-500">Fx Airbnb, Booking.com, Novasol eller din egen hjemmeside.</p>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
                     <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -318,12 +726,11 @@ export default function GeneratePostPage() {
                 )}
               </div>
 
-              {/* 2. Generate text */}
+              {/* 2. Generate */}
               {scraped && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                   <h3 className="mb-1 text-base font-bold text-slate-900">2. Generer opslag</h3>
                   <p className="mb-4 text-sm text-slate-500">AI genererer en sælgende tekst baseret på annoncen.</p>
-
                   {noCredits && (
                     <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
                       <p className="text-sm font-semibold text-amber-800">Ingen credits tilbage</p>
@@ -338,7 +745,6 @@ export default function GeneratePostPage() {
                       <AlertCircle size={14} className="mt-0.5 shrink-0" /> {generateError}
                     </p>
                   )}
-
                   <button
                     type="button"
                     onClick={handleGenerate}
@@ -352,7 +758,7 @@ export default function GeneratePostPage() {
                 </div>
               )}
 
-              {/* 3. Generated text */}
+              {/* 3. Text */}
               {generatedText && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                   <div className="mb-4 flex items-center justify-between">
@@ -409,13 +815,11 @@ export default function GeneratePostPage() {
                 </div>
               )}
 
-              {/* 4. Image selection */}
+              {/* 4. Images */}
               {scraped && images.length > 0 && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                   <h3 className="mb-1 text-base font-bold text-slate-900">4. Vælg opslagsbillede</h3>
-                  <p className="mb-4 text-sm text-slate-500">
-                    Billeder hentet fra annoncen. Klik for at vælge ét (valgfrit).
-                  </p>
+                  <p className="mb-4 text-sm text-slate-500">Billeder hentet fra annoncen. Klik for at vælge ét (valgfrit).</p>
                   <div className="grid grid-cols-5 gap-2">
                     {images.map((src, i) => (
                       <button
@@ -442,12 +846,11 @@ export default function GeneratePostPage() {
                 </div>
               )}
 
-              {/* 5. Platform + publish */}
+              {/* 5. Publish */}
               {generatedText && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                   <h3 className="mb-1 text-base font-bold text-slate-900">5. Vælg platform og udgiv</h3>
                   <p className="mb-4 text-sm text-slate-500">Vælg platform for at tilpasse tonen — eller gem som kladde.</p>
-
                   <div className="mb-5 grid grid-cols-3 gap-3">
                     {PLATFORMS.map((p) => (
                       <button
@@ -465,8 +868,6 @@ export default function GeneratePostPage() {
                       </button>
                     ))}
                   </div>
-
-                  {/* Selected image preview */}
                   {selectedImage && (
                     <div className="mb-4 flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 p-3">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -478,8 +879,6 @@ export default function GeneratePostPage() {
                       <button type="button" onClick={() => setSelectedImage(null)} className="rounded-lg p-1.5 text-blue-400 hover:bg-blue-100">✕</button>
                     </div>
                   )}
-
-                  {/* Accounts */}
                   <div className="mb-4">
                     <p className="mb-2 text-xs font-medium text-slate-600">Udgiv til konto</p>
                     {accounts.length === 0 ? (
@@ -513,8 +912,6 @@ export default function GeneratePostPage() {
                       </div>
                     )}
                   </div>
-
-                  {/* Schedule */}
                   <div className="mb-6">
                     <label className="mb-1.5 block text-xs font-medium text-slate-600">Planlæg (valgfrit)</label>
                     <input
@@ -524,7 +921,6 @@ export default function GeneratePostPage() {
                       className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
                     />
                   </div>
-
                   <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
                     <Link href="/posts" className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
                       Annuller
