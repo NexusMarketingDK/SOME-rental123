@@ -152,7 +152,8 @@ export function LandingPage({ locale }: { locale: Locale }) {
             <a href="#" className="hover:text-[#1B3F7A] transition-colors">{t.navHome}</a>
             <a href="#features" className="hover:text-[#1B3F7A] transition-colors">{t.navFeatures}</a>
             <a href="#ai" className="hover:text-[#1B3F7A] transition-colors">{t.navVideo}</a>
-            <a href="#pricing" className="hover:text-[#1B3F7A] transition-colors">{t.navPricing}</a>
+            <Link href="/blog" className="hover:text-[#1B3F7A] transition-colors">Blog</Link>
+            <Link href="/priser" className="hover:text-[#1B3F7A] transition-colors">{t.navPricing}</Link>
           </nav>
           <div className="flex items-center gap-3">
             <LanguageSwitcher current={locale} />
@@ -545,7 +546,8 @@ export function LandingPage({ locale }: { locale: Locale }) {
               <ul className="flex flex-col gap-3 text-sm text-slate-400">
                 <li><a href="#features" className="transition-colors hover:text-white">{t.footerFeatures}</a></li>
                 <li><a href="#ai" className="transition-colors hover:text-white">{t.footerAiVideo}</a></li>
-                <li><a href="#pricing" className="transition-colors hover:text-white">{t.footerPricing}</a></li>
+                <li><Link href="/priser" className="transition-colors hover:text-white">{t.footerPricing}</Link></li>
+                <li><Link href="/blog" className="transition-colors hover:text-white">Blog</Link></li>
                 <li><Link href="/signup" className="transition-colors hover:text-white">{t.footerCreateAccount}</Link></li>
                 <li><Link href="/login" className="transition-colors hover:text-white">{t.footerLogin}</Link></li>
               </ul>

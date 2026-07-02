@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import {
   LogOut, Plus, ExternalLink, BarChart2, Users, CalendarDays,
-  Video, Home, Settings, CreditCard, Building2, Menu, X,
+  Video, Home, Settings, CreditCard, Building2, Menu, X, Tag,
 } from "lucide-react";
 import { signOutAction } from "@/services/auth";
 import type { SocialAccount } from "@/types/database";
@@ -247,6 +247,7 @@ function SidebarContent({ accounts, userEmail, locale = "da", onNav }: SidebarPr
       <div className="mt-auto">
         <div className="mx-3 mb-2 h-px bg-white/10" />
         <nav className="relative flex flex-col gap-0.5 px-2">
+          <NavItem href="/priser" icon={Tag} label="Priser" onClick={onNav} external />
           <NavItem href="/billing" icon={CreditCard} label={t.billing} onClick={onNav} />
           <NavItem href="/settings" icon={Settings} label={t.settings} onClick={onNav} />
         </nav>
