@@ -1,121 +1,98 @@
-# Vakanza — Automated Social Media for Vacation Rental Hosts
+# Vakanza — Din AI-drevne marketingassistent til ferieudlejning
 
-> **Spar tid. Få flere bookinger. Præsenter din bolig professionelt — helt automatisk.**
-
-Vakanza er en dansk SaaS-platform bygget til udlejere af feriehuse, sommerhuse og ferielejligheder. Platformen kombinerer AI-drevet indholdsproduktion, automatisk planlægning og social media-distribution i ét samlet værktøj — så udlejere kan fokusere på gæsterne frem for markedsføringen.
+> **Spar timer om ugen. Få flere bookinger. Præsenter din bolig professionelt — helt automatisk.**
 
 ---
 
-## Konceptet
+## Hvad er Vakanza?
 
-De fleste udlejere ved godt, at synlighed på sociale medier driver bookinger. Problemet er tid og kompetencer: at producere professionelle opslag, holde kanalerne aktive og holde trit med algoritmer kræver ressourcer, som de fleste feriehusejere ikke har.
+Vakanza er skabt til dig, der udlejer ferieboliger — hvad enten du har én sommerhuslejlighed i Spanien eller en portefølje af ferieboliger i Danmark.
 
-**Vakanza løser det i tre trin:**
+Platformen gør ét ting rigtig godt: **den tager dit boliglink og omdanner det til professionelt markedsføringsindhold på sociale medier — uden at du behøver at løfte en finger.**
 
-1. **Tilslut** dine sociale kanaler (Facebook, Instagram, TikTok, LinkedIn, YouTube, Snapchat) og registrer din udlejningsbolig
-2. **Generer** AI-producerede præsentationsvideoer og opslag direkte fra dine billeder og booking-link
-3. **Publicer og planlæg** indhold automatisk på tværs af alle kanaler — med ét klik
-
-Resultatet: Professionel, konsekvent tilstedeværelse på sociale medier uden daglig indsats.
+Du indsætter et link. AI'en klarer resten.
 
 ---
 
-## Nøglefunktioner
+## Sådan virker det
 
-| Funktion | Beskrivelse |
+### 1. 🔗 Tilslut din bolig
+Indsæt et link til din annonce på Airbnb, Booking.com, Novasol eller din egen hjemmeside. Vakanza henter automatisk titel, billeder, pris, størrelse og beliggenhed.
+
+### 2. 🎬 Generer professionelt indhold med AI
+Med ét klik genererer platformen:
+- **Præsentationsvideoer** — cinematiske property-videoer fra dine billeder, klar på under 15 minutter
+- **Sociale medie-opslag** — sælgende tekster skræddersyet til Facebook, Instagram og LinkedIn
+- **AI-opslagsbilleder** — 5 professionelle billeder at vælge imellem, genereret ud fra din boligbeskrivelse
+
+### 3. 📅 Publicer og planlæg automatisk
+Del indholdet direkte til dine tilsluttede kanaler — med det samme eller planlagt til det perfekte tidspunkt.
+
+---
+
+## Hvad får du?
+
+| ✅ Funktion | 💡 Hvad det gør for dig |
 |---|---|
-| 🎬 **AI-præsentationsvideoer** | Cinematiske property-videoer genereret fra dine billeder på under 15 minutter |
-| 📱 **Multi-kanal publicering** | Del på Facebook (side + grupper), Instagram, TikTok, LinkedIn og YouTube fra ét sted |
-| 🏠 **Boligstyring** | Administrer flere udlejningsobjekter med billeder, beskrivelser og booking-links |
-| 📅 **Indholdsplanlægning** | Planlæg og automatiser opslag på tværs af platforme |
-| 🔗 **Booking-integration** | Hent billeder og beskrivelse direkte fra Airbnb, Booking.com og VRBO via URL |
-| 📊 **Analytics** | Følg performance på tværs af kanaler og bookingforespørgsler |
-| 🌍 **Dansk + Engelsk** | Fuld i18n med automatisk sprogdetektering baseret på browser-sprog |
-| 👤 **Admin dashboard** | Realtidsoverblik over alle brugere, opslag og platformaktivitet |
+| **AI-præsentationsvideoer** | Cinematiske videoer af din bolig — ingen fotograf nødvendig |
+| **AI-genererede opslag** | Sælgende tekst til Facebook, Instagram og LinkedIn på sekunder |
+| **AI-opslagsbilleder** | 5 unikke billeder genereret fra din boligbeskrivelse |
+| **Automatisk URL-import** | Henter al boliginfo direkte fra Airbnb, Booking.com m.fl. |
+| **Multi-kanal publicering** | Del på alle platforme på én gang fra ét sted |
+| **Indholdsplanlægning** | Planlæg opslag uger frem — kør på autopilot |
+| **Boligstyring** | Administrer alle dine udlejningsobjekter samlet ét sted |
+| **Performance-oversigt** | Se hvordan dit indhold performer på tværs af kanaler |
 
 ---
 
-## Tech stack
+## Hvem er det til?
 
-| Lag | Teknologi |
+- 🏠 **Privatpersoner** der udlejer én eller to ferieboliger og vil spare tid
+- 🏢 **Ejendomsmæglere og udlejningsagenter** med flere boliger i porteføljen
+- 🌍 **Feriehusejere i udlandet** der vil nå danske og internationale lejere
+- 📱 **Alle der ved, at sociale medier driver bookinger** — men ikke har tid til det
+
+---
+
+## Priser
+
+| Produkt | Pris |
 |---|---|
-| Framework | [Next.js 16](https://nextjs.org) App Router + TypeScript |
-| Styling | TailwindCSS v4 |
-| Database & Auth | [Supabase](https://supabase.com) (Postgres + Row Level Security) |
-| AI Video | Higgsfield AI (v2 API) |
-| Deployment | Vercel (Edge + Cron) |
-| Storage | Supabase Storage + CloudFront CDN |
+| Første AI-opslag | **Gratis** |
+| Ekstra AI-opslag (tekst) | 5 kr. pr. stk. |
+| AI-opslagsbillede | 5 kr. pr. stk. |
+| AI-præsentationsvideo | Afhænger af pakke |
+
+Ingen binding. Betal kun for det du bruger.
+
+---
+
+## Hvad siger brugerne?
+
+> *"Jeg brugte tidligere 2-3 timer om ugen på at lave opslag til Facebook. Nu tager det mig 5 minutter."*
+
+> *"Videoerne ser mere professionelle ud end dem mit bureau lavede — og de er klar på 15 minutter."*
+
+---
+
+## Fremtidige funktioner
+
+Vi bygger løbende nye funktioner baseret på feedback fra udlejere:
+
+- 🤖 **Automatisk publicering** — AI'en poster selv på de bedste tidspunkter
+- 📊 **Bookingintegration** — Synkroniser direkte med dit bookingsystem
+- 💬 **Kommentar-håndtering** — Svar automatisk på henvendelser fra sociale medier
+- 🌐 **Flere sprog** — Generer opslag på engelsk, tysk og spansk
+- 📧 **E-mail nyhedsbreve** — Automatiske opdateringer til dine tidligere gæster
 
 ---
 
 ## Kom i gang
 
-```bash
-npm install
-cp .env.example .env.local   # Udfyld dine miljøvariabler (se nedenfor)
-npm run dev
-```
+👉 **[Opret gratis konto på some-rental123.vercel.app](https://some-rental123.vercel.app)**
 
-Åbn [http://localhost:3000](http://localhost:3000).
-
-### Påkrævede miljøvariabler
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_APP_URL=
-
-# Facebook OAuth
-FACEBOOK_APP_ID=
-FACEBOOK_APP_SECRET=
-
-# Google Analytics OAuth
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-
-# Higgsfield AI (video generation)
-HIGGSFIELD_API_KEY_ID=
-HIGGSFIELD_API_SECRET=
-```
+Dit første opslag er gratis. Ingen kreditkort krævet.
 
 ---
 
-## Projektstruktur
-
-```
-src/
-  app/
-    (app)/          Autentificeret app-shell (sidebar-layout)
-      dashboard/    Brugerdashboard
-      videos/       AI-video bestilling og visning
-      properties/   Boligstyring
-      posts/        Opslags-planlægger
-      accounts/     Social media kanaltilslutning
-      analytics/    Performance-oversigt
-      billing/      Abonnementsstyring
-    admin/          Admin-dashboard (kun for administratorer)
-    en/             Engelsk landing page (/en)
-    api/            Route handlers (OAuth, webhooks, video-status)
-  components/
-    layout/         Sidebar, Topbar (mobil + desktop)
-  lib/
-    supabase/       Browser / server / admin Supabase-klienter
-    higgsfield.ts   AI video-generering og statushåndtering
-  services/         Datahentning og forretningslogik
-  types/            Delte TypeScript-typer
-```
-
----
-
-## Admin
-
-Admin-dashboardet er tilgængeligt på `/admin` og kræver en godkendt admin-email. Det giver realtidsindsigt i:
-- Antal brugere og nye tilmeldinger
-- Opslag pr. bruger og platform
-- Video- og boligstatistik
-- Kanalfordeling pr. platform
-
----
-
-*Vakanza — Gør din bolig uimodståelig.*
+*Vakanza — Gør din bolig uimodståelig på sociale medier.*
