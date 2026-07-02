@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Loader2, Clock, XCircle, Trash2, ArrowRight, Download, Share2, RefreshCw, AlertTriangle } from "lucide-react";
-import { deleteVideoOrder } from "@/services/video-orders";
+import { deleteVideoOrder, restartVideoOrder } from "@/services/video-orders";
 
 const MAX_PROCESSING_SEC = 60 * 60; // 60 minutes before showing timeout warning
 
@@ -64,16 +64,17 @@ function ProgressBadge({ status, createdAt }: { status: string; createdAt: strin
 }
 
 function ProgressSection({
-  status, createdAt, orderId, onRefresh,
+  status, createdAt, onRefresh, onRestart,
 }: {
-  status: string; createdAt: string; orderId: string; onRefresh: () => void;
+  status: string; createdAt: string; orderId: string; onRefresh: () => void; onRestart: () => void;
 }) {
   const elapsed = useElapsed(createdAt, status === "processing");
   const pct = Math.min(92, Math.round((elapsed / 1800) * 100));
   const timedOut = elapsed > MAX_PROCESSING_SEC;
   const [checking, setChecking] = useState(false);
+  const [restarting, setRestarting] = useState(false);
 
-  if (status !== "processing") return null;
+  if (status !== "processing" && status !== "failed") return null;
 
   const mins = Math.floor(elapsed / 60);
   const secs = elapsed % 60;
@@ -85,23 +86,36 @@ function ProgressSection({
     setTimeout(() => setChecking(false), 3000);
   }
 
-  if (timedOut) {
+  async function handleRestart() {
+    setRestarting(true);
+    await onRestart();
+  }
+
+  if (status === "failed" || timedOut) {
     return (
-      <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-        <p className="text-sm font-medium text-amber-800">
-          Genereringen tager længere end forventet ({mins} min).
+      <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+        <p className="text-sm font-medium text-red-800">
+          {status === "failed" ? "Video generering fejlede." : `Genereringen tager for lang tid (${mins} min).`}
         </p>
-        <p className="mt-1 text-xs text-amber-700">
-          AI-videoer kan sommetider bruge ekstra tid. Tjek status manuelt — videoen er muligvis stadig ved at blive genereret.
+        <p className="mt-1 text-xs text-red-700">
+          Klik på "Genstart" for at starte en ny generering med Google AI.
         </p>
         <div className="mt-3 flex gap-2">
           <button
+            onClick={handleRestart}
+            disabled={restarting}
+            className="flex items-center gap-1.5 rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-semibold text-red-800 hover:bg-red-50 disabled:opacity-50 transition-colors"
+          >
+            {restarting ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+            {restarting ? "Genstarter..." : "Genstart video"}
+          </button>
+          <button
             onClick={forceCheck}
             disabled={checking}
-            className="flex items-center gap-1.5 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
           >
             {checking ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
-            {checking ? "Tjekker..." : "Tjek status nu"}
+            {checking ? "Tjekker..." : "Tjek status"}
           </button>
         </div>
       </div>
@@ -140,6 +154,11 @@ export function VideoOrderCard({ order }: { order: Order }) {
   async function handleDelete() {
     setDeleting(true);
     await deleteVideoOrder(order.id);
+    router.refresh();
+  }
+
+  async function handleRestart() {
+    await restartVideoOrder(order.id);
     router.refresh();
   }
 
@@ -195,6 +214,7 @@ export function VideoOrderCard({ order }: { order: Order }) {
         createdAt={order.created_at}
         orderId={order.id}
         onRefresh={handleRefresh}
+        onRestart={handleRestart}
       />
 
       {order.status === "ready" && order.video_url && (

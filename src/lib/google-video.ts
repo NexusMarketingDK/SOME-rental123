@@ -179,7 +179,10 @@ export async function getVideoJobsStatus(
         }
 
         return { status: "completed", videoUrl: `/api/video-proxy?uri=${encodeURIComponent(googleUri)}` };
-      } catch {
+      } catch (err: unknown) {
+        // 404/400 = invalid operation ID (e.g. old Higgsfield job ID) → mark failed
+        const status = (err as { response?: { status?: number } })?.response?.status;
+        if (status === 404 || status === 400) return { status: "failed" };
         return { status: "in_progress" }; // transient error — retry next poll
       }
     })
