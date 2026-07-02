@@ -89,36 +89,51 @@ export async function startVideoGeneration(
   title: string,
   roomLabels?: string[]
 ): Promise<string[]> {
+  // Limit to 3 images max to stay within Vercel function timeout/memory
+  const limitedUrls = imageUrls.slice(0, 3);
+
   const operations = await Promise.all(
-    imageUrls.map(async (url, i) => {
+    limitedUrls.map(async (url, i) => {
       const room = roomLabels?.[i] ?? `Image ${i + 1}`;
       const prompt = buildCinematicPrompt(room, title, i);
       const image = await imageToBase64(url);
 
-      const res = await axios.post<{ name?: string }>(
-        `${GEMINI_BASE}/models/veo-2.0-generate-001:generateVideo?key=${GEMINI_API_KEY}`,
-        {
-          contents: [
-            {
-              role: "user",
-              parts: [
-                { text: prompt },
-                { inlineData: { mimeType: image.mimeType, data: image.data } },
-              ],
+      let res: { data: { name?: string } };
+      try {
+        res = await axios.post<{ name?: string }>(
+          `${GEMINI_BASE}/models/veo-2.0-flash-generate-001:generateVideo?key=${GEMINI_API_KEY}`,
+          {
+            contents: [
+              {
+                role: "user",
+                parts: [
+                  { text: prompt },
+                  { inlineData: { mimeType: image.mimeType, data: image.data } },
+                ],
+              },
+            ],
+            generationConfig: {
+              responseModalities: ["video"],
+              videoConfig: { durationSeconds: 8, aspectRatio: "16:9" },
             },
-          ],
-          generationConfig: {
-            responseModalities: ["video"],
-            videoConfig: { durationSeconds: 8, aspectRatio: "16:9" },
-          },
+          }
+        );
+      } catch (err: unknown) {
+        // Try fallback: veo-2.0-generate-001 (allowlisted accounts)
+        const status = (err as { response?: { status?: number } })?.response?.status;
+        if (status === 404 || status === 403) {
+          // Model not available — throw with detail for debugging
+          const detail = (err as { response?: { data?: unknown } })?.response?.data;
+          throw new Error(`Google Veo API error ${status}: ${JSON.stringify(detail)}`);
         }
-      );
+        throw err;
+      }
 
       return res.data.name ?? "";
     })
   );
 
-  return operations;
+  return operations.filter(Boolean);
 }
 
 type OperationResult =
