@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getVideoJobsStatus } from "@/lib/google-video";
+import { getVideoJobsStatus, startVideoGeneration } from "@/lib/google-video";
 
 export async function deleteVideoOrder(orderId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
@@ -68,4 +68,44 @@ export async function pollVideoOrder(orderId: string): Promise<{
   }
 
   return { status: "processing" };
+}
+
+export async function restartVideoOrder(orderId: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Ikke logget ind" };
+
+  const { data: order } = await supabase
+    .from("video_orders")
+    .select("image_urls, title")
+    .eq("id", orderId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (!order) return { error: "Ordre ikke fundet" };
+
+  const imageUrls: string[] = order.image_urls ?? [];
+  if (!imageUrls.length) return { error: "Ingen billeder på ordren" };
+
+  await supabase.from("video_orders").update({
+    status: "processing",
+    higgsfield_job_id: null,
+    higgsfield_job_ids: [],
+    video_url: null,
+    video_urls: [],
+  }).eq("id", orderId);
+
+  try {
+    const jobIds = await startVideoGeneration(imageUrls, order.title ?? "Bolig fremvisning");
+    await supabase.from("video_orders").update({
+      higgsfield_job_id: jobIds[0] ?? null,
+      higgsfield_job_ids: jobIds,
+    }).eq("id", orderId);
+  } catch {
+    // Generation start failed — stays in processing for poll-based retry
+  }
+
+  revalidatePath("/videos");
+  revalidatePath(`/videos/${orderId}`);
+  return {};
 }
