@@ -24,17 +24,6 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  // Check credits
-  const { data: credits } = await supabase
-    .from("ai_credits")
-    .select("balance")
-    .eq("user_id", user.id)
-    .single();
-
-  if (!credits || credits.balance < 1) {
-    return NextResponse.json({ error: "no_credits" }, { status: 402 });
-  }
-
   const body = await req.json() as {
     platform: string;
     title?: string;
@@ -73,13 +62,6 @@ Returner KUN den færdige tekst — ingen forklaringer, ingen overskrifter, inge
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(prompt);
     const text = result.response.text().trim();
-
-    // Deduct 1 credit
-    await supabase
-      .from("ai_credits")
-      .update({ balance: credits.balance - 1 })
-      .eq("user_id", user.id);
-
     return NextResponse.json({ text });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
