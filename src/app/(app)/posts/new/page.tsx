@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Link as LinkIcon, Loader2, Sparkles, CheckCircle2, Clock, Star,
-  RefreshCw, AlertCircle, MapPin, Tag, Maximize2, Search, ShoppingCart,
+  RefreshCw, AlertCircle, MapPin, Tag, Maximize2, ShoppingCart,
   Pencil, ChevronRight, ChevronLeft, Image as ImageIcon,
 } from "lucide-react";
 import { Topbar } from "@/components/layout/topbar";
@@ -64,10 +64,9 @@ const BENEFITS = [
 
 const MOBILE_STEPS = [
   { id: 1, label: "Link" },
-  { id: 2, label: "Generer" },
-  { id: 3, label: "Tekst" },
-  { id: 4, label: "Billede" },
-  { id: 5, label: "Udgiv" },
+  { id: 2, label: "Tekst" },
+  { id: 3, label: "Billede" },
+  { id: 4, label: "Udgiv" },
 ];
 
 type Account = Awaited<ReturnType<typeof getSocialAccounts>>[number];
@@ -118,43 +117,65 @@ export default function GeneratePostPage() {
     setSelectedImage(null);
 
     const result = await scrapePropertyUrl(url.trim());
-    setScraping(false);
 
     if (result.error || !result.data) {
+      setScraping(false);
       setScrapeError(result.error ?? "Kunne ikke hente annoncen.");
       return;
     }
-    setScraped(result.data);
+    const data = result.data;
+    setScraped(data);
     setListingUrl(url.trim());
-    setImages(result.data.imageUrls.slice(0, 5));
+    setImages(data.imageUrls.slice(0, 5));
     setSelectedImage(null);
 
     const accs = await getSocialAccounts();
     setAccounts(accs);
-  }
 
-  // ── Generate text ──────────────────────────────────────────────────────────
-
-  async function handleGenerate() {
+    // Auto-generate text immediately after scraping
     setGenerating(true);
-    setGenerateError("");
-    setNoCredits(false);
-
+    setScraping(false);
     const res = await fetch("/api/generate-post", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         platform,
-        title: scraped?.title,
-        description: scraped?.description,
-        location: scraped?.location,
-        price: scraped?.price,
-        size: scraped?.size,
+        title: data.title,
+        description: data.description,
+        location: data.location,
+        price: data.price,
+        size: data.size,
+        listingUrl: url.trim(),
+      }),
+    });
+    const json = await res.json() as { text?: string; error?: string; wasFree?: boolean };
+    setGenerating(false);
+    if (json.error === "no_credits") { setNoCredits(true); return; }
+    if (json.error || !json.text) { setGenerateError(json.error ?? "Generering fejlede."); return; }
+    setGeneratedText(json.text);
+    setWasFree(json.wasFree ?? false);
+    setEditingText(false);
+  }
+
+  async function handleRegenerate() {
+    if (!scraped) return;
+    setGenerating(true);
+    setGenerateError("");
+    setNoCredits(false);
+    const res = await fetch("/api/generate-post", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        platform,
+        title: scraped.title,
+        description: scraped.description,
+        location: scraped.location,
+        price: scraped.price,
+        size: scraped.size,
         listingUrl,
       }),
     });
     const json = await res.json() as { text?: string; error?: string; wasFree?: boolean };
-
     setGenerating(false);
     if (json.error === "no_credits") { setNoCredits(true); return; }
     if (json.error || !json.text) { setGenerateError(json.error ?? "Generering fejlede."); return; }
@@ -199,17 +220,31 @@ export default function GeneratePostPage() {
           <button
             type="button"
             onClick={handleScrape}
-            disabled={scraping || !url.trim()}
-            className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-50"
+            disabled={scraping || generating || !url.trim()}
+            className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white transition disabled:opacity-50"
+            style={{ background: "linear-gradient(135deg,#1B3F7A,#3B6DC9)" }}
           >
-            {scraping ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-            {scraping ? "Henter…" : "Hent"}
+            {(scraping || generating) ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+            {scraping ? "Henter…" : generating ? "Genererer…" : "Generer SOME opslag"}
           </button>
         </div>
         {scrapeError && (
           <p className="flex items-start gap-2 text-sm text-red-600">
             <AlertCircle size={14} className="mt-0.5 shrink-0" /> {scrapeError}
           </p>
+        )}
+        {generateError && (
+          <p className="flex items-start gap-2 text-sm text-red-600">
+            <AlertCircle size={14} className="mt-0.5 shrink-0" /> {generateError}
+          </p>
+        )}
+        {noCredits && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-sm font-semibold text-amber-800">Ingen credits tilbage</p>
+            <Link href="/billing" className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 underline">
+              <ShoppingCart size={11} /> Køb credits
+            </Link>
+          </div>
         )}
         {scraped && (
           <div className="flex flex-wrap gap-2">
@@ -250,49 +285,6 @@ export default function GeneratePostPage() {
     );
   }
 
-  function SectionGenerate() {
-    return (
-      <div className="flex flex-col gap-4">
-        <div>
-          <h3 className="mb-1 text-base font-bold text-slate-900">Generer opslag</h3>
-          <p className="text-sm text-slate-500">AI genererer en sælgende tekst baseret på annoncen.</p>
-        </div>
-        {noCredits && (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-            <p className="text-sm font-semibold text-amber-800">Ingen credits tilbage</p>
-            <p className="mt-0.5 text-xs text-amber-700">Køb credits for at generere flere opslag.</p>
-            <Link href="/billing" className="mt-3 inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50">
-              <ShoppingCart size={12} /> Køb credits
-            </Link>
-          </div>
-        )}
-        {generateError && (
-          <p className="flex items-start gap-2 text-sm text-red-600">
-            <AlertCircle size={14} className="mt-0.5 shrink-0" /> {generateError}
-          </p>
-        )}
-        <button
-          type="button"
-          onClick={handleGenerate}
-          disabled={generating}
-          className="flex w-full items-center justify-center gap-2 rounded-xl py-4 text-base font-semibold text-white transition disabled:opacity-50"
-          style={{ background: "linear-gradient(135deg,#1B3F7A,#3B6DC9)" }}
-        >
-          {generating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
-          {generating ? "Genererer opslag…" : "Generer opslag med AI"}
-        </button>
-        {generatedText && (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-            <p className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
-              <CheckCircle2 size={14} /> Opslag genereret!
-            </p>
-            <p className="mt-0.5 text-xs text-emerald-600">Gå til næste trin for at redigere teksten.</p>
-          </div>
-        )}
-      </div>
-    );
-  }
-
   function SectionText() {
     return (
       <div className="flex flex-col gap-4">
@@ -316,7 +308,7 @@ export default function GeneratePostPage() {
             </button>
             <button
               type="button"
-              onClick={handleGenerate}
+              onClick={handleRegenerate}
               disabled={generating}
               className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
             >
@@ -493,8 +485,7 @@ export default function GeneratePostPage() {
   // ── Mobile step can proceed? ───────────────────────────────────────────────
 
   function canProceed(step: number) {
-    if (step === 1) return !!scraped;
-    if (step === 2) return !!generatedText;
+    if (step === 1) return !!generatedText;
     return true;
   }
 
@@ -549,18 +540,9 @@ export default function GeneratePostPage() {
         {/* Step content */}
         <div className="flex-1 px-4 py-6">
           {mobileStep === 1 && <SectionLink />}
-          {mobileStep === 2 && <SectionGenerate />}
-          {mobileStep === 3 && (generatedText ? <SectionText /> : (
-            <div className="flex flex-col items-center gap-4 py-12 text-center">
-              <Sparkles size={32} className="text-slate-300" />
-              <p className="text-sm text-slate-400">Generer et opslag i trin 2 først.</p>
-              <button type="button" onClick={() => setMobileStep(2)} className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white">
-                Gå til trin 2
-              </button>
-            </div>
-          ))}
-          {mobileStep === 4 && <SectionImages />}
-          {mobileStep === 5 && <SectionPublish />}
+          {mobileStep === 2 && <SectionText />}
+          {mobileStep === 3 && <SectionImages />}
+          {mobileStep === 4 && <SectionPublish />}
         </div>
 
         {/* Bottom nav */}
@@ -677,11 +659,12 @@ export default function GeneratePostPage() {
                   <button
                     type="button"
                     onClick={handleScrape}
-                    disabled={scraping || !url.trim()}
-                    className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-50"
+                    disabled={scraping || generating || !url.trim()}
+                    className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition disabled:opacity-50"
+                    style={{ background: "linear-gradient(135deg,#1B3F7A,#3B6DC9)" }}
                   >
-                    {scraping ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-                    {scraping ? "Henter…" : "Hent"}
+                    {(scraping || generating) ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                    {scraping ? "Henter…" : generating ? "Genererer…" : "Generer SOME opslag"}
                   </button>
                 </div>
                 {scrapeError && (
@@ -726,39 +709,7 @@ export default function GeneratePostPage() {
                 )}
               </div>
 
-              {/* 2. Generate */}
-              {scraped && (
-                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                  <h3 className="mb-1 text-base font-bold text-slate-900">2. Generer opslag</h3>
-                  <p className="mb-4 text-sm text-slate-500">AI genererer en sælgende tekst baseret på annoncen.</p>
-                  {noCredits && (
-                    <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                      <p className="text-sm font-semibold text-amber-800">Ingen credits tilbage</p>
-                      <p className="mt-0.5 text-xs text-amber-700">Køb credits for at generere flere opslag.</p>
-                      <Link href="/billing" className="mt-3 inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50">
-                        <ShoppingCart size={12} /> Køb credits
-                      </Link>
-                    </div>
-                  )}
-                  {generateError && (
-                    <p className="mb-3 flex items-start gap-2 text-sm text-red-600">
-                      <AlertCircle size={14} className="mt-0.5 shrink-0" /> {generateError}
-                    </p>
-                  )}
-                  <button
-                    type="button"
-                    onClick={handleGenerate}
-                    disabled={generating}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white transition disabled:opacity-50"
-                    style={{ background: "linear-gradient(135deg,#1B3F7A,#3B6DC9)" }}
-                  >
-                    {generating ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
-                    {generating ? "Genererer opslag…" : "Generer opslag med AI"}
-                  </button>
-                </div>
-              )}
-
-              {/* 3. Text */}
+              {/* 2. Text */}
               {generatedText && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                   <div className="mb-4 flex items-center justify-between">
@@ -781,7 +732,7 @@ export default function GeneratePostPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={handleGenerate}
+                        onClick={handleRegenerate}
                         disabled={generating}
                         className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
                       >
