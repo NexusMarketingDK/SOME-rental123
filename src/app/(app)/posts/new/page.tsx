@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Link as LinkIcon, Loader2, Sparkles, CheckCircle2, Clock, Star,
-  RefreshCw, AlertCircle, MapPin, Tag, Maximize2, Search, ShoppingCart, Pencil,
+  RefreshCw, AlertCircle, MapPin, Tag, Maximize2, Search, ShoppingCart,
 } from "lucide-react";
 import { Topbar } from "@/components/layout/topbar";
 import { scrapePropertyUrl, type ScrapedProperty } from "@/services/scrape-property";
@@ -81,9 +81,6 @@ export default function GeneratePostPage() {
   const [noCredits, setNoCredits] = useState(false);
   const [wasFree, setWasFree] = useState(false);
 
-  // Text editing
-  const [editingText, setEditingText] = useState(false);
-
   // Image selection from listing
   const [images, setImages] = useState<string[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -148,7 +145,6 @@ export default function GeneratePostPage() {
     if (json.error || !json.text) { setGenerateError(json.error ?? "Generering fejlede."); return; }
     setGeneratedText(json.text);
     setWasFree(json.wasFree ?? false);
-    setEditingText(false);
   }
 
   // ── Save ───────────────────────────────────────────────────────────────────
@@ -364,48 +360,23 @@ export default function GeneratePostPage() {
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setEditingText((v) => !v)}
-                        className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${editingText ? "border-blue-400 bg-blue-50 text-blue-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"}`}
-                      >
-                        <Pencil size={11} />
-                        {editingText ? "Luk redigering" : "Rediger"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleGenerate}
-                        disabled={generating}
-                        className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
-                      >
-                        {generating ? <Loader2 size={11} className="animate-spin" /> : <RefreshCw size={11} />}
-                        Regenerer
-                      </button>
-                    </div>
-                  </div>
-                  {editingText ? (
-                    <>
-                      <textarea
-                        value={generatedText}
-                        onChange={(e) => setGeneratedText(e.target.value)}
-                        rows={10}
-                        autoFocus
-                        className="w-full rounded-xl border border-blue-300 px-3 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                      />
-                      <p className="mt-1 text-right text-xs text-slate-400">{generatedText.length} tegn</p>
-                    </>
-                  ) : (
-                    <div
-                      className="group relative cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5"
-                      onClick={() => setEditingText(true)}
+                    <button
+                      type="button"
+                      onClick={handleGenerate}
+                      disabled={generating}
+                      className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
                     >
-                      <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-800">{generatedText}</p>
-                      <div className="absolute right-3 top-3 rounded-lg border border-slate-200 bg-white p-1.5 opacity-0 shadow-sm transition group-hover:opacity-100">
-                        <Pencil size={13} className="text-slate-500" />
-                      </div>
-                    </div>
-                  )}
+                      {generating ? <Loader2 size={11} className="animate-spin" /> : <RefreshCw size={11} />}
+                      Regenerer
+                    </button>
+                  </div>
+                  <textarea
+                    value={generatedText}
+                    onChange={(e) => setGeneratedText(e.target.value)}
+                    rows={10}
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  />
+                  <p className="mt-1 text-right text-xs text-slate-400">{generatedText.length} tegn</p>
                 </div>
               )}
 
