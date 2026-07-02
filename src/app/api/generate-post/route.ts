@@ -24,15 +24,20 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  // Check credits
+  // Check free post / credits
   const { data: credits } = await supabase
     .from("ai_credits")
-    .select("balance")
+    .select("balance, free_post_used")
     .eq("user_id", user.id)
     .single();
 
-  if (!credits || credits.balance < 1) {
-    return NextResponse.json({ error: "no_credits" }, { status: 402 });
+  const freePostUsed = credits?.free_post_used ?? false;
+
+  if (freePostUsed) {
+    // Paid path — check balance
+    if (!credits || credits.balance < 1) {
+      return NextResponse.json({ error: "no_credits" }, { status: 402 });
+    }
   }
 
   const body = await req.json() as {
@@ -74,13 +79,21 @@ Returner KUN den færdige tekst — ingen forklaringer, ingen overskrifter, inge
     const result = await model.generateContent(prompt);
     const text = result.response.text().trim();
 
-    // Deduct 1 credit
-    await supabase
-      .from("ai_credits")
-      .update({ balance: credits.balance - 1 })
-      .eq("user_id", user.id);
+    if (freePostUsed) {
+      // Deduct 1 credit
+      await supabase
+        .from("ai_credits")
+        .update({ balance: credits!.balance - 1 })
+        .eq("user_id", user.id);
+    } else {
+      // Mark free post as used (upsert in case row doesn't exist yet)
+      await supabase
+        .from("ai_credits")
+        .upsert({ user_id: user.id, balance: credits?.balance ?? 0, free_post_used: true })
+        .eq("user_id", user.id);
+    }
 
-    return NextResponse.json({ text });
+    return NextResponse.json({ text, wasFree: !freePostUsed });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
