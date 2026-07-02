@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Link as LinkIcon, Loader2, Sparkles, CheckCircle2, Clock, Star,
-  RefreshCw, AlertCircle, MapPin, Tag, Maximize2, Search, Image as ImageIcon, ShoppingCart,
+  RefreshCw, AlertCircle, MapPin, Tag, Maximize2, Search, ShoppingCart,
 } from "lucide-react";
 import { Topbar } from "@/components/layout/topbar";
 import { scrapePropertyUrl, type ScrapedProperty } from "@/services/scrape-property";
@@ -56,7 +56,7 @@ const PLATFORMS = [
 
 const BENEFITS = [
   "AI-genereret tekst tilpasset platformen",
-  "5 AI-genererede opslagsbilleder at vælge imellem",
+  "Henter billeder direkte fra annoncen",
   "Henter titel, pris, størrelse og beliggenhed",
   "1. opslag er altid gratis",
 ];
@@ -81,11 +81,9 @@ export default function GeneratePostPage() {
   const [noCredits, setNoCredits] = useState(false);
   const [wasFree, setWasFree] = useState(false);
 
-  // Image generation
-  const [generatingImages, setGeneratingImages] = useState(false);
+  // Image selection from listing
   const [images, setImages] = useState<string[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [imageError, setImageError] = useState("");
 
   // Publish
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -113,6 +111,8 @@ export default function GeneratePostPage() {
     }
     setScraped(result.data);
     setListingUrl(url.trim());
+    setImages(result.data.imageUrls.slice(0, 5));
+    setSelectedImage(null);
 
     const accs = await getSocialAccounts();
     setAccounts(accs);
@@ -153,35 +153,6 @@ export default function GeneratePostPage() {
     setWasFree(json.wasFree ?? false);
   }
 
-  // ── Generate images ────────────────────────────────────────────────────────
-
-  async function handleGenerateImages() {
-    setGeneratingImages(true);
-    setImageError("");
-    setImages([]);
-    setSelectedImage(null);
-
-    const res = await fetch("/api/generate-post-images", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: scraped?.title,
-        location: scraped?.location,
-        price: scraped?.price,
-        size: scraped?.size,
-        description: scraped?.description,
-      }),
-    });
-    const json = await res.json() as { images?: string[]; error?: string };
-
-    setGeneratingImages(false);
-    if (json.error || !json.images?.length) {
-      setImageError("Kunne ikke generere billeder. Prøv igen.");
-      return;
-    }
-    setImages(json.images);
-  }
-
   // ── Save ───────────────────────────────────────────────────────────────────
 
   async function handleSave() {
@@ -191,10 +162,7 @@ export default function GeneratePostPage() {
     for (const id of selectedAccounts) formData.append("account_ids[]", id);
     if (scheduledAt) formData.append("scheduled_at", scheduledAt);
     if (selectedImage) {
-      // Strip data URL prefix to get base64 only
-      const mimeMatch = selectedImage.match(/^data:([^;]+);base64,/);
-      formData.append("image_data", selectedImage);
-      formData.append("image_mime", mimeMatch?.[1] ?? "image/png");
+      formData.append("image_url", selectedImage);
     }
     await createPostAction(formData);
   }
@@ -208,7 +176,7 @@ export default function GeneratePostPage() {
       {/* Info banner */}
       <div className="border-b border-orange-100 bg-orange-50 px-8 py-3">
         <p className="text-sm text-orange-800">
-          <span className="font-semibold">Dit første opslag er gratis.</span> Derefter koster tekst 1 credit (5 kr.) og et AI-billede 1 credit (5 kr.).
+          <span className="font-semibold">De første 5 opslag er gratis.</span> Derefter koster hvert opslag (tekst + billede) 0,5 credit. Credits købes for min. 100 kr.
         </p>
       </div>
 
@@ -253,9 +221,10 @@ export default function GeneratePostPage() {
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Priser</p>
                 <div className="space-y-2">
                   {[
-                    { label: "1. opslag tekst", price: "Gratis" },
-                    { label: "Ekstra opslag tekst", price: "1 credit (5 kr.)" },
-                    { label: "AI-opslagsbillede", price: "1 credit (5 kr.)" },
+                    { label: "5 første opslag", price: "Gratis" },
+                    { label: "Opslag (tekst + billede)", price: "0,5 credit" },
+                    { label: "Video", price: "1 credit" },
+                    { label: "Min. køb", price: "100 kr." },
                   ].map((row) => (
                     <div key={row.label} className="flex items-center justify-between text-sm">
                       <span className="text-slate-600">{row.label}</span>
@@ -413,77 +382,38 @@ export default function GeneratePostPage() {
                 </div>
               )}
 
-              {/* AI Image generation */}
-              {scraped && (
+              {/* Listing images */}
+              {scraped && images.length > 0 && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                  <div className="mb-1 flex items-center justify-between">
-                    <h3 className="text-base font-bold text-slate-900">AI-opslagsbillede</h3>
-                    <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">1 credit at vælge</span>
-                  </div>
+                  <h3 className="mb-1 text-base font-bold text-slate-900">Vælg opslagsbillede</h3>
                   <p className="mb-4 text-sm text-slate-500">
-                    Generer 5 AI-billeder baseret på boligen. Vælg ét som opslagsbillede (koster 1 credit).
+                    Billeder hentet fra annoncen. Klik for at vælge ét som medfølger opslaget.
                   </p>
-
-                  {!images.length && (
-                    <button
-                      type="button"
-                      onClick={handleGenerateImages}
-                      disabled={generatingImages}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 py-5 text-sm font-semibold text-slate-600 transition hover:border-blue-400 hover:text-blue-700 disabled:opacity-50"
-                    >
-                      {generatingImages
-                        ? <><Loader2 size={15} className="animate-spin" /> Genererer 5 billeder…</>
-                        : <><ImageIcon size={15} /> Generer 5 AI-billeder (gratis forhåndsvisning)</>
-                      }
-                    </button>
-                  )}
-
-                  {imageError && (
-                    <p className="mt-3 flex items-start gap-2 text-sm text-red-600">
-                      <AlertCircle size={14} className="mt-0.5 shrink-0" /> {imageError}
-                    </p>
-                  )}
-
-                  {images.length > 0 && (
-                    <>
-                      <div className="grid grid-cols-5 gap-2">
-                        {images.map((src, i) => (
-                          <button
-                            key={i}
-                            type="button"
-                            onClick={() => setSelectedImage(selectedImage === src ? null : src)}
-                            className={`group relative aspect-square overflow-hidden rounded-xl border-2 transition ${
-                              selectedImage === src
-                                ? "border-blue-500 shadow-md"
-                                : "border-transparent hover:border-slate-300"
-                            }`}
-                          >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={src} alt={`AI billede ${i + 1}`} className="h-full w-full object-cover" />
-                            {selectedImage === src && (
-                              <div className="absolute inset-0 flex items-center justify-center bg-blue-600/20">
-                                <CheckCircle2 size={20} className="text-white drop-shadow" />
-                              </div>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                      <div className="mt-3 flex items-center justify-between">
-                        <p className="text-xs text-slate-500">
-                          {selectedImage ? "✓ 1 billede valgt — 1 credit trækkes ved gem" : "Klik et billede for at vælge det"}
-                        </p>
-                        <button
-                          type="button"
-                          onClick={handleGenerateImages}
-                          disabled={generatingImages}
-                          className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50"
-                        >
-                          {generatingImages ? <Loader2 size={11} className="animate-spin" /> : <RefreshCw size={11} />}
-                          Nye billeder
-                        </button>
-                      </div>
-                    </>
-                  )}
+                  <div className="grid grid-cols-5 gap-2">
+                    {images.map((src, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setSelectedImage(selectedImage === src ? null : src)}
+                        className={`group relative aspect-square overflow-hidden rounded-xl border-2 transition ${
+                          selectedImage === src
+                            ? "border-blue-500 shadow-md"
+                            : "border-transparent hover:border-slate-300"
+                        }`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={src} alt={`Billede ${i + 1}`} className="h-full w-full object-cover" />
+                        {selectedImage === src && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-blue-600/20">
+                            <CheckCircle2 size={20} className="text-white drop-shadow" />
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-xs text-slate-400">
+                    {selectedImage ? "✓ Billede valgt — følger med i opslaget" : "Klik et billede for at vælge det (valgfrit)"}
+                  </p>
                 </div>
               )}
 
@@ -528,7 +458,7 @@ export default function GeneratePostPage() {
                       <img src={selectedImage} alt="Valgt billede" className="h-16 w-16 rounded-lg object-cover" />
                       <div className="flex-1">
                         <p className="text-xs font-semibold text-blue-800">Opslagsbillede valgt</p>
-                        <p className="text-xs text-blue-600">1 credit trækkes ved gem</p>
+                        <p className="text-xs text-blue-600">Følger med opslaget ved deling</p>
                       </div>
                       <button
                         type="button"

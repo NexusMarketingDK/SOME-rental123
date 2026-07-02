@@ -320,6 +320,23 @@ export default function NewVideoPage() {
                   <p className="text-xs text-slate-500">Du modtager besked i appen, så snart din video er klar.</p>
                 </div>
               </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Priser</p>
+                <div className="space-y-2">
+                  {[
+                    { label: "5 første opslag", price: "Gratis" },
+                    { label: "Opslag (tekst + billede)", price: "0,5 credit" },
+                    { label: "Video", price: "1 credit" },
+                    { label: "Min. køb", price: "100 kr." },
+                  ].map((row) => (
+                    <div key={row.label} className="flex items-center justify-between text-sm">
+                      <span className="text-slate-600">{row.label}</span>
+                      <span className="font-semibold text-slate-900">{row.price}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* ── Right: order form ── */}
