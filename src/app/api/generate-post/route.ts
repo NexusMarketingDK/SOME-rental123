@@ -74,8 +74,12 @@ ${platformInstructions}
 Returner KUN den færdige tekst — ingen forklaringer, ingen overskrifter, ingen citationstegn omkring teksten.
 `;
 
+  if (!process.env.GEMINI_API_KEY) {
+    return NextResponse.json({ error: "GEMINI_API_KEY er ikke konfigureret på serveren." }, { status: 500 });
+  }
+
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = new GoogleGenerativeAI(process.env.GEMINI_API_KEY).getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(prompt);
     const text = result.response.text().trim();
 
