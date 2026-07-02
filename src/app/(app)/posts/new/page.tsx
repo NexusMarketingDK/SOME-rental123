@@ -176,7 +176,7 @@ export default function GeneratePostPage() {
       {/* Info banner */}
       <div className="border-b border-orange-100 bg-orange-50 px-8 py-3">
         <p className="text-sm text-orange-800">
-          <span className="font-semibold">Dit første opslag er gratis.</span> Derefter koster tekst 1 credit (5 kr.) og et AI-billede 1 credit (5 kr.).
+          <span className="font-semibold">De første 5 opslag er gratis.</span> Derefter koster hvert opslag (tekst + billede) 0,5 credit. Credits købes for min. 100 kr.
         </p>
       </div>
 
@@ -221,9 +221,10 @@ export default function GeneratePostPage() {
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Priser</p>
                 <div className="space-y-2">
                   {[
-                    { label: "1. opslag tekst", price: "Gratis" },
-                    { label: "Ekstra opslag tekst", price: "1 credit (5 kr.)" },
-                    { label: "AI-opslagsbillede", price: "1 credit (5 kr.)" },
+                    { label: "5 første opslag", price: "Gratis" },
+                    { label: "Opslag (tekst + billede)", price: "0,5 credit" },
+                    { label: "Video", price: "1 credit" },
+                    { label: "Min. køb", price: "100 kr." },
                   ].map((row) => (
                     <div key={row.label} className="flex items-center justify-between text-sm">
                       <span className="text-slate-600">{row.label}</span>
