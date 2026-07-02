@@ -97,12 +97,18 @@ export async function restartVideoOrder(orderId: string): Promise<{ error?: stri
 
   try {
     const jobIds = await startVideoGeneration(imageUrls, order.title ?? "Bolig fremvisning");
+    if (!jobIds.length) {
+      await supabase.from("video_orders").update({ status: "failed" }).eq("id", orderId);
+      return { error: "Ingen videoer blev startet — tjek at GEMINI_API_KEY er korrekt og har adgang til Veo 2" };
+    }
     await supabase.from("video_orders").update({
       higgsfield_job_id: jobIds[0] ?? null,
       higgsfield_job_ids: jobIds,
     }).eq("id", orderId);
-  } catch {
-    // Generation start failed — stays in processing for poll-based retry
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    await supabase.from("video_orders").update({ status: "failed" }).eq("id", orderId);
+    return { error: `Generering fejlede: ${msg.slice(0, 200)}` };
   }
 
   revalidatePath("/videos");
