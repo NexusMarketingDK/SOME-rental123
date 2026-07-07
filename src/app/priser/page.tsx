@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Check, X, Sparkles, Zap, Building2, CreditCard } from "lucide-react";
+import { getCurrency } from "@/lib/locale-server";
+import { formatPriceKey } from "@/lib/currency";
 
 const FEATURES = [
   { label: "Generér SOME opslag (AI)", starter: true, pro: true, business: true },
@@ -36,7 +38,13 @@ function CheckItem({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function PriserPage() {
+export default async function PriserPage() {
+  const currency = await getCurrency();
+  const starterPrice = formatPriceKey("starter", currency);
+  const proPrice = formatPriceKey("pro", currency);
+  const businessMinPrice = formatPriceKey("businessMin", currency);
+  const businessMaxPrice = formatPriceKey("businessMax", currency);
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Minimal nav */}
@@ -114,8 +122,8 @@ export default function PriserPage() {
               <Zap size={12} /> Starter
             </div>
             <div className="mt-4 flex items-baseline gap-1">
-              <span className="text-4xl font-extrabold text-slate-900">199</span>
-              <span className="text-slate-500 text-sm">kr./md.</span>
+              <span className="text-4xl font-extrabold text-slate-900">{starterPrice}</span>
+              <span className="text-slate-500 text-sm">/md.</span>
             </div>
             <p className="mt-1 text-xs text-slate-400">Faktureres månedligt · inkl. moms</p>
             <p className="mt-3 text-sm text-slate-600">Del nemt til dine sociale medier med AI-genererede opslag og videoer.</p>
@@ -146,8 +154,8 @@ export default function PriserPage() {
               <Sparkles size={12} /> Pro
             </div>
             <div className="mt-4 flex items-baseline gap-1">
-              <span className="text-4xl font-extrabold text-[#1B3F7A]">799</span>
-              <span className="text-slate-500 text-sm">kr./md.</span>
+              <span className="text-4xl font-extrabold text-[#1B3F7A]">{proPrice}</span>
+              <span className="text-slate-500 text-sm">/md.</span>
             </div>
             <p className="mt-1 text-xs text-slate-400">Faktureres månedligt · inkl. moms</p>
             <p className="mt-3 text-sm text-slate-600">Publicér direkte fra platformen og administrér dine sociale medier.</p>
@@ -176,8 +184,8 @@ export default function PriserPage() {
               <Building2 size={12} /> Business
             </div>
             <div className="mt-4 flex items-baseline gap-1">
-              <span className="text-4xl font-extrabold text-slate-900">999</span>
-              <span className="text-slate-500 text-sm">–2.999 kr./md.</span>
+              <span className="text-4xl font-extrabold text-slate-900">{businessMinPrice}</span>
+              <span className="text-slate-500 text-sm">–{businessMaxPrice}/md.</span>
             </div>
             <p className="mt-1 text-xs text-slate-400">Bureauer og større virksomheder</p>
             <p className="mt-3 text-sm text-slate-600">Skalerbar løsning til teams med avancerede behov og prioriteret support.</p>

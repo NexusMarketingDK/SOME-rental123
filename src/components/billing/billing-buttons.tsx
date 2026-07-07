@@ -2,14 +2,14 @@
 
 import { createSubscriptionCheckout, createAiCreditCheckout, createVideoOrderCheckout, createBillingPortalSession } from "@/services/billing";
 
-export function SubscribeButton() {
+export function SubscribeButton({ price }: { price: string }) {
   return (
     <form action={createSubscriptionCheckout}>
       <button
         type="submit"
         className="rounded-lg bg-[#1B3F7A] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#152f5c] transition-colors"
       >
-        Start abonnement — 299 kr/md
+        Start abonnement — {price}/md
       </button>
     </form>
   );
@@ -29,14 +29,14 @@ export function BuyCreditsButton({ credits }: { credits: number }) {
   );
 }
 
-export function BuyVideoButton() {
+export function BuyVideoButton({ price }: { price: string }) {
   return (
     <form action={createVideoOrderCheckout}>
       <button
         type="submit"
         className="rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-600 transition-colors"
       >
-        Bestil video — 499 kr
+        Bestil video — {price}
       </button>
     </form>
   );

@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 import { LANDING, LOCALE_FLAGS, LOCALE_LABELS, LOCALE_PATHS, LOCALES } from "@/lib/i18n";
+import { currencyForLocale, formatPriceKey } from "@/lib/currency";
 
 function Pill({ children }: { children: React.ReactNode }) {
   return (
@@ -137,6 +138,7 @@ function LanguageSwitcher({ current }: { current: Locale }) {
 
 export function LandingPage({ locale }: { locale: Locale }) {
   const t = LANDING[locale];
+  const currency = currencyForLocale(locale);
 
   return (
     <div className="flex min-h-screen flex-col bg-white text-slate-900">
@@ -381,7 +383,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
               <div className="flex items-center justify-between rounded-2xl border border-orange-500/20 bg-orange-500/10 p-5">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider text-orange-400">{t.aiOnetimeLabel}</p>
-                  <p className="text-3xl font-bold text-white">€67 <span className="text-sm font-normal text-slate-400">/ video</span></p>
+                  <p className="text-3xl font-bold text-white">{formatPriceKey("video", currency)} <span className="text-sm font-normal text-slate-400">/ video</span></p>
                 </div>
                 <Link href="/signup" className="rounded-xl px-6 py-3 text-sm font-bold text-white shadow-lg transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}>
                   {t.aiOrderBtn}
@@ -457,7 +459,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
                 <Share2 size={12} /> {t.plan1Name}
               </div>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-[#1B3F7A]">€40</span>
+                <span className="text-4xl font-bold text-[#1B3F7A]">{formatPriceKey("subscription", currency)}</span>
                 <span className="text-slate-500">/mo</span>
               </div>
               <p className="text-xs text-slate-400">incl. VAT</p>
@@ -473,7 +475,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
                 <ImageIcon size={12} /> {t.plan2Name}
               </div>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-slate-900">€0.67</span>
+                <span className="text-4xl font-bold text-slate-900">{formatPriceKey("aiPost", currency, { decimals: true })}</span>
                 <span className="text-slate-500">/each</span>
               </div>
               <p className="text-xs text-slate-400">{t.plan2PayLabel}</p>
@@ -489,7 +491,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
                 <Video size={12} /> {t.plan3Name}
               </div>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-slate-900">€67</span>
+                <span className="text-4xl font-bold text-slate-900">{formatPriceKey("video", currency)}</span>
                 <span className="text-slate-500">/video</span>
               </div>
               <p className="text-xs text-slate-400">{t.plan3OnetimeLabel}</p>
