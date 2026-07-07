@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Play, Pause, Loader2, SlidersHorizontal } from "lucide-react";
+import { Play, Pause, Loader2, SlidersHorizontal, Move } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 
 // ── Types ───────────────────────────────────────────────────────────────────
@@ -13,12 +13,23 @@ export type Scene = { src: string; roomKey: RoomKey };
 
 type LoadedScene = { img: HTMLImageElement; roomKey: RoomKey };
 
+type Mode = "auto" | "explore";
+
 // ── Room labels per language ────────────────────────────────────────────────
 const ROOM_LABELS: Record<Locale, Record<RoomKey, string>> = {
   da: { facade: "Facade", entrance: "Entré", kitchen: "Køkken", living: "Stue", bedroom: "Soveværelse", bathroom: "Badeværelse", terrace: "Terrasse" },
   en: { facade: "Exterior", entrance: "Entrance", kitchen: "Kitchen", living: "Living room", bedroom: "Bedroom", bathroom: "Bathroom", terrace: "Terrace" },
   es: { facade: "Fachada", entrance: "Entrada", kitchen: "Cocina", living: "Salón", bedroom: "Dormitorio", bathroom: "Baño", terrace: "Terraza" },
   de: { facade: "Fassade", entrance: "Eingang", kitchen: "Küche", living: "Wohnzimmer", bedroom: "Schlafzimmer", bathroom: "Badezimmer", terrace: "Terrasse" },
+};
+
+const ROOM_WORD: Record<Locale, string> = { da: "Rum", en: "Room", es: "Sala", de: "Raum" };
+
+const HINTS: Record<Locale, string> = {
+  da: "Scroll eller ↑ ↓ for at gå frem og tilbage · bevæg musen for at se dig omkring",
+  en: "Scroll or ↑ ↓ to walk forward/back · move the mouse to look around",
+  es: "Desplázate o usa ↑ ↓ para avanzar/retroceder · mueve el ratón para mirar alrededor",
+  de: "Scrollen oder ↑ ↓ zum Vor-/Zurückgehen · Maus bewegen zum Umsehen",
 };
 
 // ── Color-grade filters (CSS filters on the canvas — GPU-accelerated) ──────
@@ -46,7 +57,7 @@ const DEFAULT_SCENES: Scene[] = [
   { src: "/walkthrough/07-terrace.svg", roomKey: "terrace" },
 ];
 
-// ── Timeline constants ──────────────────────────────────────────────────────
+// ── Auto-tour timeline ──────────────────────────────────────────────────────
 const SCENE_DUR = 6;   // seconds each room is on screen
 const FADE = 1.2;      // crossfade overlap between rooms
 
@@ -60,6 +71,18 @@ const KB_VARIANTS = [
   { z0: 1.08, z1: 1.22, p0: [0.5, 0.25], p1: [0.5, 0.75] },
   { z0: 1.22, z1: 1.08, p0: [0.35, 0.65], p1: [0.65, 0.35] },
 ] as const;
+
+// ── First-person explore tuning ─────────────────────────────────────────────
+const EXPLORE = {
+  minZoom: 1.12,     // depth 0 — just stepped into the room
+  maxZoom: 1.65,     // depth 1 — deep inside, about to walk through
+  lookX: 0.5,        // how far the view pans sideways at full look
+  lookY: 0.28,       // vertical look range
+  wheelStep: 0.0016, // depth per wheel deltaY unit
+  keyStep: 0.16,     // depth per arrow-key press
+  walkDur: 0.75,     // seconds for the walk-through room transition
+  parallax: 0.10,    // subtle mouse parallax while the auto tour plays
+};
 
 const easeInOut = (u: number) => 0.5 - 0.5 * Math.cos(Math.PI * u);
 const lerp = (a: number, b: number, u: number) => a + (b - a) * u;
@@ -98,21 +121,33 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
   const [scenes, setScenes] = useState<LoadedScene[]>([]);
   const [ready, setReady] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [mode, setMode] = useState<Mode>("auto");
   const [activeIdx, setActiveIdx] = useState(0);
   const [title, setTitle] = useState("Villa · Valencia, Spanien");
   const [filterKey, setFilterKey] = useState<FilterKey>("none");
 
   const activeFilter = FILTERS.find((f) => f.key === filterKey) ?? FILTERS[0];
 
-  // Mutable playback state, read inside the rAF loop.
-  const tRef = useRef(0);
+  // Mutable playback/interaction state, read inside the rAF loop.
+  const tRef = useRef(0);                                  // auto-tour clock
   const playingRef = useRef(false);
+  const modeRef = useRef<Mode>("auto");
   const scenesRef = useRef<LoadedScene[]>([]);
   const dirtyRef = useRef(true);
   const seekingRef = useRef(false);
 
+  // First-person explore state
+  const roomRef = useRef(0);                               // which room we're standing in
+  const depthRef = useRef(0.15);                           // 0 = doorway, 1 = about to pass through
+  const lookRef = useRef({ x: 0, y: 0 });                  // smoothed look direction (-1..1)
+  const lookTargetRef = useRef({ x: 0, y: 0 });
+  const dragRef = useRef<{ id: number; x: number; y: number } | null>(null);
+  const dragLookRef = useRef({ x: 0, y: 0 });              // extra look from dragging
+  const walkRef = useRef<{ from: number; to: number; u: number } | null>(null);
+
   useEffect(() => { scenesRef.current = scenes; }, [scenes]);
   useEffect(() => { playingRef.current = playing; }, [playing]);
+  useEffect(() => { modeRef.current = mode; }, [mode]);
 
   // ── Load the default (bundled) tour, then try to upgrade to listing photos ──
   useEffect(() => {
@@ -137,6 +172,7 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
         setReady(true);
         if (data.title) setTitle(data.title.slice(0, 60));
         tRef.current = Math.min(tRef.current, totalDuration(loaded.length) - 0.01);
+        roomRef.current = Math.min(roomRef.current, loaded.length - 1);
         dirtyRef.current = true;
       })
       .catch(() => { /* offline or blocked — bundled tour keeps working */ });
@@ -144,14 +180,13 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
     return () => { cancelled = true; };
   }, []);
 
-  // ── Canvas sizing (device-pixel-ratio aware) ──────────────────────────────
+  // ── Canvas sizing (supersampled for sharpness) ────────────────────────────
   useEffect(() => {
     const wrap = wrapRef.current;
     const canvas = canvasRef.current;
     if (!wrap || !canvas) return;
     const ro = new ResizeObserver(() => {
-      // Supersample: render at ≥2× CSS size (up to 3×) so the tour stays
-      // crisp even on 1× displays; the browser downscales for extra sharpness.
+      // Render at ≥2× CSS size (up to 3×) so the tour stays crisp on 1× displays.
       const scale = Math.min(Math.max(window.devicePixelRatio || 1, 2), 3);
       canvas.width = Math.round(wrap.clientWidth * scale);
       canvas.height = Math.round(wrap.clientHeight * scale);
@@ -161,85 +196,282 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
     return () => ro.disconnect();
   }, []);
 
-  // ── Autoplay when scrolled into view, pause when scrolled away ────────────
+  // ── Autoplay when scrolled into view (auto mode only) ─────────────────────
   useEffect(() => {
     const wrap = wrapRef.current;
     if (!wrap || !ready) return;
     const io = new IntersectionObserver(
-      ([entry]) => setPlaying(entry.isIntersecting),
+      ([entry]) => {
+        if (modeRef.current === "auto") setPlaying(entry.isIntersecting);
+        else if (!entry.isIntersecting) setPlaying(false);
+      },
       { threshold: 0.35 },
     );
     io.observe(wrap);
     return () => io.disconnect();
   }, [ready]);
 
+  // ── Mode switching ────────────────────────────────────────────────────────
+  const enterExplore = useCallback(() => {
+    if (modeRef.current === "explore") return;
+    // Stand in whichever room the auto tour is currently showing.
+    const n = scenesRef.current.length;
+    if (n > 0) {
+      const idx = clamp(Math.floor(tRef.current / (SCENE_DUR - FADE)), 0, n - 1);
+      roomRef.current = idx;
+    }
+    depthRef.current = 0.15;
+    dragLookRef.current = { x: 0, y: 0 };
+    walkRef.current = null;
+    modeRef.current = "explore";
+    setMode("explore");
+    setPlaying(false);
+    dirtyRef.current = true;
+  }, []);
+
+  const resumeAutoTour = useCallback(() => {
+    tRef.current = sceneStart(roomRef.current) + 0.01;
+    walkRef.current = null;
+    modeRef.current = "auto";
+    setMode("auto");
+    setPlaying(true);
+    dirtyRef.current = true;
+  }, []);
+
+  /** Walk through to an adjacent room (explore mode). */
+  const startWalk = useCallback((dir: 1 | -1) => {
+    const n = scenesRef.current.length;
+    if (walkRef.current || n === 0) return;
+    const to = roomRef.current + dir;
+    if (to < 0 || to >= n) {
+      // At the ends of the tour: stay in the room.
+      depthRef.current = clamp(depthRef.current, 0, 1);
+      return;
+    }
+    walkRef.current = { from: roomRef.current, to, u: 0 };
+    dirtyRef.current = true;
+  }, []);
+
+  const changeDepth = useCallback((delta: number) => {
+    if (walkRef.current) return; // ignore input mid-transition
+    const d = depthRef.current + delta;
+    if (d > 1) startWalk(1);
+    else if (d < 0) startWalk(-1);
+    else {
+      depthRef.current = d;
+      dirtyRef.current = true;
+    }
+  }, [startWalk]);
+
+  // ── Wheel = walk forward/back (non-passive so we can keep the page still) ──
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      enterExplore();
+      changeDepth(e.deltaY * EXPLORE.wheelStep);
+    };
+    wrap.addEventListener("wheel", onWheel, { passive: false });
+    return () => wrap.removeEventListener("wheel", onWheel);
+  }, [enterExplore, changeDepth]);
+
+  // ── Keyboard: arrows/WASD walk & look, space toggles the tour ─────────────
+  const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    const k = e.key;
+    if (k === " " || k === "Spacebar") {
+      e.preventDefault();
+      if (modeRef.current === "explore") resumeAutoTour();
+      else setPlaying((p) => !p);
+      return;
+    }
+    if (["ArrowUp", "w", "W"].includes(k)) {
+      e.preventDefault(); enterExplore(); changeDepth(EXPLORE.keyStep);
+    } else if (["ArrowDown", "s", "S"].includes(k)) {
+      e.preventDefault(); enterExplore(); changeDepth(-EXPLORE.keyStep);
+    } else if (["ArrowLeft", "a", "A"].includes(k)) {
+      e.preventDefault(); enterExplore();
+      dragLookRef.current.x = clamp(dragLookRef.current.x - 0.3, -1.2, 1.2);
+      dirtyRef.current = true;
+    } else if (["ArrowRight", "d", "D"].includes(k)) {
+      e.preventDefault(); enterExplore();
+      dragLookRef.current.x = clamp(dragLookRef.current.x + 0.3, -1.2, 1.2);
+      dirtyRef.current = true;
+    }
+  }, [enterExplore, changeDepth, resumeAutoTour]);
+
+  // ── Mouse look: hover = glance, drag = turn your head further ─────────────
+  const onCanvasPointerMove = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const nx = clamp(((e.clientX - rect.left) / rect.width - 0.5) * 2, -1, 1);
+    const ny = clamp(((e.clientY - rect.top) / rect.height - 0.5) * 2, -1, 1);
+
+    if (dragRef.current && e.pointerId === dragRef.current.id) {
+      const dx = e.clientX - dragRef.current.x;
+      const dy = e.clientY - dragRef.current.y;
+      dragRef.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
+      if (Math.abs(dx) + Math.abs(dy) > 2) enterExplore();
+      // Drag left → look right, like grabbing the scene.
+      dragLookRef.current.x = clamp(dragLookRef.current.x - (dx / rect.width) * 2.4, -1.2, 1.2);
+      dragLookRef.current.y = clamp(dragLookRef.current.y - (dy / rect.height) * 1.6, -1, 1);
+    }
+    lookTargetRef.current = { x: nx, y: ny };
+    dirtyRef.current = true;
+  }, [enterExplore]);
+
+  const onCanvasPointerDown = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragRef.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    wrapRef.current?.focus({ preventScroll: true });
+  }, []);
+
+  const onCanvasPointerUp = useCallback(() => { dragRef.current = null; }, []);
+  const onCanvasPointerLeave = useCallback(() => {
+    dragRef.current = null;
+    lookTargetRef.current = { x: 0, y: 0 };
+    dirtyRef.current = true;
+  }, []);
+
   // ── Render loop ───────────────────────────────────────────────────────────
   useEffect(() => {
     let raf = 0;
     let last = performance.now();
 
-    const drawScene = (
+    // Draw one room image with an explicit camera (zoom + pan position 0..1).
+    const drawCamera = (
       ctx: CanvasRenderingContext2D,
-      scene: LoadedScene,
-      idx: number,
-      t: number,
+      img: HTMLImageElement,
+      zoom: number,
+      px: number,
+      py: number,
       alpha: number,
       cw: number,
       ch: number,
     ) => {
-      const { img } = scene;
-      const u = easeInOut(clamp((t - sceneStart(idx)) / SCENE_DUR, 0, 1));
-      const kb = KB_VARIANTS[idx % KB_VARIANTS.length];
-      const zoom = lerp(kb.z0, kb.z1, u);
-      const px = lerp(kb.p0[0], kb.p1[0], u);
-      const py = lerp(kb.p0[1], kb.p1[1], u);
-
       const base = Math.max(cw / img.width, ch / img.height);
       const scale = base * zoom;
       const dw = img.width * scale;
       const dh = img.height * scale;
-      const x = -(dw - cw) * px;
-      const y = -(dh - ch) * py;
-
+      const x = -(dw - cw) * clamp(px, 0, 1);
+      const y = -(dh - ch) * clamp(py, 0, 1);
       ctx.globalAlpha = alpha;
       ctx.drawImage(img, x, y, dw, dh);
       ctx.globalAlpha = 1;
     };
 
+    // Camera for the auto tour's Ken Burns motion + gentle mouse parallax.
+    const autoCamera = (idx: number, t: number) => {
+      const u = easeInOut(clamp((t - sceneStart(idx)) / SCENE_DUR, 0, 1));
+      const kb = KB_VARIANTS[idx % KB_VARIANTS.length];
+      return {
+        zoom: lerp(kb.z0, kb.z1, u),
+        px: lerp(kb.p0[0], kb.p1[0], u) + lookRef.current.x * EXPLORE.parallax,
+        py: lerp(kb.p0[1], kb.p1[1], u) + lookRef.current.y * EXPLORE.parallax * 0.6,
+      };
+    };
+
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);
-      const dt = (now - last) / 1000;
+      const dt = Math.min((now - last) / 1000, 0.1);
       last = now;
 
       const list = scenesRef.current;
       const canvas = canvasRef.current;
       if (!canvas || list.length === 0) return;
+      const n = list.length;
+      const total = totalDuration(n);
+      const explore = modeRef.current === "explore";
 
-      const total = totalDuration(list.length);
-      if (playingRef.current && !seekingRef.current) {
+      // Advance the auto tour clock.
+      if (!explore && playingRef.current && !seekingRef.current) {
         tRef.current = (tRef.current + dt) % total; // loop the tour
         dirtyRef.current = true;
       }
+
+      // Smooth the look direction toward its target.
+      const k = 1 - Math.exp(-dt * 5);
+      const look = lookRef.current;
+      const tx = clamp(lookTargetRef.current.x + dragLookRef.current.x, -1.3, 1.3);
+      const ty = clamp(lookTargetRef.current.y + dragLookRef.current.y, -1.1, 1.1);
+      if (Math.abs(look.x - tx) > 0.001 || Math.abs(look.y - ty) > 0.001) {
+        look.x = lerp(look.x, tx, k);
+        look.y = lerp(look.y, ty, k);
+        dirtyRef.current = true;
+      }
+
+      // Advance a walk-through transition.
+      const walk = walkRef.current;
+      if (walk) {
+        walk.u = Math.min(walk.u + dt / EXPLORE.walkDur, 1);
+        dirtyRef.current = true;
+        if (walk.u >= 1) {
+          roomRef.current = walk.to;
+          depthRef.current = walk.to > walk.from ? 0.08 : 0.85;
+          walkRef.current = null;
+        }
+      }
+
       if (!dirtyRef.current) return;
       dirtyRef.current = false;
 
-      const t = tRef.current;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
       const cw = canvas.width;
       const ch = canvas.height;
-
-      // Which scene(s) are on screen — at most two during a crossfade.
-      const idx = clamp(Math.floor(t / (SCENE_DUR - FADE)), 0, list.length - 1);
-      const nextIdx = idx + 1;
-      const nextT = nextIdx < list.length ? t - sceneStart(nextIdx) : -1;
-
       ctx.clearRect(0, 0, cw, ch);
-      drawScene(ctx, list[idx], idx, t, 1, cw, ch);
-      if (nextT >= 0) {
-        drawScene(ctx, list[nextIdx], nextIdx, t, clamp(nextT / FADE, 0, 1), cw, ch);
+
+      let visIdx: number;
+
+      if (!explore) {
+        // ── Auto tour: Ken Burns timeline with crossfades ──
+        const t = tRef.current;
+        const idx = clamp(Math.floor(t / (SCENE_DUR - FADE)), 0, n - 1);
+        const nextIdx = idx + 1;
+        const nextT = nextIdx < n ? t - sceneStart(nextIdx) : -1;
+
+        const cam = autoCamera(idx, t);
+        drawCamera(ctx, list[idx].img, cam.zoom, cam.px, cam.py, 1, cw, ch);
+        if (nextT >= 0) {
+          const cam2 = autoCamera(nextIdx, t);
+          drawCamera(ctx, list[nextIdx].img, cam2.zoom, cam2.px, cam2.py, clamp(nextT / FADE, 0, 1), cw, ch);
+        }
+
+        visIdx = nextT >= 0 && nextT / FADE > 0.5 ? nextIdx : idx;
+        if (fillRef.current) fillRef.current.style.width = `${(t / total) * 100}%`;
+        if (timeRef.current) timeRef.current.textContent = `${formatTime(t)} / ${formatTime(total)}`;
+      } else {
+        // ── First-person explore: stand in the room, look around, walk ──
+        const px = 0.5 + look.x * EXPLORE.lookX;
+        const py = 0.5 + look.y * EXPLORE.lookY;
+
+        if (walk) {
+          const u = easeInOut(walk.u);
+          const forward = walk.to > walk.from;
+          if (forward) {
+            // Push deeper into the current room while the next one opens up.
+            const zOut = lerp(EXPLORE.maxZoom, EXPLORE.maxZoom + 0.5, u);
+            const zIn = lerp(EXPLORE.minZoom - 0.06, EXPLORE.minZoom + 0.08 * 0.5, u);
+            drawCamera(ctx, list[walk.from].img, zOut, px, py, 1 - u, cw, ch);
+            drawCamera(ctx, list[walk.to].img, zIn, px, py, u, cw, ch);
+          } else {
+            // Step back out: current room recedes, previous room closes in.
+            const zOut = lerp(EXPLORE.minZoom, EXPLORE.minZoom - 0.08, u);
+            const zIn = lerp(EXPLORE.maxZoom + 0.3, lerp(EXPLORE.minZoom, EXPLORE.maxZoom, 0.85), u);
+            drawCamera(ctx, list[walk.from].img, zOut, px, py, 1 - u, cw, ch);
+            drawCamera(ctx, list[walk.to].img, zIn, px, py, u, cw, ch);
+          }
+          visIdx = walk.u > 0.5 ? walk.to : walk.from;
+        } else {
+          const zoom = lerp(EXPLORE.minZoom, EXPLORE.maxZoom, easeInOut(depthRef.current));
+          drawCamera(ctx, list[roomRef.current].img, zoom, px, py, 1, cw, ch);
+          visIdx = roomRef.current;
+        }
+
+        const progress = (clamp(visIdx + (walk ? walk.u : depthRef.current), 0, n)) / n;
+        if (fillRef.current) fillRef.current.style.width = `${progress * 100}%`;
+        if (timeRef.current) timeRef.current.textContent = `${ROOM_WORD[locale] ?? "Rum"} ${visIdx + 1} / ${n}`;
       }
 
       // Soft vignette at the bottom so overlaid controls stay readable.
@@ -249,23 +481,24 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
       ctx.fillStyle = grad;
       ctx.fillRect(0, ch * 0.72, cw, ch * 0.28);
 
-      // Update lightweight UI directly (no React re-render at 60 fps).
-      const visIdx = nextT >= 0 && nextT / FADE > 0.5 ? nextIdx : idx;
       setActiveIdx((prev) => (prev === visIdx ? prev : visIdx));
-      if (fillRef.current) fillRef.current.style.width = `${(t / total) * 100}%`;
-      if (timeRef.current) timeRef.current.textContent = `${formatTime(t)} / ${formatTime(total)}`;
     };
 
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [locale]);
 
-  // ── Seeking ───────────────────────────────────────────────────────────────
+  // ── Progress-bar seeking (returns to the auto tour) ───────────────────────
   const seekToFraction = useCallback((clientX: number, track: HTMLDivElement) => {
     const rect = track.getBoundingClientRect();
     const frac = clamp((clientX - rect.left) / rect.width, 0, 1);
     const total = totalDuration(scenesRef.current.length);
     tRef.current = clamp(frac * total, 0, total - 0.01);
+    if (modeRef.current !== "auto") {
+      walkRef.current = null;
+      modeRef.current = "auto";
+      setMode("auto");
+    }
     dirtyRef.current = true;
   }, []);
 
@@ -289,12 +522,28 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
   const onTrackPointerUp = useCallback(() => { seekingRef.current = false; }, []);
 
   const jumpToScene = useCallback((i: number) => {
-    tRef.current = sceneStart(i) + 0.01;
-    dirtyRef.current = true;
-    setPlaying(true);
+    if (modeRef.current === "explore") {
+      // Step directly into that room.
+      roomRef.current = i;
+      depthRef.current = 0.12;
+      dragLookRef.current = { x: 0, y: 0 };
+      walkRef.current = null;
+      dirtyRef.current = true;
+      setActiveIdx(i);
+    } else {
+      tRef.current = sceneStart(i) + 0.01;
+      dirtyRef.current = true;
+      setPlaying(true);
+    }
   }, []);
 
+  const onPlayButton = useCallback(() => {
+    if (modeRef.current === "explore") resumeAutoTour();
+    else setPlaying((p) => !p);
+  }, [resumeAutoTour]);
+
   const currentRoom = scenes[activeIdx] ? labels[scenes[activeIdx].roomKey] : "";
+  const showPlayIcon = mode === "explore" || !playing;
 
   return (
     <div className="flex w-full flex-col items-center gap-4">
@@ -303,82 +552,105 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
         <div className="pointer-events-none absolute left-1/2 top-3 z-20 h-5 w-24 -translate-x-1/2 rounded-full bg-black" />
         <div
           ref={wrapRef}
-          className="relative w-full select-none overflow-hidden bg-[#0a1428]"
+          tabIndex={0}
+          role="application"
+          aria-label="Interactive walkthrough"
+          onKeyDown={onKeyDown}
+          className="relative w-full select-none overflow-hidden bg-[#0a1428] outline-none"
           style={{ aspectRatio: "9 / 16" }}
         >
           <canvas
             ref={canvasRef}
-            className="absolute inset-0 h-full w-full"
+            className="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing"
             style={activeFilter.css ? { filter: activeFilter.css } : undefined}
+            onPointerMove={onCanvasPointerMove}
+            onPointerDown={onCanvasPointerDown}
+            onPointerUp={onCanvasPointerUp}
+            onPointerCancel={onCanvasPointerUp}
+            onPointerLeave={onCanvasPointerLeave}
           />
 
-        {/* Top overlay: title + current room (below the phone notch) */}
-        <div className="pointer-events-none absolute left-0 right-0 top-0 bg-gradient-to-b from-black/60 to-transparent p-3 pt-9">
-          <p className="truncate text-[11px] font-semibold text-white">{title}</p>
-          <span className="mt-1 inline-block rounded-full bg-white/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
-            {currentRoom}
-          </span>
-        </div>
-
-        {/* Loading state */}
-        {!ready && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Loader2 size={28} className="animate-spin text-orange-300" />
+          {/* Top overlay: title + current room (below the phone notch) */}
+          <div className="pointer-events-none absolute left-0 right-0 top-0 bg-gradient-to-b from-black/60 to-transparent p-3 pt-9">
+            <p className="truncate text-[11px] font-semibold text-white">{title}</p>
+            <div className="mt-1 flex items-center gap-1.5">
+              <span className="inline-block rounded-full bg-white/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+                {currentRoom}
+              </span>
+              {mode === "explore" && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-orange-500/25 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-orange-300 backdrop-blur-sm">
+                  <Move size={8} /> Walk
+                </span>
+              )}
+            </div>
           </div>
-        )}
 
-        {/* Center play button when paused */}
-        {ready && !playing && (
-          <button
-            type="button"
-            aria-label="Play"
-            onClick={() => setPlaying(true)}
-            className="absolute inset-0 m-auto flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-sm transition-transform hover:scale-105"
-          >
-            <Play size={22} className="ml-0.5 text-white" fill="white" />
-          </button>
-        )}
+          {/* Loading state */}
+          {!ready && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Loader2 size={28} className="animate-spin text-orange-300" />
+            </div>
+          )}
 
-        {/* Bottom controls: play/pause + scrubber + time */}
-        {ready && (
-          <div className="absolute bottom-0 left-0 right-0 flex items-center gap-2 p-3">
+          {/* Center play button when the auto tour is paused */}
+          {ready && !playing && mode === "auto" && (
             <button
               type="button"
-              aria-label={playing ? "Pause" : "Play"}
-              onClick={() => setPlaying((p) => !p)}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-colors hover:bg-white/30"
+              aria-label="Play"
+              onClick={() => setPlaying(true)}
+              className="absolute inset-0 m-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-sm transition-transform hover:scale-105"
             >
-              {playing ? <Pause size={12} fill="white" /> : <Play size={12} className="ml-0.5" fill="white" />}
+              <Play size={26} className="ml-0.5 text-white" fill="white" />
             </button>
-            <div
-              role="slider"
-              aria-label="Progress"
-              aria-valuemin={0}
-              aria-valuemax={scenes.length}
-              aria-valuenow={activeIdx}
-              onPointerDown={onTrackPointerDown}
-              onPointerMove={onTrackPointerMove}
-              onPointerUp={onTrackPointerUp}
-              className="group flex h-6 flex-1 cursor-pointer touch-none items-center"
-            >
-              <div className="relative h-1 w-full overflow-hidden rounded-full bg-white/25 transition-all group-hover:h-1.5">
-                <div
-                  ref={fillRef}
-                  className="absolute left-0 top-0 h-full rounded-full"
-                  style={{ width: "0%", background: "linear-gradient(90deg, #FFB36B, #FF6B4A)" }}
-                />
+          )}
+
+          {/* Bottom controls: play/pause + scrubber + status */}
+          {ready && (
+            <div className="absolute bottom-0 left-0 right-0 flex items-center gap-2 p-3">
+              <button
+                type="button"
+                aria-label={showPlayIcon ? "Play" : "Pause"}
+                onClick={onPlayButton}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-colors hover:bg-white/30"
+              >
+                {showPlayIcon
+                  ? <Play size={13} className="ml-0.5" fill="white" />
+                  : <Pause size={13} fill="white" />}
+              </button>
+              <div
+                role="slider"
+                aria-label="Progress"
+                aria-valuemin={0}
+                aria-valuemax={scenes.length}
+                aria-valuenow={activeIdx}
+                onPointerDown={onTrackPointerDown}
+                onPointerMove={onTrackPointerMove}
+                onPointerUp={onTrackPointerUp}
+                className="group flex h-6 flex-1 cursor-pointer touch-none items-center"
+              >
+                <div className="relative h-1 w-full overflow-hidden rounded-full bg-white/25 transition-all group-hover:h-1.5">
+                  <div
+                    ref={fillRef}
+                    className="absolute left-0 top-0 h-full rounded-full"
+                    style={{ width: "0%", background: "linear-gradient(90deg, #FFB36B, #FF6B4A)" }}
+                  />
+                </div>
               </div>
+              <span ref={timeRef} className="shrink-0 text-[10px] font-medium tabular-nums text-white/80">
+                0:00 / 0:00
+              </span>
             </div>
-            <span ref={timeRef} className="shrink-0 text-[9px] font-medium tabular-nums text-white/80">
-              0:00 / 0:00
-            </span>
-          </div>
-        )}
+          )}
         </div>
       </div>
 
-      {/* ── Room chips: click to jump to that part of the tour ── */}
-      <div className="flex max-w-[320px] flex-wrap justify-center gap-1.5">
+      {/* ── Interaction hint ── */}
+      <p className="max-w-[340px] text-center text-[10px] leading-relaxed text-slate-500">
+        {HINTS[locale] ?? HINTS.da}
+      </p>
+
+      {/* ── Room chips: click to step into that room ── */}
+      <div className="flex max-w-[360px] flex-wrap justify-center gap-1.5">
         {scenes.map((s, i) => (
           <button
             key={`${s.roomKey}-${i}`}
@@ -397,7 +669,7 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
       </div>
 
       {/* ── Filter picker: try different color grades on the tour ── */}
-      <div className="flex max-w-[320px] flex-wrap items-center justify-center gap-1.5">
+      <div className="flex max-w-[360px] flex-wrap items-center justify-center gap-1.5">
         <SlidersHorizontal size={12} className="shrink-0 text-slate-500" aria-hidden />
         {FILTERS.map((f) => (
           <button

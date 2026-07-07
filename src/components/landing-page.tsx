@@ -312,7 +312,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
               <div className="relative">
                 <div className="absolute inset-0 scale-90 rounded-[2.5rem] opacity-40 blur-2xl" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }} />
                 {/* Interactive cinematic walkthrough prototype (canvas Ken Burns tour) */}
-                <div className="relative mx-auto w-[260px]">
+                <div className="relative mx-auto w-[300px] md:w-[340px]">
                   <CinematicWalkthrough locale={locale} />
                 </div>
                 <div className="absolute -right-8 top-12 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md">
