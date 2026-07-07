@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Play, Pause, Loader2 } from "lucide-react";
+import { Play, Pause, Loader2, SlidersHorizontal } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 
 // ── Types ───────────────────────────────────────────────────────────────────
@@ -20,6 +20,19 @@ const ROOM_LABELS: Record<Locale, Record<RoomKey, string>> = {
   es: { facade: "Fachada", entrance: "Entrada", kitchen: "Cocina", living: "Salón", bedroom: "Dormitorio", bathroom: "Baño", terrace: "Terraza" },
   de: { facade: "Fassade", entrance: "Eingang", kitchen: "Küche", living: "Wohnzimmer", bedroom: "Schlafzimmer", bathroom: "Badezimmer", terrace: "Terrasse" },
 };
+
+// ── Color-grade filters (CSS filters on the canvas — GPU-accelerated) ──────
+type FilterKey = "none" | "cinematic" | "warm" | "cool" | "vivid" | "vintage" | "mono";
+
+const FILTERS: { key: FilterKey; css: string; label: Record<Locale, string> }[] = [
+  { key: "none", css: "", label: { da: "Ingen", en: "None", es: "Ninguno", de: "Ohne" } },
+  { key: "cinematic", css: "contrast(1.1) saturate(1.18) brightness(1.03)", label: { da: "Cinematic", en: "Cinematic", es: "Cinematic", de: "Cinematic" } },
+  { key: "warm", css: "sepia(0.22) saturate(1.35) contrast(1.06) brightness(1.04)", label: { da: "Varm", en: "Warm", es: "Cálido", de: "Warm" } },
+  { key: "cool", css: "hue-rotate(-10deg) saturate(1.12) contrast(1.08) brightness(1.02)", label: { da: "Kølig", en: "Cool", es: "Frío", de: "Kühl" } },
+  { key: "vivid", css: "saturate(1.5) contrast(1.12)", label: { da: "Levende", en: "Vivid", es: "Vívido", de: "Lebendig" } },
+  { key: "vintage", css: "sepia(0.35) contrast(0.98) brightness(1.06) saturate(1.15)", label: { da: "Vintage", en: "Vintage", es: "Vintage", de: "Vintage" } },
+  { key: "mono", css: "grayscale(1) contrast(1.12) brightness(1.05)", label: { da: "S/H", en: "B/W", es: "B/N", de: "S/W" } },
+];
 
 // The default tour: bundled placeholder art that always works offline.
 // Upgraded at runtime with real listing photos from /api/walkthrough-images.
@@ -87,6 +100,9 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
   const [playing, setPlaying] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
   const [title, setTitle] = useState("Villa · Valencia, Spanien");
+  const [filterKey, setFilterKey] = useState<FilterKey>("none");
+
+  const activeFilter = FILTERS.find((f) => f.key === filterKey) ?? FILTERS[0];
 
   // Mutable playback state, read inside the rAF loop.
   const tRef = useRef(0);
@@ -134,9 +150,11 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
     const canvas = canvasRef.current;
     if (!wrap || !canvas) return;
     const ro = new ResizeObserver(() => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.round(wrap.clientWidth * dpr);
-      canvas.height = Math.round(wrap.clientHeight * dpr);
+      // Supersample: render at ≥2× CSS size (up to 3×) so the tour stays
+      // crisp even on 1× displays; the browser downscales for extra sharpness.
+      const scale = Math.min(Math.max(window.devicePixelRatio || 1, 2), 3);
+      canvas.width = Math.round(wrap.clientWidth * scale);
+      canvas.height = Math.round(wrap.clientHeight * scale);
       dirtyRef.current = true;
     });
     ro.observe(wrap);
@@ -208,6 +226,8 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
       const t = tRef.current;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
       const cw = canvas.width;
       const ch = canvas.height;
 
@@ -286,7 +306,11 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
           className="relative w-full select-none overflow-hidden bg-[#0a1428]"
           style={{ aspectRatio: "9 / 16" }}
         >
-          <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 h-full w-full"
+            style={activeFilter.css ? { filter: activeFilter.css } : undefined}
+          />
 
         {/* Top overlay: title + current room (below the phone notch) */}
         <div className="pointer-events-none absolute left-0 right-0 top-0 bg-gradient-to-b from-black/60 to-transparent p-3 pt-9">
@@ -368,6 +392,26 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
             style={i === activeIdx ? { background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" } : undefined}
           >
             {labels[s.roomKey]}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Filter picker: try different color grades on the tour ── */}
+      <div className="flex max-w-[320px] flex-wrap items-center justify-center gap-1.5">
+        <SlidersHorizontal size={12} className="shrink-0 text-slate-500" aria-hidden />
+        {FILTERS.map((f) => (
+          <button
+            key={f.key}
+            type="button"
+            aria-pressed={f.key === filterKey}
+            onClick={() => setFilterKey(f.key)}
+            className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold transition-all ${
+              f.key === filterKey
+                ? "border border-orange-400/60 bg-orange-500/15 text-orange-300"
+                : "border border-white/10 bg-white/5 text-slate-500 hover:bg-white/10 hover:text-white"
+            }`}
+          >
+            {f.label[locale] ?? f.label.da}
           </button>
         ))}
       </div>

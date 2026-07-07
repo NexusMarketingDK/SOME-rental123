@@ -31,13 +31,13 @@ const ROOM_KEYWORDS: Record<RoomKey, RegExp> = {
 // can't be scraped. Hotlinked from Unsplash; the client preloads and only
 // swaps them in if they actually load.
 const PHOTO_FALLBACK: Scene[] = [
-  { src: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1080&q=80", roomKey: "facade" },
-  { src: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1080&q=80", roomKey: "entrance" },
-  { src: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=1080&q=80", roomKey: "kitchen" },
-  { src: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1080&q=80", roomKey: "living" },
-  { src: "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=1080&q=80", roomKey: "bedroom" },
-  { src: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=1080&q=80", roomKey: "bathroom" },
-  { src: "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1080&q=80", roomKey: "terrace" },
+  { src: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=85", roomKey: "facade" },
+  { src: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1600&q=85", roomKey: "entrance" },
+  { src: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=1600&q=85", roomKey: "kitchen" },
+  { src: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1600&q=85", roomKey: "living" },
+  { src: "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=1600&q=85", roomKey: "bedroom" },
+  { src: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=1600&q=85", roomKey: "bathroom" },
+  { src: "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1600&q=85", roomKey: "terrace" },
 ];
 
 type Payload = {
