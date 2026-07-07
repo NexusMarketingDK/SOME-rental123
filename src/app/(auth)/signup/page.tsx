@@ -9,6 +9,7 @@ export default function SignupPage() {
       pendingLabel="Creating account…"
       title="Create your account"
       description="Start scheduling posts for your vacation rentals."
+      showPreferences
       footer={{
         text: "Already have an account?",
         linkLabel: "Log in",

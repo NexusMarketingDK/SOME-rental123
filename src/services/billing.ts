@@ -3,8 +3,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getStripe, subscriptionLineItem } from "@/lib/stripe";
-import { getLocale } from "@/lib/locale-server";
-import { currencyForLocale, priceAmount } from "@/lib/currency";
+import { getLocale, getCurrency } from "@/lib/locale-server";
+import { priceAmount } from "@/lib/currency";
 
 export async function getSubscription() {
   const supabase = await createClient();
@@ -43,8 +43,7 @@ export async function createSubscriptionCheckout(): Promise<void> {
   if (!user) redirect("/login");
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://some-rental123.vercel.app";
-  const locale = await getLocale();
-  const currency = currencyForLocale(locale);
+  const [locale, currency] = await Promise.all([getLocale(), getCurrency()]);
 
   // Get or create Stripe customer
   let customerId: string;
@@ -81,8 +80,7 @@ export async function createAiCreditCheckout(formData: FormData): Promise<void> 
   if (!user) redirect("/login");
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://some-rental123.vercel.app";
-  const locale = await getLocale();
-  const currency = currencyForLocale(locale);
+  const [locale, currency] = await Promise.all([getLocale(), getCurrency()]);
 
   const session = await getStripe().checkout.sessions.create({
     mode: "payment",

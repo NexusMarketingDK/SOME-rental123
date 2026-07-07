@@ -1,8 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import type { AuthFormState } from "@/types/auth";
+import { LOCALES, LOCALE_FLAGS, LOCALE_LABELS, type Locale } from "@/lib/i18n";
+import { CURRENCIES, CURRENCY_LABELS, currencyForLocale, type Currency } from "@/lib/currency";
 
 interface AuthFormProps {
   action: (
@@ -14,9 +16,14 @@ interface AuthFormProps {
   title: string;
   description: string;
   footer: { text: string; linkLabel: string; href: string };
+  /** Show language + currency pickers (used on signup). */
+  showPreferences?: boolean;
 }
 
 const initialState: AuthFormState = {};
+
+const selectClass =
+  "rounded-lg border border-[#E7E2D9] bg-white px-3 py-2 text-sm text-[#1B1B1F] outline-none focus:border-[#FF6B4A] focus:ring-1 focus:ring-[#FF6B4A]";
 
 export function AuthForm({
   action,
@@ -25,11 +32,21 @@ export function AuthForm({
   title,
   description,
   footer,
+  showPreferences = false,
 }: AuthFormProps) {
   const [state, formAction, isPending] = useActionState(
     action,
     initialState
   );
+
+  const [locale, setLocale] = useState<Locale>("da");
+  const [currency, setCurrency] = useState<Currency>("dkk");
+
+  // Default the currency to match the chosen language; the user can override it.
+  function onLocaleChange(next: Locale) {
+    setLocale(next);
+    setCurrency(currencyForLocale(next));
+  }
 
   return (
     <div>
@@ -76,6 +93,47 @@ export function AuthForm({
             className="rounded-lg border border-[#E7E2D9] bg-white px-3 py-2 text-sm text-[#1B1B1F] outline-none focus:border-[#FF6B4A] focus:ring-1 focus:ring-[#FF6B4A]"
           />
         </div>
+
+        {showPreferences && (
+          <div className="flex gap-3">
+            <div className="flex flex-1 flex-col gap-1.5">
+              <label htmlFor="locale" className="text-sm font-medium text-[#1B1B1F]">
+                Language
+              </label>
+              <select
+                id="locale"
+                name="locale"
+                value={locale}
+                onChange={(e) => onLocaleChange(e.target.value as Locale)}
+                className={selectClass}
+              >
+                {LOCALES.map((loc) => (
+                  <option key={loc} value={loc}>
+                    {LOCALE_FLAGS[loc]} {LOCALE_LABELS[loc]}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-1 flex-col gap-1.5">
+              <label htmlFor="currency" className="text-sm font-medium text-[#1B1B1F]">
+                Currency
+              </label>
+              <select
+                id="currency"
+                name="currency"
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value as Currency)}
+                className={selectClass}
+              >
+                {CURRENCIES.map((cur) => (
+                  <option key={cur} value={cur}>
+                    {CURRENCY_LABELS[cur]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
 
         {state?.error && (
           <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">

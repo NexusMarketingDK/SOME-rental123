@@ -3,6 +3,22 @@ import type { Locale } from "./i18n";
 // ── Currency ────────────────────────────────────────────────────────────────
 export type Currency = "dkk" | "eur";
 
+export const CURRENCIES: Currency[] = ["dkk", "eur"];
+
+export const CURRENCY_LABELS: Record<Currency, string> = {
+  dkk: "DKK (kr.)",
+  eur: "EUR (€)",
+};
+
+export function isCurrency(value: unknown): value is Currency {
+  return value === "dkk" || value === "eur";
+}
+
+/** Validate a raw value to a Currency, falling back when it's not one. */
+export function coerceCurrency(value: unknown, fallback: Currency = "eur"): Currency {
+  return isCurrency(value) ? value : fallback;
+}
+
 /**
  * Which currency a visitor is billed & shown prices in, based on their language.
  * Danish users use DKK; everyone else uses EUR.
