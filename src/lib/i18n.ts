@@ -2,6 +2,15 @@ export type Locale = "da" | "en" | "es" | "de";
 
 export const LOCALES: Locale[] = ["da", "en", "es", "de"];
 
+export function isLocale(value: unknown): value is Locale {
+  return typeof value === "string" && (LOCALES as string[]).includes(value);
+}
+
+/** Validate a raw value to a Locale, falling back when it's not one. */
+export function coerceLocale(value: unknown, fallback: Locale = "da"): Locale {
+  return isLocale(value) ? value : fallback;
+}
+
 export const LOCALE_LABELS: Record<Locale, string> = {
   da: "Dansk",
   en: "English",

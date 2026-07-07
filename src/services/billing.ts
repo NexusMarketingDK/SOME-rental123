@@ -2,7 +2,9 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getStripe, PLANS, PRICES } from "@/lib/stripe";
+import { getStripe, subscriptionLineItem } from "@/lib/stripe";
+import { getLocale, getCurrency } from "@/lib/locale-server";
+import { priceAmount } from "@/lib/currency";
 
 export async function getSubscription() {
   const supabase = await createClient();
@@ -41,6 +43,7 @@ export async function createSubscriptionCheckout(): Promise<void> {
   if (!user) redirect("/login");
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://some-rental123.vercel.app";
+  const [locale, currency] = await Promise.all([getLocale(), getCurrency()]);
 
   // Get or create Stripe customer
   let customerId: string;
@@ -60,12 +63,11 @@ export async function createSubscriptionCheckout(): Promise<void> {
   const session = await getStripe().checkout.sessions.create({
     customer: customerId,
     mode: "subscription",
-    line_items: [{ price: PLANS.social.priceId, quantity: 1 }],
+    line_items: [subscriptionLineItem(currency)],
     success_url: `${appUrl}/dashboard?payment=success`,
     cancel_url: `${appUrl}/billing`,
     metadata: { user_id: user.id },
-    locale: "da",
-    currency: "dkk",
+    locale,
   });
 
   redirect(session.url!);
@@ -78,21 +80,22 @@ export async function createAiCreditCheckout(formData: FormData): Promise<void> 
   if (!user) redirect("/login");
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://some-rental123.vercel.app";
+  const [locale, currency] = await Promise.all([getLocale(), getCurrency()]);
 
   const session = await getStripe().checkout.sessions.create({
     mode: "payment",
     line_items: [{
       price_data: {
-        currency: "dkk",
+        currency,
         product_data: { name: `${credits} AI opslag credits` },
-        unit_amount: PRICES.aiPost * credits,
+        unit_amount: priceAmount("aiPost", currency) * credits,
       },
       quantity: 1,
     }],
     success_url: `${appUrl}/billing?payment=success`,
     cancel_url: `${appUrl}/billing`,
     metadata: { user_id: user.id, type: "ai_credits", credits: String(credits) },
-    locale: "da",
+    locale,
   });
 
   redirect(session.url!);

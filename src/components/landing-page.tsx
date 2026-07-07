@@ -6,6 +6,8 @@ import {
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 import { LANDING, LOCALE_FLAGS, LOCALE_LABELS, LOCALE_PATHS, LOCALES } from "@/lib/i18n";
+import { currencyForLocale, formatPriceKey } from "@/lib/currency";
+import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
 
 function Pill({ children }: { children: React.ReactNode }) {
   return (
@@ -137,6 +139,7 @@ function LanguageSwitcher({ current }: { current: Locale }) {
 
 export function LandingPage({ locale }: { locale: Locale }) {
   const t = LANDING[locale];
+  const currency = currencyForLocale(locale);
 
   return (
     <div className="flex min-h-screen flex-col bg-white text-slate-900">
@@ -308,41 +311,15 @@ export function LandingPage({ locale }: { locale: Locale }) {
             <div className="flex justify-center">
               <div className="relative">
                 <div className="absolute inset-0 scale-90 rounded-[2.5rem] opacity-40 blur-2xl" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }} />
-                <div className="relative mx-auto w-[220px] overflow-hidden rounded-[2.5rem] border-4 border-white/10 bg-black shadow-2xl">
-                  <div className="absolute left-1/2 top-3 z-10 h-5 w-24 -translate-x-1/2 rounded-full bg-black" />
-                  <div className="relative aspect-[9/16] overflow-hidden" style={{ background: "linear-gradient(160deg, #1a2540 0%, #0d1520 100%)" }}>
-                    <div className="absolute inset-0">
-                      <img src="https://d8j0ntlcm91z4.cloudfront.net/user_3FimRw5snqnWCSryULAZQYDRUt3/hf_20260628_010551_53f64722-cfad-4a28-a4b6-b6f9e903fc1b.png" alt="" className="h-full w-full object-cover" />
-                    </div>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/30">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-sm">
-                        <Play size={22} className="text-white" fill="white" />
-                      </div>
-                      <div className="mt-2 px-4 text-center">
-                        <p className="text-[10px] font-semibold text-white/90">{t.mockupLabel}</p>
-                        <p className="text-[9px] text-white/60">{t.mockupSub}</p>
-                      </div>
-                    </div>
-                    <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/80 to-transparent" />
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5">
-                          <div className="h-1.5 w-1.5 rounded-full bg-red-500" />
-                          <span className="text-[9px] font-medium text-white">REELS READY</span>
-                        </div>
-                        <span className="text-[9px] text-white/70">0:28</span>
-                      </div>
-                      <div className="mt-1.5 h-0.5 overflow-hidden rounded-full bg-white/20">
-                        <div className="h-full w-2/3 rounded-full" style={{ background: "linear-gradient(90deg, #FFB36B, #FF6B4A)" }} />
-                      </div>
-                    </div>
-                  </div>
+                {/* Interactive cinematic walkthrough prototype (canvas Ken Burns tour) */}
+                <div className="relative mx-auto w-[300px] md:w-[340px]">
+                  <CinematicWalkthrough locale={locale} />
                 </div>
                 <div className="absolute -right-8 top-12 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md">
                   <p className="text-[10px] font-semibold text-white">9:16 format</p>
                   <p className="text-[9px] text-slate-400">Reels & TikTok</p>
                 </div>
-                <div className="absolute -left-8 bottom-16 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md">
+                <div className="absolute -left-10 top-80 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md">
                   <p className="text-[10px] font-semibold text-emerald-400">✓ Ready in 15 min</p>
                   <p className="text-[9px] text-slate-400">AI generates</p>
                 </div>
@@ -381,7 +358,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
               <div className="flex items-center justify-between rounded-2xl border border-orange-500/20 bg-orange-500/10 p-5">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider text-orange-400">{t.aiOnetimeLabel}</p>
-                  <p className="text-3xl font-bold text-white">€67 <span className="text-sm font-normal text-slate-400">/ video</span></p>
+                  <p className="text-3xl font-bold text-white">{formatPriceKey("video", currency)} <span className="text-sm font-normal text-slate-400">/ video</span></p>
                 </div>
                 <Link href="/signup" className="rounded-xl px-6 py-3 text-sm font-bold text-white shadow-lg transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}>
                   {t.aiOrderBtn}
@@ -457,7 +434,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
                 <Share2 size={12} /> {t.plan1Name}
               </div>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-[#1B3F7A]">€40</span>
+                <span className="text-4xl font-bold text-[#1B3F7A]">{formatPriceKey("subscription", currency)}</span>
                 <span className="text-slate-500">/mo</span>
               </div>
               <p className="text-xs text-slate-400">incl. VAT</p>
@@ -473,7 +450,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
                 <ImageIcon size={12} /> {t.plan2Name}
               </div>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-slate-900">€0.67</span>
+                <span className="text-4xl font-bold text-slate-900">{formatPriceKey("aiPost", currency, { decimals: true })}</span>
                 <span className="text-slate-500">/each</span>
               </div>
               <p className="text-xs text-slate-400">{t.plan2PayLabel}</p>
@@ -489,7 +466,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
                 <Video size={12} /> {t.plan3Name}
               </div>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-slate-900">€67</span>
+                <span className="text-4xl font-bold text-slate-900">{formatPriceKey("video", currency)}</span>
                 <span className="text-slate-500">/video</span>
               </div>
               <p className="text-xs text-slate-400">{t.plan3OnetimeLabel}</p>
