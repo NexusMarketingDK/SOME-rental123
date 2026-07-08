@@ -290,6 +290,20 @@ export function LandingPage({ locale }: { locale: Locale }) {
 
       {/* ── AI Video section ── */}
       <section id="ai" className="relative overflow-hidden py-28" style={{ background: "linear-gradient(160deg, #0a0f1e 0%, #0f1f3d 50%, #0a0f1e 100%)" }}>
+        {/* AI-generated cinematic property walkthrough as section background */}
+        <div className="pointer-events-none absolute inset-0">
+          <video
+            src="https://d8j0ntlcm91z4.cloudfront.net/user_3FimRw5snqnWCSryULAZQYDRUt3/hf_20260703_230623_1b70e16e-b4bd-4fc2-b5fc-5409245b52dd.mp4"
+            poster="https://d2ol7oe51mr4n9.cloudfront.net/user_3FimRw5snqnWCSryULAZQYDRUt3/c9fd8941-99b3-4373-a2d5-50c9db021c88.png"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            className="h-full w-full object-cover opacity-30"
+          />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(160deg, rgba(10,15,30,0.85) 0%, rgba(15,31,61,0.65) 50%, rgba(10,15,30,0.9) 100%)" }} />
+        </div>
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -left-40 top-20 h-[500px] w-[500px] rounded-full opacity-20 blur-[120px]" style={{ background: "radial-gradient(circle, #FF6B4A, transparent 70%)" }} />
           <div className="absolute -right-40 bottom-20 h-[400px] w-[400px] rounded-full opacity-15 blur-[100px]" style={{ background: "radial-gradient(circle, #FFB36B, transparent 70%)" }} />
