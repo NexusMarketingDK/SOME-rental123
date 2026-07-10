@@ -20,6 +20,18 @@ const POSTS_PER_WEEK = [
   { value: "10+", label: "10+ opslag" },
 ];
 
+const VIDEOS_PER_WEEK = [
+  { value: "0", label: "Ingen endnu" },
+  { value: "1-2", label: "1–2 videoer" },
+  { value: "3-5", label: "3–5 videoer" },
+  { value: "6+", label: "6+ videoer" },
+];
+
+const COUNTRIES = [
+  "Danmark", "Spanien", "Tyskland", "Sverige", "Norge", "Storbritannien",
+  "Frankrig", "Italien", "Holland", "Portugal", "USA", "Andet",
+];
+
 const CHANNELS = [
   { value: "facebook", label: "Facebook", color: "#1877F2" },
   { value: "instagram", label: "Instagram", color: "#E1306C" },
@@ -34,6 +46,7 @@ export function SignupForm() {
   const [locale, setLocale] = useState<Locale>("da");
   const [currency, setCurrency] = useState<Currency>("dkk");
   const [postsPerWeek, setPostsPerWeek] = useState("3-5");
+  const [videosPerWeek, setVideosPerWeek] = useState("1-2");
   const [channels, setChannels] = useState<Set<string>>(new Set(["facebook", "instagram"]));
 
   function onLocaleChange(next: Locale) {
@@ -139,6 +152,43 @@ export function SignupForm() {
             })}
           </div>
           <input type="hidden" name="posts_per_week" value={postsPerWeek} />
+        </div>
+
+        {/* Videos per week */}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium text-[#1B1B1F]">
+            Hvor mange nye videoer forventer du om ugen?
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {VIDEOS_PER_WEEK.map((opt) => {
+              const on = videosPerWeek === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setVideosPerWeek(opt.value)}
+                  className={`rounded-lg border px-3 py-2 text-sm font-medium transition ${
+                    on
+                      ? "border-[#FF6B4A] bg-[#FFF4F1] text-[#FF6B4A]"
+                      : "border-[#E7E2D9] bg-white text-[#6B6B76] hover:border-[#d9d2c6]"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+          <input type="hidden" name="videos_per_week" value={videosPerWeek} />
+        </div>
+
+        {/* Country */}
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="country" className="text-sm font-medium text-[#1B1B1F]">Land</label>
+          <select id="country" name="country" defaultValue="Danmark" className={fieldClass}>
+            {COUNTRIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
         </div>
 
         {/* Channels */}
