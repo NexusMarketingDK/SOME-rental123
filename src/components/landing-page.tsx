@@ -170,9 +170,9 @@ export function LandingPage({ locale }: { locale: Locale }) {
               {t.navStart}
             </Link>
             <MobileNav links={[
-              { href: "/", label: t.navHome },
-              { href: "#features", label: t.navFeatures, external: true },
-              { href: "#ai", label: t.navVideo, external: true },
+              { href: LOCALE_PATHS[locale], label: t.navHome },
+              { href: `${LOCALE_PATHS[locale]}#features`, label: t.navFeatures, external: true },
+              { href: `${LOCALE_PATHS[locale]}#ai`, label: t.navVideo, external: true },
               { href: "/blog", label: "Blog" },
               { href: "/priser", label: t.navPricing },
               { href: "/login", label: t.navLogin },
