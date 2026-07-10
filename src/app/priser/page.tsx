@@ -1,7 +1,27 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Check, X, Sparkles, Zap, Building2, CreditCard } from "lucide-react";
 import { getCurrency } from "@/lib/locale-server";
 import { formatPriceKey } from "@/lib/currency";
+import { MobileNav } from "@/components/layout/mobile-nav";
+import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
+
+export const metadata: Metadata = {
+  title: "Priser — SOME VIDEO POST | AI-video og sociale medier til udlejere",
+  description:
+    "Se priser for somevideopost.com. Generer AI-præsentationsvideoer og sociale medie-opslag til din feriebolig. Planer uden binding — start gratis.",
+  keywords:
+    "somevideopost priser, AI video pris, sociale medier udlejning abonnement, feriebolig markedsføring pris",
+  alternates: { canonical: "https://www.somevideopost.com/priser" },
+  openGraph: {
+    title: "Priser — SOME VIDEO POST",
+    description:
+      "Generer AI-præsentationsvideoer og sociale medie-opslag til din feriebolig. Planer uden binding — start gratis.",
+    type: "website",
+    siteName: "somevideopost.com",
+    url: "https://www.somevideopost.com/priser",
+  },
+};
 
 const FEATURES = [
   { label: "Generér SOME opslag (AI)", starter: true, pro: true, business: true },
@@ -51,8 +71,8 @@ export default async function PriserPage() {
       <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
           <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg font-bold text-sm text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>V</span>
-            <span className="text-lg font-bold text-[#1B3F7A]">Vakanza</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg font-bold text-sm text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>S</span>
+            <span className="text-lg font-bold uppercase tracking-tight text-[#1B3F7A]">SOME VIDEO <span className="text-orange-500">POST</span></span>
           </Link>
           <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
             <Link href="/" className="hover:text-[#1B3F7A] transition-colors">Forside</Link>
@@ -61,10 +81,17 @@ export default async function PriserPage() {
             <Link href="/priser" className="text-[#1B3F7A] font-semibold">Priser</Link>
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-[#1B3F7A] transition-colors">Log ind</Link>
+            <Link href="/login" className="hidden sm:inline text-sm font-medium text-slate-600 hover:text-[#1B3F7A] transition-colors">Log ind</Link>
             <Link href="/signup" className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>
               Kom i gang gratis
             </Link>
+            <MobileNav links={[
+              { href: "/", label: "Forside" },
+              { href: "/#features", label: "Funktioner", external: true },
+              { href: "/blog", label: "Blog" },
+              { href: "/priser", label: "Priser" },
+              { href: "/login", label: "Log ind" },
+            ]} />
           </div>
         </div>
       </header>
@@ -199,7 +226,7 @@ export default async function PriserPage() {
             </ul>
             <div className="mt-auto">
               <a
-                href="mailto:kontakt@vakanza.dk"
+                href="mailto:mail@somevideopost.com"
                 className="block w-full rounded-xl py-3 text-center text-sm font-bold text-white transition-opacity hover:opacity-90"
                 style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}
               >
@@ -267,6 +294,35 @@ export default async function PriserPage() {
           </div>
         </div>
 
+        {/* Live video demo */}
+        <div
+          className="overflow-hidden rounded-2xl p-8 md:p-12 text-white"
+          style={{ background: "linear-gradient(160deg, #0a0f1e 0%, #0f1f3d 50%, #0a0f1e 100%)" }}
+        >
+          <div className="grid items-center gap-10 md:grid-cols-2">
+            <div>
+              <span className="mb-3 inline-block rounded-full border border-orange-400/30 bg-orange-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-orange-400">Live demo</span>
+              <h2 className="text-2xl font-bold mb-3">Se hvad du får for 1 credit</h2>
+              <p className="text-sm leading-relaxed text-slate-300 mb-5 max-w-md">
+                Sådan ser en AI-genereret præsentationsvideo ud. Indsæt et link til din annonce — AI&apos;en henter billederne, bygger fotoruten og leverer en cinematisk video i 9:16 til Reels & TikTok.
+              </p>
+              <ul className="flex flex-col gap-2 text-sm text-slate-300">
+                <CheckItem><span className="text-slate-300">Prøv selv: scroll i videoen for at gå rundt i boligen</span></CheckItem>
+                <CheckItem><span className="text-slate-300">Skift farvestemning med filtre</span></CheckItem>
+                <CheckItem><span className="text-slate-300">Klar på under 15 minutter</span></CheckItem>
+              </ul>
+            </div>
+            <div className="flex justify-center">
+              <div className="relative w-full max-w-[300px]">
+                <div className="absolute inset-0 scale-90 rounded-[2.5rem] opacity-40 blur-2xl" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }} />
+                <div className="relative">
+                  <CinematicWalkthrough locale="da" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* CTA */}
         <div
           className="rounded-2xl p-8 text-white text-center"
@@ -274,7 +330,7 @@ export default async function PriserPage() {
         >
           <h2 className="text-xl font-bold mb-2">Klar til at komme i gang?</h2>
           <p className="text-blue-200 text-sm mb-6 max-w-md mx-auto">
-            Prøv Vakanza gratis. Intet kreditkort påkrævet.
+            Prøv somevideopost.com gratis. Intet kreditkort påkrævet.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
@@ -284,7 +340,7 @@ export default async function PriserPage() {
               Opret gratis konto
             </Link>
             <a
-              href="mailto:kontakt@vakanza.dk"
+              href="mailto:mail@somevideopost.com"
               className="rounded-xl border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-bold text-white hover:bg-white/20 transition"
             >
               Kontakt salg

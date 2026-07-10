@@ -5,7 +5,7 @@ import type { RoomKey, Scene } from "@/components/walkthrough/cinematic-walkthro
 // Demo listing for the landing-page walkthrough prototype.
 // Hardcoded server-side so this endpoint can't be used as an open scrape proxy.
 const LISTING_URL =
-  "https://www.airbnb.es/rooms/1183079345536437587";
+  "https://www.feriebolig-spanien.dk/d/68771546?locale=da-DK&currency=DKK&adults=2";
 
 const SCRAPE_TIMEOUT_MS = 15_000;
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
@@ -40,15 +40,16 @@ const PHOTO_FALLBACK: Scene[] = [
 ];
 
 // Hardcoded demo metadata shown when live scrape fails.
+// Raw numbers only — the client component appends locale-aware unit labels.
 const DEMO_META = {
   title: "Strandnær villa · Alicante, Spanien",
   location: "Alicante, Spanien",
-  price: "€149 / nat",
-  guests: "6 gæster",
-  beds: "3 soveværelser",
-  baths: "2 badeværelser",
+  price: "€149",
+  guests: "6",
+  beds: "3",
+  baths: "2",
   rating: "4.94",
-  reviews: "87 anmeldelser",
+  reviews: "87",
 };
 
 type Payload = {
@@ -115,7 +116,7 @@ export async function GET() {
 
     if (result.data?.imageUrls?.length) {
       const scenes = buildScenes(result.data.imageUrls);
-      if (scenes.length >= 4) {
+      if (scenes.length >= 3) {
         payload = {
           ...DEMO_META,
           source: "listing",

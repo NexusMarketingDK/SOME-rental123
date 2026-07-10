@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://some-rental123.vercel.app";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.somevideopost.com";
   if (!user) return NextResponse.redirect(`${appUrl}/login`);
 
   const clientId = process.env.GOOGLE_CLIENT_ID;

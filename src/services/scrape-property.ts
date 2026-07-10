@@ -152,7 +152,7 @@ function isAirbnb(url: string): boolean {
 }
 
 function isJsHeavySite(url: string): boolean {
-  return /novasol\.|dansommer\.|solfaktor\.|dancenter\.|feriepartner\.|tripadvisor\.|vrbo\.com/i.test(url);
+  return /novasol\.|dansommer\.|solfaktor\.|dancenter\.|feriepartner\.|tripadvisor\.|vrbo\.com|ferieboliger\.dk/i.test(url);
 }
 
 async function fetchViaPlaywright(url: string): Promise<{ data?: ScrapedProperty }> {

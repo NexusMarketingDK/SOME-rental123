@@ -9,6 +9,7 @@ import { LANDING, LOCALE_FLAGS, LOCALE_LABELS, LOCALE_PATHS, LOCALES } from "@/l
 import { currencyForLocale, formatPriceKey } from "@/lib/currency";
 import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
 import { WorkflowDemo } from "@/components/workflow-demo";
+import { MobileNav } from "@/components/layout/mobile-nav";
 
 function Pill({ children }: { children: React.ReactNode }) {
   return (
@@ -149,8 +150,11 @@ export function LandingPage({ locale }: { locale: Locale }) {
       <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
           <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg font-bold text-sm text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>V</span>
-            <span className="text-lg font-bold text-[#1B3F7A]">Vakanza</span>
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-bold text-sm text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>S</span>
+            <span className="font-bold uppercase tracking-tight text-[#1B3F7A]">
+              <span className="text-base sm:hidden">SOME</span>
+              <span className="hidden text-base sm:inline">SOME VIDEO <span className="text-orange-500">POST</span></span>
+            </span>
           </div>
           <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
             <a href="#" className="hover:text-[#1B3F7A] transition-colors">{t.navHome}</a>
@@ -161,10 +165,18 @@ export function LandingPage({ locale }: { locale: Locale }) {
           </nav>
           <div className="flex items-center gap-3">
             <LanguageSwitcher current={locale} />
-            <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-[#1B3F7A] transition-colors">{t.navLogin}</Link>
+            <Link href="/login" className="hidden sm:inline text-sm font-medium text-slate-600 hover:text-[#1B3F7A] transition-colors">{t.navLogin}</Link>
             <Link href="/signup" className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>
               {t.navStart}
             </Link>
+            <MobileNav links={[
+              { href: LOCALE_PATHS[locale], label: t.navHome },
+              { href: `${LOCALE_PATHS[locale]}#features`, label: t.navFeatures, external: true },
+              { href: `${LOCALE_PATHS[locale]}#ai`, label: t.navVideo, external: true },
+              { href: "/blog", label: "Blog" },
+              { href: "/priser", label: t.navPricing },
+              { href: "/login", label: t.navLogin },
+            ]} />
           </div>
         </div>
       </header>
@@ -216,7 +228,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
               <div className="relative mx-auto w-full max-w-lg select-none">
                 {/* Workflow demo above the dashboard */}
                 <div className="mb-4">
-                  <WorkflowDemo />
+                  <WorkflowDemo t={t} />
                 </div>
                 <div className="absolute -inset-4 rounded-3xl bg-white/10 blur-2xl" />
                 <div className="relative rounded-2xl border border-white/20 bg-[#0e1f3d] p-4 shadow-2xl">
@@ -317,7 +329,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
               <div className="relative">
                 <div className="absolute inset-0 scale-90 rounded-[2.5rem] opacity-40 blur-2xl" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }} />
                 {/* Interactive cinematic walkthrough prototype (canvas Ken Burns tour) */}
-                <div className="relative mx-auto w-[300px] md:w-[340px]">
+                <div className="relative mx-auto w-full max-w-[300px] md:max-w-[340px]">
                   <CinematicWalkthrough locale={locale} />
                 </div>
                 <div className="absolute -right-8 top-12 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md">
@@ -325,8 +337,8 @@ export function LandingPage({ locale }: { locale: Locale }) {
                   <p className="text-[9px] text-slate-400">Reels & TikTok</p>
                 </div>
                 <div className="absolute -left-10 top-80 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md">
-                  <p className="text-[10px] font-semibold text-emerald-400">✓ Ready in 15 min</p>
-                  <p className="text-[9px] text-slate-400">AI generates</p>
+                  <p className="text-[10px] font-semibold text-emerald-400">{t.walkthroughReadyIn}</p>
+                  <p className="text-[9px] text-slate-400">{t.walkthroughAiGenerates}</p>
                 </div>
               </div>
             </div>
@@ -507,8 +519,11 @@ export function LandingPage({ locale }: { locale: Locale }) {
           <div className="grid gap-12 md:grid-cols-4">
             <div className="md:col-span-1">
               <div className="flex items-center gap-2">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>V</span>
-                <span className="text-lg font-bold text-white">Vakanza</span>
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>S</span>
+                <span className="font-bold uppercase tracking-tight text-white">
+                  <span className="text-base sm:hidden">SOME</span>
+                  <span className="hidden text-base sm:inline">SOME VIDEO <span className="text-orange-400">POST</span></span>
+                </span>
               </div>
               <p className="mt-4 text-sm leading-relaxed text-slate-400">{t.footerDesc}</p>
               <div className="mt-5 flex gap-3">
@@ -545,7 +560,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
             <div>
               <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-500">{t.footerSupport}</p>
               <ul className="flex flex-col gap-3 text-sm text-slate-400">
-                <li><a href="mailto:kontakt@vakanza.dk" className="transition-colors hover:text-white">kontakt@vakanza.dk</a></li>
+                <li><a href="mailto:mail@somevideopost.com" className="transition-colors hover:text-white">mail@somevideopost.com</a></li>
                 <li><Link href="/signup" className="transition-colors hover:text-white">{t.plan2StartBtn}</Link></li>
               </ul>
               <div className="mt-6 rounded-xl border border-orange-500/20 bg-orange-500/10 p-4">
