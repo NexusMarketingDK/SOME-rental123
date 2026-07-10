@@ -44,13 +44,14 @@ export async function proxy(request: NextRequest) {
 
   const locale = detectLocale(request);
 
-  // Redirect non-Danish users to their locale path on public pages
-  const isPublicPage =
-    pathname === "/" || pathname.startsWith("/login") || pathname.startsWith("/signup");
-
-  if (locale !== "da" && isPublicPage) {
+  // Redirect non-Danish users to their localized landing page. Only the root
+  // "/" has locale variants (/en, /es, /de) — the auth pages (/login, /signup)
+  // and everything else live at a single path, so they must NOT be locale-
+  // prefixed. Prefixing /login would send it to /es/login, which redirects
+  // back to /login (next.config) and loops infinitely (ERR_TOO_MANY_REDIRECTS).
+  if (locale !== "da" && pathname === "/") {
     const url = request.nextUrl.clone();
-    url.pathname = `${LOCALE_PATHS[locale]}${pathname === "/" ? "" : pathname}`;
+    url.pathname = LOCALE_PATHS[locale];
     const redirect = NextResponse.redirect(url);
     setLocaleCookie(redirect, locale);
     return redirect;
