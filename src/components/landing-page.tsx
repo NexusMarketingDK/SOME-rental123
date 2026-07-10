@@ -8,6 +8,7 @@ import type { Locale } from "@/lib/i18n";
 import { LANDING, LOCALE_FLAGS, LOCALE_LABELS, LOCALE_PATHS, LOCALES } from "@/lib/i18n";
 import { currencyForLocale, formatPriceKey } from "@/lib/currency";
 import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
+import { WorkflowDemo } from "@/components/workflow-demo";
 
 function Pill({ children }: { children: React.ReactNode }) {
   return (
@@ -213,6 +214,10 @@ export function LandingPage({ locale }: { locale: Locale }) {
             </div>
             <div className="hidden lg:block">
               <div className="relative mx-auto w-full max-w-lg select-none">
+                {/* Workflow demo above the dashboard */}
+                <div className="mb-4">
+                  <WorkflowDemo />
+                </div>
                 <div className="absolute -inset-4 rounded-3xl bg-white/10 blur-2xl" />
                 <div className="relative rounded-2xl border border-white/20 bg-[#0e1f3d] p-4 shadow-2xl">
                   <div className="mb-3 flex items-center gap-1.5">
