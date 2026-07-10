@@ -560,7 +560,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
             <div>
               <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-500">{t.footerSupport}</p>
               <ul className="flex flex-col gap-3 text-sm text-slate-400">
-                <li><a href="mailto:kontakt@somevideopost.com" className="transition-colors hover:text-white">kontakt@somevideopost.com</a></li>
+                <li><a href="mailto:mail@somevideopost.com" className="transition-colors hover:text-white">mail@somevideopost.com</a></li>
                 <li><Link href="/signup" className="transition-colors hover:text-white">{t.plan2StartBtn}</Link></li>
               </ul>
               <div className="mt-6 rounded-xl border border-orange-500/20 bg-orange-500/10 p-4">

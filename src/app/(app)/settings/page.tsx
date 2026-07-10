@@ -26,11 +26,11 @@ export default async function SettingsPage() {
           <h2 className="mb-1 text-sm font-semibold text-slate-900">Support</h2>
           <p className="mb-3 text-sm text-slate-500">Har du spørgsmål? Skriv til os.</p>
           <a
-            href="mailto:kontakt@somevideopost.com"
+            href="mailto:mail@somevideopost.com"
             className="inline-flex items-center gap-2 text-sm font-medium text-[#1B3F7A] hover:underline"
           >
             <Mail size={14} />
-            kontakt@somevideopost.com
+            mail@somevideopost.com
           </a>
         </div>
       </div>

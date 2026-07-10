@@ -226,7 +226,7 @@ export default async function PriserPage() {
             </ul>
             <div className="mt-auto">
               <a
-                href="mailto:kontakt@somevideopost.com"
+                href="mailto:mail@somevideopost.com"
                 className="block w-full rounded-xl py-3 text-center text-sm font-bold text-white transition-opacity hover:opacity-90"
                 style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}
               >
@@ -340,7 +340,7 @@ export default async function PriserPage() {
               Opret gratis konto
             </Link>
             <a
-              href="mailto:kontakt@somevideopost.com"
+              href="mailto:mail@somevideopost.com"
               className="rounded-xl border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-bold text-white hover:bg-white/20 transition"
             >
               Kontakt salg

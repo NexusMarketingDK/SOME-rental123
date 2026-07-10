@@ -113,7 +113,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Hvad hvis jeg ikke er tilfreds med videoen?",
-    a: "Kontakt os på kontakt@somevideopost.com inden for 14 dage, hvis du ikke er tilfreds, og vi finder en løsning. Vi ønsker, at du er 100% glad for resultatet.",
+    a: "Kontakt os på mail@somevideopost.com inden for 14 dage, hvis du ikke er tilfreds, og vi finder en løsning. Vi ønsker, at du er 100% glad for resultatet.",
   },
 ];
 
