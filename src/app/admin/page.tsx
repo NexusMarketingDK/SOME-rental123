@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { Users, FileText, Video, Building2, Share2, TrendingUp, Activity, Calendar } from "lucide-react";
+import { Users, FileText, Video, Building2, Share2, TrendingUp, Activity, CreditCard, Globe } from "lucide-react";
 
 const PLATFORM_COLORS: Record<string, string> = {
   facebook: "#1877F2",
@@ -19,27 +19,50 @@ async function getAdminStats() {
     videosRes,
     propertiesRes,
     accountsRes,
+    subsRes,
   ] = await Promise.all([
     admin.auth.admin.listUsers({ perPage: 1000 }),
     admin.from("posts").select("id, user_id, status, created_at, image_urls").order("created_at", { ascending: false }),
     admin.from("video_orders").select("id, user_id, status, created_at").order("created_at", { ascending: false }),
     admin.from("properties").select("id, user_id, title, created_at"),
     admin.from("social_accounts").select("id, user_id, platform, account_name, created_at"),
+    admin.from("subscriptions").select("user_id, status, created_at, current_period_end, cancel_at_period_end"),
   ]);
 
   type PostRow = { id: string; user_id: string; status: string; created_at: string; image_urls: string[] };
   type VideoRow = { id: string; user_id: string; status: string; created_at: string };
   type PropertyRow = { id: string; user_id: string; title: string; created_at: string };
   type AccountRow = { id: string; user_id: string; platform: string; account_name: string; created_at: string };
+  type SubRow = { user_id: string; status: string; created_at: string; current_period_end: string | null; cancel_at_period_end: boolean };
 
   const users = usersRes.data?.users ?? [];
   const posts = (postsRes.data ?? []) as PostRow[];
   const videos = (videosRes.data ?? []) as VideoRow[];
   const properties = (propertiesRes.data ?? []) as PropertyRow[];
   const accounts = (accountsRes.data ?? []) as AccountRow[];
+  const subs = (subsRes.data ?? []) as SubRow[];
+  const subByUser = new Map(subs.map((s) => [s.user_id, s]));
+
+  // Derive a plan label + "since" date from the subscription (Stripe is inactive,
+  // so most users are on the free plan — no subscription row).
+  function derivePlan(userId: string, userCreatedAt: string) {
+    const sub = subByUser.get(userId);
+    if (!sub) return { plan: "Gratis", planColor: "#94a3b8", since: userCreatedAt };
+    switch (sub.status) {
+      case "active":
+        return { plan: "Pro", planColor: "#34D399", since: sub.created_at };
+      case "trialing":
+        return { plan: "Prøve", planColor: "#FBBF24", since: sub.created_at };
+      case "past_due":
+        return { plan: "Forfalden", planColor: "#F87171", since: sub.created_at };
+      case "canceled":
+        return { plan: "Opsagt", planColor: "#64748b", since: sub.created_at };
+      default:
+        return { plan: "Gratis", planColor: "#94a3b8", since: userCreatedAt };
+    }
+  }
 
   // Per-user aggregation
-  const userMap = new Map(users.map((u) => [u.id, u]));
 
   const userStats = users.map((u) => {
     const userPosts = posts.filter((p) => p.user_id === u.id);
@@ -55,9 +78,23 @@ async function getAdminStats() {
     const publishedPosts = userPosts.filter((p) => p.status === "published").length;
     const scheduledPosts = userPosts.filter((p) => p.status === "scheduled").length;
 
+    const meta = (u.user_metadata ?? {}) as Record<string, unknown>;
+    const { plan, planColor, since } = derivePlan(u.id, u.created_at);
+    const planDays = Math.max(0, Math.floor((Date.now() - new Date(since).getTime()) / 86400000));
+
     return {
       id: u.id,
       email: u.email ?? "—",
+      name: (meta.name as string) ?? "",
+      country: (meta.country as string) ?? "—",
+      expectedPosts: (meta.posts_per_week as string) ?? "—",
+      expectedVideos: (meta.videos_per_week as string) ?? "—",
+      plannedChannels: Array.isArray(meta.channels) ? (meta.channels as string[]) : [],
+      locale: (meta.locale as string) ?? "—",
+      plan,
+      planColor,
+      planSince: since,
+      planDays,
       createdAt: u.created_at,
       lastSignIn: u.last_sign_in_at,
       totalPosts: userPosts.length,
@@ -70,6 +107,14 @@ async function getAdminStats() {
       platformCounts,
     };
   }).sort((a, b) => b.totalPosts - a.totalPosts);
+
+  // Plan & country breakdowns for stats
+  const planBreakdown: Record<string, number> = {};
+  const countryBreakdown: Record<string, number> = {};
+  userStats.forEach((u) => {
+    planBreakdown[u.plan] = (planBreakdown[u.plan] ?? 0) + 1;
+    countryBreakdown[u.country] = (countryBreakdown[u.country] ?? 0) + 1;
+  });
 
   // Platform totals
   const platformTotals: Record<string, number> = {};
@@ -104,6 +149,8 @@ async function getAdminStats() {
     platformTotals,
     postsByDay,
     userStats,
+    planBreakdown,
+    countryBreakdown,
   };
 }
 
@@ -261,6 +308,44 @@ export default async function AdminPage() {
         </div>
       </div>
 
+      {/* Plan & country breakdown */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <div className="mb-4 flex items-center gap-2">
+            <CreditCard size={16} className="text-[#34D399]" />
+            <p className="text-sm font-bold text-white">Fordeling på plan</p>
+          </div>
+          <div className="space-y-3">
+            {Object.entries(stats.planBreakdown).sort((a, b) => b[1] - a[1]).map(([plan, count]) => (
+              <div key={plan}>
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="text-xs font-medium text-slate-300">{plan}</span>
+                  <span className="text-xs text-slate-400">{count}</span>
+                </div>
+                <MiniBar value={count} max={Math.max(...Object.values(stats.planBreakdown))} color="#34D399" />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <div className="mb-4 flex items-center gap-2">
+            <Globe size={16} className="text-[#60A5FA]" />
+            <p className="text-sm font-bold text-white">Fordeling på land</p>
+          </div>
+          <div className="space-y-3">
+            {Object.entries(stats.countryBreakdown).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([country, count]) => (
+              <div key={country}>
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="text-xs font-medium text-slate-300">{country}</span>
+                  <span className="text-xs text-slate-400">{count}</span>
+                </div>
+                <MiniBar value={count} max={Math.max(...Object.values(stats.countryBreakdown))} color="#60A5FA" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* User table */}
       <div className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
         <div className="flex items-center gap-3 border-b border-white/10 px-6 py-4">
@@ -273,6 +358,10 @@ export default async function AdminPage() {
             <thead>
               <tr className="border-b border-white/5">
                 <th className="px-6 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500">Bruger</th>
+                <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500">Plan</th>
+                <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-500">Land</th>
+                <th className="px-4 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-slate-500">Forv. opslag/uge</th>
+                <th className="px-4 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-slate-500">Forv. videoer/uge</th>
                 <th className="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-wider text-slate-500">Opslag</th>
                 <th className="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-wider text-slate-500">Publiceret</th>
                 <th className="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-wider text-slate-500">Planlagt</th>
@@ -294,9 +383,26 @@ export default async function AdminPage() {
                       >
                         {u.email[0].toUpperCase()}
                       </div>
-                      <span className="text-slate-300 font-medium">{u.email}</span>
+                      <div className="flex flex-col">
+                        <span className="text-slate-300 font-medium">{u.name || u.email}</span>
+                        {u.name && <span className="text-[11px] text-slate-500">{u.email}</span>}
+                      </div>
                     </div>
                   </td>
+                  <td className="px-4 py-3.5">
+                    <div className="flex flex-col gap-0.5">
+                      <span
+                        className="w-fit rounded-full px-2 py-0.5 text-[10px] font-bold"
+                        style={{ backgroundColor: u.planColor + "22", color: u.planColor }}
+                      >
+                        {u.plan}
+                      </span>
+                      <span className="text-[10px] text-slate-500">{u.planDays} dage</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3.5 text-slate-400 text-xs">{u.country}</td>
+                  <td className="px-4 py-3.5 text-center text-slate-400 text-xs">{u.expectedPosts}</td>
+                  <td className="px-4 py-3.5 text-center text-slate-400 text-xs">{u.expectedVideos}</td>
                   <td className="px-4 py-3.5 text-right">
                     <div className="flex flex-col items-end gap-1">
                       <span className="font-bold text-white">{u.totalPosts}</span>
@@ -343,7 +449,7 @@ export default async function AdminPage() {
               ))}
               {stats.userStats.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-6 py-10 text-center text-sm text-slate-600">Ingen brugere endnu</td>
+                  <td colSpan={13} className="px-6 py-10 text-center text-sm text-slate-600">Ingen brugere endnu</td>
                 </tr>
               )}
             </tbody>

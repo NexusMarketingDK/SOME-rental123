@@ -26,9 +26,11 @@ export async function signUpAction(
   // Default currency follows the language unless the user picked one explicitly.
   const currency = coerceCurrency(formData.get("currency"), currencyForLocale(locale));
 
-  // Onboarding profile fields (optional — improve personalisation only).
+  // Onboarding profile fields (optional — improve personalisation & admin stats).
   const name = String(formData.get("name") ?? "").trim().slice(0, 120);
   const postsPerWeek = String(formData.get("posts_per_week") ?? "").trim().slice(0, 20);
+  const videosPerWeek = String(formData.get("videos_per_week") ?? "").trim().slice(0, 20);
+  const country = String(formData.get("country") ?? "").trim().slice(0, 60);
   const channels = formData
     .getAll("channels")
     .map(String)
@@ -49,6 +51,8 @@ export async function signUpAction(
         currency,
         ...(name ? { name } : {}),
         ...(postsPerWeek ? { posts_per_week: postsPerWeek } : {}),
+        ...(videosPerWeek ? { videos_per_week: videosPerWeek } : {}),
+        ...(country ? { country } : {}),
         ...(channels.length ? { channels } : {}),
       },
     },
