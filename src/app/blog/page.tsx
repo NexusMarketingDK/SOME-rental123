@@ -250,8 +250,8 @@ export default function BlogPage() {
       <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur">
         <div className="relative mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
           <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg font-bold text-sm text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>V</span>
-            <span className="text-lg font-bold text-[#1B3F7A]">Vakanza</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg font-bold text-sm text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>S</span>
+            <span className="text-lg font-bold text-[#1B3F7A]">somevideopost.com</span>
           </Link>
           <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
             <Link href="/" className="hover:text-[#1B3F7A] transition-colors">Forside</Link>

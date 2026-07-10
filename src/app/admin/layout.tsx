@@ -22,7 +22,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         >
           V
         </span>
-        <span className="text-sm font-bold text-white tracking-tight">Vakanza</span>
+        <span className="text-sm font-bold text-white tracking-tight">SOME Video Post</span>
         <span className="rounded-full bg-orange-500/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-orange-400">Admin</span>
         <nav className="ml-6 flex items-center gap-1">
           <a href="/admin" className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-white transition-colors">Oversigt</a>

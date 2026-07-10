@@ -148,7 +148,7 @@ function SidebarContent({ accounts, userEmail, locale = "da", onNav }: SidebarPr
         >
           V
         </span>
-        <span className="text-base font-bold leading-none text-white tracking-tight">Vakanza</span>
+        <span className="text-base font-bold leading-none text-white tracking-tight">SOME Video Post</span>
       </div>
 
       {/* + New button */}
@@ -414,7 +414,7 @@ export function Sidebar({ accounts = [], userEmail, locale = "da" }: SidebarProp
           >
             V
           </span>
-          <span className="text-sm font-bold text-slate-900 tracking-tight">Vakanza</span>
+          <span className="text-sm font-bold text-slate-900 tracking-tight">SOME Video Post</span>
         </div>
         <div className="ml-auto">
           <Link

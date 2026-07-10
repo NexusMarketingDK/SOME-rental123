@@ -150,8 +150,11 @@ export function LandingPage({ locale }: { locale: Locale }) {
       <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
           <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg font-bold text-sm text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>V</span>
-            <span className="text-lg font-bold text-[#1B3F7A]">Vakanza</span>
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-bold text-sm text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>S</span>
+            <span className="font-bold text-[#1B3F7A]">
+              <span className="text-base sm:hidden">SOME</span>
+              <span className="hidden text-base sm:inline">somevideopost<span className="text-orange-500">.com</span></span>
+            </span>
           </div>
           <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
             <a href="#" className="hover:text-[#1B3F7A] transition-colors">{t.navHome}</a>
@@ -516,8 +519,11 @@ export function LandingPage({ locale }: { locale: Locale }) {
           <div className="grid gap-12 md:grid-cols-4">
             <div className="md:col-span-1">
               <div className="flex items-center gap-2">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>V</span>
-                <span className="text-lg font-bold text-white">Vakanza</span>
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>S</span>
+                <span className="font-bold text-white">
+                  <span className="text-base sm:hidden">SOME</span>
+                  <span className="hidden text-base sm:inline">somevideopost<span className="text-orange-400">.com</span></span>
+                </span>
               </div>
               <p className="mt-4 text-sm leading-relaxed text-slate-400">{t.footerDesc}</p>
               <div className="mt-5 flex gap-3">
@@ -554,7 +560,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
             <div>
               <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-500">{t.footerSupport}</p>
               <ul className="flex flex-col gap-3 text-sm text-slate-400">
-                <li><a href="mailto:kontakt@vakanza.dk" className="transition-colors hover:text-white">kontakt@vakanza.dk</a></li>
+                <li><a href="mailto:kontakt@somevideopost.com" className="transition-colors hover:text-white">kontakt@somevideopost.com</a></li>
                 <li><Link href="/signup" className="transition-colors hover:text-white">{t.plan2StartBtn}</Link></li>
               </ul>
               <div className="mt-6 rounded-xl border border-orange-500/20 bg-orange-500/10 p-4">

@@ -16,7 +16,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
             className="text-lg leading-none text-[#1B1B1F]"
             style={{ fontFamily: "var(--font-fraunces)" }}
           >
-            Vakanza
+            somevideopost.com
           </span>
         </div>
         {children}
