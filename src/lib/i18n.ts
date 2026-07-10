@@ -96,6 +96,7 @@ export type LandingT = {
   step2Title: string; step2Desc: string;
   step3Title: string; step3Desc: string;
   aiStat1: string; aiStat2: string; aiStat3: string;
+  walkthroughReadyIn: string; walkthroughAiGenerates: string;
   aiFeats: string[];
   aiOnetimeLabel: string; aiOrderBtn: string;
   // how it works
@@ -163,6 +164,7 @@ export const LANDING: Record<Locale, LandingT> = {
     step2Title: "AI skaber din video", step2Desc: "Google AI sammensætter en smooth præsentationsvideo med cinematiske overgange og stemningsfuld musik.",
     step3Title: "Del på alle platforme", step3Desc: "Download videoen og del den direkte til Instagram Reels, TikTok og Facebook — alt fra én app.",
     aiStat1: "mere engagement", aiStat2: "genereringstid", aiStat3: "Reels & TikTok",
+    walkthroughReadyIn: "✓ Klar om 15 min", walkthroughAiGenerates: "AI genererer",
     aiFeats: ["Novasol, Airbnb & Booking.com integration","Upload dine egne billeder","Cinematiske kamerabevægelser","Automatisk baggrundsmusik","Leveret på under 15 minutter","9:16 optimeret til Reels & TikTok"],
     aiOnetimeLabel: "Engangspris", aiOrderBtn: "Bestil video →",
     howTitle: "Klar til brug på 3 minutter", howSub: "Ingen teknisk viden påkrævet",
@@ -227,6 +229,7 @@ export const LANDING: Record<Locale, LandingT> = {
     step2Title: "AI creates your video", step2Desc: "Google AI composes a smooth presentation video with cinematic transitions and atmospheric music.",
     step3Title: "Share on all platforms", step3Desc: "Download the video and share it directly to Instagram Reels, TikTok and Facebook — all from one app.",
     aiStat1: "more engagement", aiStat2: "generation time", aiStat3: "Reels & TikTok",
+    walkthroughReadyIn: "✓ Ready in 15 min", walkthroughAiGenerates: "AI generates",
     aiFeats: ["Novasol, Airbnb & Booking.com integration","Upload your own photos","Cinematic camera transitions","Automatic background music","Delivered in under 15 minutes","9:16 optimised for Reels & TikTok"],
     aiOnetimeLabel: "One-time price", aiOrderBtn: "Order video →",
     howTitle: "Up and running in 3 minutes", howSub: "No technical knowledge required",
@@ -291,6 +294,7 @@ export const LANDING: Record<Locale, LandingT> = {
     step2Title: "La IA crea tu vídeo", step2Desc: "Google IA compone un vídeo de presentación suave con transiciones cinematográficas y música ambiental.",
     step3Title: "Comparte en todas las plataformas", step3Desc: "Descarga el vídeo y compártelo directamente en Instagram Reels, TikTok y Facebook — todo desde una app.",
     aiStat1: "más engagement", aiStat2: "tiempo de generación", aiStat3: "Reels & TikTok",
+    walkthroughReadyIn: "✓ Listo en 15 min", walkthroughAiGenerates: "IA genera",
     aiFeats: ["Integración con Novasol, Airbnb & Booking.com","Sube tus propias fotos","Transiciones de cámara cinematográficas","Música de fondo automática","Entregado en menos de 15 minutos","9:16 optimizado para Reels & TikTok"],
     aiOnetimeLabel: "Precio único", aiOrderBtn: "Pedir vídeo →",
     howTitle: "Listo en 3 minutos", howSub: "Sin conocimientos técnicos necesarios",
@@ -355,6 +359,7 @@ export const LANDING: Record<Locale, LandingT> = {
     step2Title: "KI erstellt dein Video", step2Desc: "Google KI erstellt ein flüssiges Präsentationsvideo mit kinematischen Übergängen und atmosphärischer Musik.",
     step3Title: "Auf allen Plattformen teilen", step3Desc: "Video herunterladen und direkt auf Instagram Reels, TikTok und Facebook teilen — alles aus einer App.",
     aiStat1: "mehr Engagement", aiStat2: "Generierungszeit", aiStat3: "Reels & TikTok",
+    walkthroughReadyIn: "✓ Fertig in 15 Min", walkthroughAiGenerates: "KI generiert",
     aiFeats: ["Novasol, Airbnb & Booking.com Integration","Eigene Fotos hochladen","Kinematische Kameraübergänge","Automatische Hintergrundmusik","In unter 15 Minuten geliefert","9:16 für Reels & TikTok optimiert"],
     aiOnetimeLabel: "Einmalpreis", aiOrderBtn: "Video bestellen →",
     howTitle: "In 3 Minuten einsatzbereit", howSub: "Keine technischen Kenntnisse erforderlich",

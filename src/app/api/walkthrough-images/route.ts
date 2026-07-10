@@ -40,15 +40,16 @@ const PHOTO_FALLBACK: Scene[] = [
 ];
 
 // Hardcoded demo metadata shown when live scrape fails.
+// Raw numbers only — the client component appends locale-aware unit labels.
 const DEMO_META = {
   title: "Strandnær villa · Alicante, Spanien",
   location: "Alicante, Spanien",
-  price: "€149 / nat",
-  guests: "6 gæster",
-  beds: "3 soveværelser",
-  baths: "2 badeværelser",
+  price: "€149",
+  guests: "6",
+  beds: "3",
+  baths: "2",
   rating: "4.94",
-  reviews: "87 anmeldelser",
+  reviews: "87",
 };
 
 type Payload = {

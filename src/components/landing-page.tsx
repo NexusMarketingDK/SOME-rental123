@@ -337,8 +337,8 @@ export function LandingPage({ locale }: { locale: Locale }) {
                   <p className="text-[9px] text-slate-400">Reels & TikTok</p>
                 </div>
                 <div className="absolute -left-10 top-80 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md">
-                  <p className="text-[10px] font-semibold text-emerald-400">✓ Ready in 15 min</p>
-                  <p className="text-[9px] text-slate-400">AI generates</p>
+                  <p className="text-[10px] font-semibold text-emerald-400">{t.walkthroughReadyIn}</p>
+                  <p className="text-[9px] text-slate-400">{t.walkthroughAiGenerates}</p>
                 </div>
               </div>
             </div>

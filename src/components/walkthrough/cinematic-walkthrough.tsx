@@ -25,6 +25,20 @@ const ROOM_LABELS: Record<Locale, Record<RoomKey, string>> = {
 
 const ROOM_WORD: Record<Locale, string> = { da: "Rum", en: "Room", es: "Sala", de: "Raum" };
 
+const META_LABELS: Record<Locale, { beds: string; baths: string; guests: string; reviews: string; perNight: string }> = {
+  da: { beds: "soveværelser", baths: "badeværelser", guests: "gæster", reviews: "anmeldelser", perNight: "/ nat" },
+  en: { beds: "bedrooms", baths: "bathrooms", guests: "guests", reviews: "reviews", perNight: "/ night" },
+  es: { beds: "dormitorios", baths: "baños", guests: "huéspedes", reviews: "reseñas", perNight: "/ noche" },
+  de: { beds: "Schlafzimmer", baths: "Badezimmer", guests: "Gäste", reviews: "Bewertungen", perNight: "/ Nacht" },
+};
+
+const DEMO_TITLE_OVERRIDE: Record<Locale, string> = {
+  da: "Strandnær villa · Alicante, Spanien",
+  en: "Beachfront villa · Alicante, Spain",
+  es: "Villa en primera línea · Alicante, España",
+  de: "Strandvilla · Alicante, Spanien",
+};
+
 const HINTS: Record<Locale, string> = {
   da: "Scroll eller ↑ ↓ for at gå frem og tilbage · bevæg musen for at se dig omkring",
   en: "Scroll or ↑ ↓ to walk forward/back · move the mouse to look around",
@@ -123,7 +137,7 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
   const [playing, setPlaying] = useState(false);
   const [mode, setMode] = useState<Mode>("auto");
   const [activeIdx, setActiveIdx] = useState(0);
-  const [title, setTitle] = useState("Villa · Valencia, Spanien");
+  const [title, setTitle] = useState(DEMO_TITLE_OVERRIDE[locale] ?? DEMO_TITLE_OVERRIDE.da);
   const [filterKey, setFilterKey] = useState<FilterKey>("none");
   const [meta, setMeta] = useState<{ price?: string; guests?: string; beds?: string; baths?: string; rating?: string; reviews?: string }>({});
 
@@ -171,7 +185,7 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
         if (cancelled || loaded.length < 4) return;
         setScenes(loaded);
         setReady(true);
-        if (data.title) setTitle(data.title.slice(0, 60));
+        setTitle((data.title ? data.title.slice(0, 60) : null) ?? DEMO_TITLE_OVERRIDE[locale] ?? DEMO_TITLE_OVERRIDE.da);
         setMeta({ price: data.price, guests: data.guests, beds: data.beds, baths: data.baths, rating: data.rating, reviews: data.reviews });
         tRef.current = Math.min(tRef.current, totalDuration(loaded.length) - 0.01);
         roomRef.current = Math.min(roomRef.current, loaded.length - 1);
@@ -609,24 +623,26 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
           {/* Property info panel */}
           {ready && (meta.price || meta.rating) && (
             <div className="pointer-events-none absolute left-0 right-0 bottom-10 px-3">
+              {(() => { const ml = META_LABELS[locale] ?? META_LABELS.da; return (
               <div className="flex items-end justify-between gap-2">
-                {/* Left: price + guests */}
+                {/* Left: price + rooms */}
                 <div className="rounded-xl border border-white/10 bg-black/50 px-2.5 py-1.5 backdrop-blur-md">
-                  {meta.price && <p className="text-[11px] font-bold text-white">{meta.price}</p>}
+                  {meta.price && <p className="text-[11px] font-bold text-white">{meta.price} <span className="text-[9px] font-normal text-white/60">{ml.perNight}</span></p>}
                   <div className="flex items-center gap-2 mt-0.5">
-                    {meta.beds && <span className="text-[9px] text-white/60">🛏 {meta.beds}</span>}
-                    {meta.baths && <span className="text-[9px] text-white/60">🚿 {meta.baths}</span>}
-                    {meta.guests && <span className="text-[9px] text-white/60">👥 {meta.guests}</span>}
+                    {meta.beds && <span className="text-[9px] text-white/60">🛏 {meta.beds} {ml.beds}</span>}
+                    {meta.baths && <span className="text-[9px] text-white/60">🚿 {meta.baths} {ml.baths}</span>}
+                    {meta.guests && <span className="text-[9px] text-white/60">👥 {meta.guests} {ml.guests}</span>}
                   </div>
                 </div>
                 {/* Right: rating */}
                 {meta.rating && (
                   <div className="rounded-xl border border-white/10 bg-black/50 px-2.5 py-1.5 backdrop-blur-md text-right">
                     <p className="text-[11px] font-bold text-white">⭐ {meta.rating}</p>
-                    {meta.reviews && <p className="text-[9px] text-white/60">{meta.reviews}</p>}
+                    {meta.reviews && <p className="text-[9px] text-white/60">{meta.reviews} {ml.reviews}</p>}
                   </div>
                 )}
               </div>
+              ); })()}
             </div>
           )}
 
