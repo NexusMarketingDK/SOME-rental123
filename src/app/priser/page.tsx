@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Check, X, Sparkles, Zap, Building2, CreditCard } from "lucide-react";
 import { getCurrency } from "@/lib/locale-server";
 import { formatPriceKey } from "@/lib/currency";
+import { MobileNav } from "@/components/layout/mobile-nav";
 
 const FEATURES = [
   { label: "Generér SOME opslag (AI)", starter: true, pro: true, business: true },
@@ -61,10 +62,17 @@ export default async function PriserPage() {
             <Link href="/priser" className="text-[#1B3F7A] font-semibold">Priser</Link>
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-[#1B3F7A] transition-colors">Log ind</Link>
+            <Link href="/login" className="hidden sm:inline text-sm font-medium text-slate-600 hover:text-[#1B3F7A] transition-colors">Log ind</Link>
             <Link href="/signup" className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>
               Kom i gang gratis
             </Link>
+            <MobileNav links={[
+              { href: "/", label: "Forside" },
+              { href: "/#features", label: "Funktioner", external: true },
+              { href: "/blog", label: "Blog" },
+              { href: "/priser", label: "Priser" },
+              { href: "/login", label: "Log ind" },
+            ]} />
           </div>
         </div>
       </header>

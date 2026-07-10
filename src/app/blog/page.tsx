@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BookOpen, Video, Home, Building, Hotel, Megaphone } from "lucide-react";
+import { MobileNav } from "@/components/layout/mobile-nav";
 
 // ── Blog data ──────────────────────────────────────────────────────────────────
 
@@ -245,6 +246,35 @@ function formatDate(dateStr: string) {
 export default function BlogPage() {
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* Nav */}
+      <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur">
+        <div className="relative mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg font-bold text-sm text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>V</span>
+            <span className="text-lg font-bold text-[#1B3F7A]">Vakanza</span>
+          </Link>
+          <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
+            <Link href="/" className="hover:text-[#1B3F7A] transition-colors">Forside</Link>
+            <Link href="/#features" className="hover:text-[#1B3F7A] transition-colors">Funktioner</Link>
+            <Link href="/blog" className="text-[#1B3F7A] font-semibold">Blog</Link>
+            <Link href="/priser" className="hover:text-[#1B3F7A] transition-colors">Priser</Link>
+          </nav>
+          <div className="flex items-center gap-3">
+            <Link href="/login" className="hidden sm:inline text-sm font-medium text-slate-600 hover:text-[#1B3F7A] transition-colors">Log ind</Link>
+            <Link href="/signup" className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>
+              Kom i gang gratis
+            </Link>
+            <MobileNav links={[
+              { href: "/", label: "Forside" },
+              { href: "/#features", label: "Funktioner", external: true },
+              { href: "/blog", label: "Blog" },
+              { href: "/priser", label: "Priser" },
+              { href: "/login", label: "Log ind" },
+            ]} />
+          </div>
+        </div>
+      </header>
+
       {/* Hero */}
       <div className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-14 text-center">
