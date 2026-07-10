@@ -2,10 +2,17 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { Topbar } from "@/components/layout/topbar";
 import { getPosts } from "@/services/posts";
+import { getSocialAccounts } from "@/services/social-accounts";
 import { PostCard } from "@/components/posts/post-card";
+import type { ConnectedAccount } from "@/components/posts/publish-panel";
 
 export default async function PostsPage() {
-  const posts = await getPosts();
+  const [posts, allAccounts] = await Promise.all([getPosts(), getSocialAccounts()]);
+
+  // Only Facebook Pages and Instagram accounts support direct publishing.
+  const accounts: ConnectedAccount[] = allAccounts
+    .filter((a) => a.platform === "facebook" || a.platform === "instagram")
+    .map((a) => ({ id: a.id, platform: a.platform as "facebook" | "instagram", name: a.account_name }));
 
   return (
     <>
@@ -41,7 +48,7 @@ export default async function PostsPage() {
         ) : (
           <div className="flex flex-col gap-3">
             {posts.map((post) => (
-              <PostCard key={post.id} post={post} />
+              <PostCard key={post.id} post={post} accounts={accounts} />
             ))}
           </div>
         )}

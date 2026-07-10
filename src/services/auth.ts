@@ -26,6 +26,15 @@ export async function signUpAction(
   // Default currency follows the language unless the user picked one explicitly.
   const currency = coerceCurrency(formData.get("currency"), currencyForLocale(locale));
 
+  // Onboarding profile fields (optional — improve personalisation only).
+  const name = String(formData.get("name") ?? "").trim().slice(0, 120);
+  const postsPerWeek = String(formData.get("posts_per_week") ?? "").trim().slice(0, 20);
+  const channels = formData
+    .getAll("channels")
+    .map(String)
+    .filter(Boolean)
+    .slice(0, 10);
+
   if (!email || !password) {
     return { error: "Email and password are required." };
   }
@@ -34,7 +43,15 @@ export async function signUpAction(
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { locale, currency } },
+    options: {
+      data: {
+        locale,
+        currency,
+        ...(name ? { name } : {}),
+        ...(postsPerWeek ? { posts_per_week: postsPerWeek } : {}),
+        ...(channels.length ? { channels } : {}),
+      },
+    },
   });
 
   if (error) {
