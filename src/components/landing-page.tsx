@@ -225,7 +225,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
               <div className="relative mx-auto w-full max-w-lg select-none">
                 {/* Workflow demo above the dashboard */}
                 <div className="mb-4">
-                  <WorkflowDemo />
+                  <WorkflowDemo t={t} />
                 </div>
                 <div className="absolute -inset-4 rounded-3xl bg-white/10 blur-2xl" />
                 <div className="relative rounded-2xl border border-white/20 bg-[#0e1f3d] p-4 shadow-2xl">

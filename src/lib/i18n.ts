@@ -128,6 +128,14 @@ export type LandingT = {
   footerCopyright: string;
   // phone mockup
   mockupLabel: string; mockupSub: string;
+  // workflow demo
+  demoStep1: string; demoStep2: string; demoStep3: string; demoStep4: string;
+  demoInputLabel: string;
+  demoAnalyzing: string; demoAnalyzingSub: string;
+  demoRoom1: string; demoRoom2: string; demoRoom3: string; demoRoom4: string;
+  demoPostLabel: string;
+  demoShareTitle: string; demoShared: string;
+  demoSampleText: string;
 };
 
 export const LANDING: Record<Locale, LandingT> = {
@@ -187,6 +195,13 @@ export const LANDING: Record<Locale, LandingT> = {
     footerPrivacy: "Privatlivspolitik", footerCookies: "Cookiepolitik", footerTerms: "Servicevilkår",
     footerCopyright: "© 2026 Vakanza. Alle rettigheder forbeholdes.",
     mockupLabel: "Sommerhus, Skagen", mockupSub: "AI-genereret præsentationsvideo",
+    demoStep1: "Indsæt link", demoStep2: "AI genererer", demoStep3: "Klar!", demoStep4: "Del",
+    demoInputLabel: "Indsæt dit boliglink",
+    demoAnalyzing: "AI analyserer annoncen", demoAnalyzingSub: "Henter billeder · Skriver tekst · Genererer video",
+    demoRoom1: "Facade", demoRoom2: "Stue", demoRoom3: "Soveværelse", demoRoom4: "Terrasse",
+    demoPostLabel: "AI OPSLAG",
+    demoShareTitle: "Del med ét klik", demoShared: "Delt!",
+    demoSampleText: "🏖️ Strandnær villa i Alicante — 3 soveværelser, privat pool og havudsigt. Perfekt til 6 gæster. Book dit sommereventyr nu! 🌊",
   },
   en: {
     navHome: "Home", navFeatures: "Features", navVideo: "Video", navPricing: "Pricing",
@@ -244,6 +259,13 @@ export const LANDING: Record<Locale, LandingT> = {
     footerPrivacy: "Privacy policy", footerCookies: "Cookie policy", footerTerms: "Terms of service",
     footerCopyright: "© 2026 Vakanza. All rights reserved.",
     mockupLabel: "Seaside cottage, Skagen", mockupSub: "AI-generated presentation video",
+    demoStep1: "Paste link", demoStep2: "AI generates", demoStep3: "Ready!", demoStep4: "Share",
+    demoInputLabel: "Paste your property link",
+    demoAnalyzing: "AI is analysing the listing", demoAnalyzingSub: "Fetching photos · Writing text · Generating video",
+    demoRoom1: "Facade", demoRoom2: "Living room", demoRoom3: "Bedroom", demoRoom4: "Terrace",
+    demoPostLabel: "AI POST",
+    demoShareTitle: "Share with one click", demoShared: "Shared!",
+    demoSampleText: "🏖️ Beachfront villa in Alicante — 3 bedrooms, private pool & sea views. Perfect for 6 guests. Book your summer adventure now! 🌊",
   },
   es: {
     navHome: "Inicio", navFeatures: "Características", navVideo: "Vídeo", navPricing: "Precios",
@@ -301,6 +323,13 @@ export const LANDING: Record<Locale, LandingT> = {
     footerPrivacy: "Política de privacidad", footerCookies: "Política de cookies", footerTerms: "Términos de servicio",
     footerCopyright: "© 2026 Vakanza. Todos los derechos reservados.",
     mockupLabel: "Casa junto al mar, Skagen", mockupSub: "Vídeo de presentación generado por IA",
+    demoStep1: "Pegar enlace", demoStep2: "IA genera", demoStep3: "¡Listo!", demoStep4: "Compartir",
+    demoInputLabel: "Pega el enlace de tu propiedad",
+    demoAnalyzing: "La IA analiza el anuncio", demoAnalyzingSub: "Descargando fotos · Escribiendo texto · Generando vídeo",
+    demoRoom1: "Fachada", demoRoom2: "Salón", demoRoom3: "Dormitorio", demoRoom4: "Terraza",
+    demoPostLabel: "PUBLICACIÓN IA",
+    demoShareTitle: "Comparte con un clic", demoShared: "¡Compartido!",
+    demoSampleText: "🏖️ Villa en primera línea de playa en Alicante — 3 dormitorios, piscina privada y vistas al mar. Perfecta para 6 huéspedes. ¡Reserva ya tu aventura de verano! 🌊",
   },
   de: {
     navHome: "Startseite", navFeatures: "Funktionen", navVideo: "Video", navPricing: "Preise",
@@ -358,5 +387,12 @@ export const LANDING: Record<Locale, LandingT> = {
     footerPrivacy: "Datenschutzrichtlinie", footerCookies: "Cookie-Richtlinie", footerTerms: "Nutzungsbedingungen",
     footerCopyright: "© 2026 Vakanza. Alle Rechte vorbehalten.",
     mockupLabel: "Ferienhaus am Meer, Skagen", mockupSub: "KI-generiertes Präsentationsvideo",
+    demoStep1: "Link einfügen", demoStep2: "KI generiert", demoStep3: "Fertig!", demoStep4: "Teilen",
+    demoInputLabel: "Immobilienlink einfügen",
+    demoAnalyzing: "KI analysiert das Inserat", demoAnalyzingSub: "Fotos laden · Text schreiben · Video generieren",
+    demoRoom1: "Fassade", demoRoom2: "Wohnzimmer", demoRoom3: "Schlafzimmer", demoRoom4: "Terrasse",
+    demoPostLabel: "KI-BEITRAG",
+    demoShareTitle: "Mit einem Klick teilen", demoShared: "Geteilt!",
+    demoSampleText: "🏖️ Strandvilla in Alicante — 3 Schlafzimmer, privater Pool und Meerblick. Perfekt für 6 Gäste. Buche jetzt dein Sommererlebnis! 🌊",
   },
 };
