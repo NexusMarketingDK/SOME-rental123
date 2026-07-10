@@ -10,7 +10,7 @@ const PLATFORMS = [
   { name: "LinkedIn", color: "#0A66C2", letter: "in" },
 ];
 
-const SAMPLE_URL = "ferieboliger.dk/feriebolig-90-4813";
+const SAMPLE_URL = "feriebolig-spanien.dk/d/68771546";
 
 // Real property photos (Unsplash fallback — same as the cinematic walkthrough)
 const ROOM_PHOTOS = [

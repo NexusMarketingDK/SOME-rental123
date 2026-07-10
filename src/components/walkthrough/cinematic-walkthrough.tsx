@@ -180,9 +180,9 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
     fetch("/api/walkthrough-images")
       .then((r) => (r.ok ? r.json() : null))
       .then(async (data: { title?: string; scenes?: Scene[]; price?: string; guests?: string; beds?: string; baths?: string; rating?: string; reviews?: string } | null) => {
-        if (cancelled || !data?.scenes || data.scenes.length < 4) return;
+        if (cancelled || !data?.scenes || data.scenes.length < 3) return;
         const loaded = await preloadScenes(data.scenes);
-        if (cancelled || loaded.length < 4) return;
+        if (cancelled || loaded.length < 3) return;
         setScenes(loaded);
         setReady(true);
         setTitle((data.title ? data.title.slice(0, 60) : null) ?? DEMO_TITLE_OVERRIDE[locale] ?? DEMO_TITLE_OVERRIDE.da);
