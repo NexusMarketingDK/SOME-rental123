@@ -42,7 +42,7 @@ export async function createSubscriptionCheckout(): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://some-rental123.vercel.app";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.somevideopost.com";
   const [locale, currency] = await Promise.all([getLocale(), getCurrency()]);
 
   // Get or create Stripe customer
@@ -79,7 +79,7 @@ export async function createAiCreditCheckout(formData: FormData): Promise<void> 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://some-rental123.vercel.app";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.somevideopost.com";
   const [locale, currency] = await Promise.all([getLocale(), getCurrency()]);
 
   const session = await getStripe().checkout.sessions.create({
@@ -141,7 +141,7 @@ export async function createBillingPortalSession(): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://some-rental123.vercel.app";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.somevideopost.com";
 
   const { data: sub } = await supabase
     .from("subscriptions")

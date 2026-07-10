@@ -1,9 +1,27 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Check, X, Sparkles, Zap, Building2, CreditCard } from "lucide-react";
 import { getCurrency } from "@/lib/locale-server";
 import { formatPriceKey } from "@/lib/currency";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
+
+export const metadata: Metadata = {
+  title: "Priser — SOME VIDEO POST | AI-video og sociale medier til udlejere",
+  description:
+    "Se priser for somevideopost.com. Generer AI-præsentationsvideoer og sociale medie-opslag til din feriebolig. Planer uden binding — start gratis.",
+  keywords:
+    "somevideopost priser, AI video pris, sociale medier udlejning abonnement, feriebolig markedsføring pris",
+  alternates: { canonical: "https://www.somevideopost.com/priser" },
+  openGraph: {
+    title: "Priser — SOME VIDEO POST",
+    description:
+      "Generer AI-præsentationsvideoer og sociale medie-opslag til din feriebolig. Planer uden binding — start gratis.",
+    type: "website",
+    siteName: "somevideopost.com",
+    url: "https://www.somevideopost.com/priser",
+  },
+};
 
 const FEATURES = [
   { label: "Generér SOME opslag (AI)", starter: true, pro: true, business: true },
@@ -54,7 +72,7 @@ export default async function PriserPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
           <Link href="/" className="flex items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg font-bold text-sm text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>S</span>
-            <span className="text-lg font-bold text-[#1B3F7A]">somevideopost.com</span>
+            <span className="text-lg font-bold uppercase tracking-tight text-[#1B3F7A]">SOME VIDEO <span className="text-orange-500">POST</span></span>
           </Link>
           <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
             <Link href="/" className="hover:text-[#1B3F7A] transition-colors">Forside</Link>

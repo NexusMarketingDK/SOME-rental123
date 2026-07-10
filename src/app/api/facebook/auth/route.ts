@@ -6,7 +6,7 @@ export async function GET() {
     return NextResponse.json({ error: "FACEBOOK_APP_ID ikke konfigureret" }, { status: 500 });
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://some-rental123.vercel.app";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.somevideopost.com";
   const redirectUri = `${appUrl}/api/facebook/callback`;
 
   const scope = [

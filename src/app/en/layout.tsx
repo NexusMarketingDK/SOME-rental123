@@ -2,22 +2,27 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
-  title: "Vakanza — Automated social media for vacation rental hosts",
+  metadataBase: new URL("https://www.somevideopost.com"),
+  title: "SOME VIDEO POST — Automated social media & AI video for vacation rental hosts",
   description:
-    "Save time and get professional posts on Facebook, Instagram, TikTok and LinkedIn automatically. Sync your booking calendar from Airbnb, Booking.com and more. AI-generated content and video for vacation homes, apartments and houses.",
+    "somevideopost.com saves you time and gets professional posts on Facebook, Instagram, TikTok and LinkedIn automatically. Sync your booking calendar from Airbnb, Booking.com and more. AI-generated content and presentation videos for vacation homes, apartments and houses.",
   keywords:
-    "vacation rental social media, holiday home posts, automatic booking calendar, Airbnb Facebook posts, property marketing, host platform",
+    "somevideopost, SOME video post, AI property video, vacation rental social media, holiday home posts, automatic booking calendar, Airbnb Facebook posts, property marketing, host platform, presentation video real estate",
   openGraph: {
-    title: "Vakanza — Automated social media for vacation rental hosts",
+    title: "SOME VIDEO POST — Automated social media & AI video for vacation rental hosts",
     description:
-      "Save hours every week. Post to all social media at once, sync your booking calendar and let AI generate your posts automatically.",
+      "Save hours every week. Post to all social media at once, sync your booking calendar and let AI generate your posts and presentation videos automatically.",
     type: "website",
+    siteName: "somevideopost.com",
+    url: "https://www.somevideopost.com/en",
   },
   alternates: {
-    canonical: "https://vakanza.dk/en",
+    canonical: "https://www.somevideopost.com/en",
     languages: {
-      "da": "https://vakanza.dk",
-      "en": "https://vakanza.dk/en",
+      "da": "https://www.somevideopost.com",
+      "en": "https://www.somevideopost.com/en",
+      "es": "https://www.somevideopost.com/es",
+      "de": "https://www.somevideopost.com/de",
     },
   },
 };

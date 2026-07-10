@@ -151,9 +151,9 @@ export function LandingPage({ locale }: { locale: Locale }) {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
           <div className="flex items-center gap-2">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-bold text-sm text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>S</span>
-            <span className="font-bold text-[#1B3F7A]">
+            <span className="font-bold uppercase tracking-tight text-[#1B3F7A]">
               <span className="text-base sm:hidden">SOME</span>
-              <span className="hidden text-base sm:inline">somevideopost<span className="text-orange-500">.com</span></span>
+              <span className="hidden text-base sm:inline">SOME VIDEO <span className="text-orange-500">POST</span></span>
             </span>
           </div>
           <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
@@ -520,9 +520,9 @@ export function LandingPage({ locale }: { locale: Locale }) {
             <div className="md:col-span-1">
               <div className="flex items-center gap-2">
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>S</span>
-                <span className="font-bold text-white">
+                <span className="font-bold uppercase tracking-tight text-white">
                   <span className="text-base sm:hidden">SOME</span>
-                  <span className="hidden text-base sm:inline">somevideopost<span className="text-orange-400">.com</span></span>
+                  <span className="hidden text-base sm:inline">SOME VIDEO <span className="text-orange-400">POST</span></span>
                 </span>
               </div>
               <p className="mt-4 text-sm leading-relaxed text-slate-400">{t.footerDesc}</p>

@@ -1,36 +1,45 @@
 import type { MetadataRoute } from "next";
 
-const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://some-rental123.vercel.app";
+const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.somevideopost.com";
+const LOCALES = ["en", "es", "de"] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const now = new Date();
+
+  // Localised landing pages (da is the root, en/es/de are prefixed)
+  const landingPages: MetadataRoute.Sitemap = [
+    { url: BASE, lastModified: now, changeFrequency: "weekly", priority: 1 },
+    ...LOCALES.map((loc) => ({
+      url: `${BASE}/${loc}`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.9,
+    })),
+  ];
+
   return [
-    {
-      url: BASE,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1,
-    },
+    ...landingPages,
     {
       url: `${BASE}/priser`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.9,
     },
     {
       url: `${BASE}/blog`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
       url: `${BASE}/signup`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: "yearly",
       priority: 0.6,
     },
     {
       url: `${BASE}/login`,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: "yearly",
       priority: 0.5,
     },

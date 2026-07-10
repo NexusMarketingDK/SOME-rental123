@@ -113,7 +113,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Hvad hvis jeg ikke er tilfreds med videoen?",
-    a: "Kontakt os på support@vakanza.dk inden for 14 dage, hvis du ikke er tilfreds, og vi finder en løsning. Vi ønsker, at du er 100% glad for resultatet.",
+    a: "Kontakt os på kontakt@somevideopost.com inden for 14 dage, hvis du ikke er tilfreds, og vi finder en løsning. Vi ønsker, at du er 100% glad for resultatet.",
   },
 ];
 
@@ -283,7 +283,7 @@ export default async function VideosPage() {
               <div className="mx-auto max-w-5xl">
                 <div className="mb-10 text-center">
                   <span className="text-xs font-bold uppercase tracking-widest text-[#FF6B4A]">Fordele</span>
-                  <h2 className="mt-2 text-2xl font-bold text-slate-900">Derfor vælger udlejere Vakanza Video</h2>
+                  <h2 className="mt-2 text-2xl font-bold text-slate-900">Derfor vælger udlejere SOME VIDEO POST</h2>
                 </div>
                 <div className="grid grid-cols-2 gap-5">
                   {[
@@ -299,7 +299,7 @@ export default async function VideosPage() {
                       color: "#FF6B4A",
                       bg: "#FFF4F1",
                       title: "Klar på 15 minutter",
-                      text: "Vakanza Video leverer din færdige præsentationsvideo på bare 5-15 minutter. Du modtager besked direkte i appen, så snart den er klar til download.",
+                      text: "SOME VIDEO POST leverer din færdige præsentationsvideo på bare 5-15 minutter. Du modtager besked direkte i appen, så snart den er klar til download.",
                     },
                     {
                       icon: TrendingUp,

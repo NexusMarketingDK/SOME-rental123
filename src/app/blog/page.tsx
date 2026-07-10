@@ -1,7 +1,25 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { BookOpen, Video, Home, Building, Hotel, Megaphone } from "lucide-react";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
+
+export const metadata: Metadata = {
+  title: "Blog & guides — SOME VIDEO POST | AI-video og sociale medier til udlejere",
+  description:
+    "Guides om AI-genererede præsentationsvideoer, sociale medier og markedsføring af ferieboliger. Lær hvordan somevideopost.com hjælper udlejere med at få flere bookinger.",
+  keywords:
+    "feriebolig markedsføring, AI video guide, sociale medier udlejning, præsentationsvideo bolig, somevideopost blog",
+  alternates: { canonical: "https://www.somevideopost.com/blog" },
+  openGraph: {
+    title: "Blog & guides — SOME VIDEO POST",
+    description:
+      "Guides om AI-genererede præsentationsvideoer, sociale medier og markedsføring af ferieboliger.",
+    type: "website",
+    siteName: "somevideopost.com",
+    url: "https://www.somevideopost.com/blog",
+  },
+};
 
 // ── Blog data ──────────────────────────────────────────────────────────────────
 
@@ -252,7 +270,7 @@ export default function BlogPage() {
         <div className="relative mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
           <Link href="/" className="flex items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg font-bold text-sm text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>S</span>
-            <span className="text-lg font-bold text-[#1B3F7A]">somevideopost.com</span>
+            <span className="text-lg font-bold uppercase tracking-tight text-[#1B3F7A]">SOME VIDEO <span className="text-orange-500">POST</span></span>
           </Link>
           <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
             <Link href="/" className="hover:text-[#1B3F7A] transition-colors">Forside</Link>

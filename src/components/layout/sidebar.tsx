@@ -146,9 +146,9 @@ function SidebarContent({ accounts, userEmail, locale = "da", onNav }: SidebarPr
           className="flex h-7 w-7 items-center justify-center rounded-lg text-white font-bold text-sm shrink-0"
           style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
         >
-          V
+          S
         </span>
-        <span className="text-base font-bold leading-none text-white tracking-tight">SOME Video Post</span>
+        <span className="text-base font-bold uppercase leading-none text-white tracking-tight">SOME VIDEO POST</span>
       </div>
 
       {/* + New button */}
@@ -412,9 +412,9 @@ export function Sidebar({ accounts = [], userEmail, locale = "da" }: SidebarProp
             className="flex h-6 w-6 items-center justify-center rounded-md text-white font-bold text-xs shrink-0"
             style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
           >
-            V
+            S
           </span>
-          <span className="text-sm font-bold text-slate-900 tracking-tight">SOME Video Post</span>
+          <span className="text-sm font-bold uppercase text-slate-900 tracking-tight">SOME VIDEO POST</span>
         </div>
         <div className="ml-auto">
           <Link

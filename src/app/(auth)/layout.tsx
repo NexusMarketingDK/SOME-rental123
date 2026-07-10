@@ -12,11 +12,8 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
               background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)",
             }}
           />
-          <span
-            className="text-lg leading-none text-[#1B1B1F]"
-            style={{ fontFamily: "var(--font-fraunces)" }}
-          >
-            somevideopost.com
+          <span className="text-lg font-bold uppercase leading-none tracking-tight text-[#1B1B1F]">
+            SOME VIDEO POST
           </span>
         </div>
         {children}
