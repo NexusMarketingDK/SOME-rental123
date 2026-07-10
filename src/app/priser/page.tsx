@@ -3,6 +3,7 @@ import { Check, X, Sparkles, Zap, Building2, CreditCard } from "lucide-react";
 import { getCurrency } from "@/lib/locale-server";
 import { formatPriceKey } from "@/lib/currency";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
 
 const FEATURES = [
   { label: "Generér SOME opslag (AI)", starter: true, pro: true, business: true },
@@ -272,6 +273,35 @@ export default async function PriserPage() {
                 <p className="text-sm text-slate-500 leading-relaxed">{item.a}</p>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Live video demo */}
+        <div
+          className="overflow-hidden rounded-2xl p-8 md:p-12 text-white"
+          style={{ background: "linear-gradient(160deg, #0a0f1e 0%, #0f1f3d 50%, #0a0f1e 100%)" }}
+        >
+          <div className="grid items-center gap-10 md:grid-cols-2">
+            <div>
+              <span className="mb-3 inline-block rounded-full border border-orange-400/30 bg-orange-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-orange-400">Live demo</span>
+              <h2 className="text-2xl font-bold mb-3">Se hvad du får for 1 credit</h2>
+              <p className="text-sm leading-relaxed text-slate-300 mb-5 max-w-md">
+                Sådan ser en AI-genereret præsentationsvideo ud. Indsæt et link til din annonce — AI&apos;en henter billederne, bygger fotoruten og leverer en cinematisk video i 9:16 til Reels & TikTok.
+              </p>
+              <ul className="flex flex-col gap-2 text-sm text-slate-300">
+                <CheckItem><span className="text-slate-300">Prøv selv: scroll i videoen for at gå rundt i boligen</span></CheckItem>
+                <CheckItem><span className="text-slate-300">Skift farvestemning med filtre</span></CheckItem>
+                <CheckItem><span className="text-slate-300">Klar på under 15 minutter</span></CheckItem>
+              </ul>
+            </div>
+            <div className="flex justify-center">
+              <div className="relative w-full max-w-[300px]">
+                <div className="absolute inset-0 scale-90 rounded-[2.5rem] opacity-40 blur-2xl" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }} />
+                <div className="relative">
+                  <CinematicWalkthrough locale="da" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

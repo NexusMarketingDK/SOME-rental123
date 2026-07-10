@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BookOpen, Video, Home, Building, Hotel, Megaphone } from "lucide-react";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
 
 // ── Blog data ──────────────────────────────────────────────────────────────────
 
@@ -353,28 +354,41 @@ export default function BlogPage() {
           );
         })}
 
-        {/* CTA */}
+        {/* CTA with live video demo */}
         <div
-          className="rounded-2xl p-8 text-white text-center"
+          className="overflow-hidden rounded-2xl p-8 md:p-12 text-white"
           style={{ background: "linear-gradient(135deg, #1B3F7A 0%, #14306b 100%)" }}
         >
-          <h2 className="text-xl font-bold mb-2">Klar til at gøre din bolig uimodståelig?</h2>
-          <p className="text-blue-200 text-sm mb-6 max-w-md mx-auto">
-            AI genererer sælgende SOME-opslag og professionelle præsentationsvideoer direkte fra din annonce — klar på minutter.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/posts/new"
-              className="rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-slate-900 hover:bg-slate-100 transition"
-            >
-              Generer SOME opslag
-            </Link>
-            <Link
-              href="/videos/new"
-              className="rounded-xl border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-bold text-white hover:bg-white/20 transition"
-            >
-              Opret præsentationsvideo
-            </Link>
+          <div className="grid items-center gap-10 md:grid-cols-2">
+            <div className="text-center md:text-left">
+              <span className="mb-3 inline-block rounded-full border border-orange-400/30 bg-orange-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-orange-300">Live demo</span>
+              <h2 className="text-xl font-bold mb-2">Klar til at gøre din bolig uimodståelig?</h2>
+              <p className="text-blue-200 text-sm mb-6 max-w-md mx-auto md:mx-0">
+                AI genererer sælgende SOME-opslag og professionelle præsentationsvideoer direkte fra din annonce — klar på minutter. Prøv demoen her: scroll i videoen for at gå rundt i boligen.
+              </p>
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                <Link
+                  href="/posts/new"
+                  className="rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-slate-900 hover:bg-slate-100 transition"
+                >
+                  Generer SOME opslag
+                </Link>
+                <Link
+                  href="/videos/new"
+                  className="rounded-xl border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-bold text-white hover:bg-white/20 transition"
+                >
+                  Opret præsentationsvideo
+                </Link>
+              </div>
+            </div>
+            <div className="flex justify-center">
+              <div className="relative w-full max-w-[280px]">
+                <div className="absolute inset-0 scale-90 rounded-[2.5rem] opacity-40 blur-2xl" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }} />
+                <div className="relative">
+                  <CinematicWalkthrough locale="da" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -138,7 +138,7 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
   const [mode, setMode] = useState<Mode>("auto");
   const [activeIdx, setActiveIdx] = useState(0);
   const [title, setTitle] = useState(DEMO_TITLE_OVERRIDE[locale] ?? DEMO_TITLE_OVERRIDE.da);
-  const [filterKey, setFilterKey] = useState<FilterKey>("none");
+  const [filterKey, setFilterKey] = useState<FilterKey>("cinematic");
   const [meta, setMeta] = useState<{ price?: string; guests?: string; beds?: string; baths?: string; rating?: string; reviews?: string }>({});
 
   const activeFilter = FILTERS.find((f) => f.key === filterKey) ?? FILTERS[0];
