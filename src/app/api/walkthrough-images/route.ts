@@ -5,7 +5,7 @@ import type { RoomKey, Scene } from "@/components/walkthrough/cinematic-walkthro
 // Demo listing for the landing-page walkthrough prototype.
 // Hardcoded server-side so this endpoint can't be used as an open scrape proxy.
 const LISTING_URL =
-  "https://www.feriebolig-spanien.dk/d/65060663?locale=da-DK&currency=DKK";
+  "https://www.airbnb.es/rooms/1183079345536437587";
 
 const SCRAPE_TIMEOUT_MS = 15_000;
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
@@ -27,23 +27,40 @@ const ROOM_KEYWORDS: Record<RoomKey, RegExp> = {
   terrace: /terra|pool|garden|have|jardin|patio|balcon|outdoor/i,
 };
 
-// Curated photo placeholders (vacation-villa style) used when the listing
-// can't be scraped. Hotlinked from Unsplash; the client preloads and only
-// swaps them in if they actually load.
+// Curated photo placeholders — Spanish villa/apartment style matching the demo listing.
+// Hotlinked from Unsplash; the client preloads and only swaps them in if they load.
 const PHOTO_FALLBACK: Scene[] = [
-  { src: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=85", roomKey: "facade" },
-  { src: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1600&q=85", roomKey: "entrance" },
-  { src: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=1600&q=85", roomKey: "kitchen" },
-  { src: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1600&q=85", roomKey: "living" },
-  { src: "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=1600&q=85", roomKey: "bedroom" },
-  { src: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=1600&q=85", roomKey: "bathroom" },
-  { src: "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1600&q=85", roomKey: "terrace" },
+  { src: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1600&q=90", roomKey: "facade" },
+  { src: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=90", roomKey: "entrance" },
+  { src: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=1600&q=90", roomKey: "kitchen" },
+  { src: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1600&q=90", roomKey: "living" },
+  { src: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=1600&q=90", roomKey: "bedroom" },
+  { src: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?auto=format&fit=crop&w=1600&q=90", roomKey: "bathroom" },
+  { src: "https://images.unsplash.com/photo-1601084881623-cbe9425f1297?auto=format&fit=crop&w=1600&q=90", roomKey: "terrace" },
 ];
+
+// Hardcoded demo metadata shown when live scrape fails.
+const DEMO_META = {
+  title: "Strandnær villa · Alicante, Spanien",
+  location: "Alicante, Spanien",
+  price: "€149 / nat",
+  guests: "6 gæster",
+  beds: "3 soveværelser",
+  baths: "2 badeværelser",
+  rating: "4.94",
+  reviews: "87 anmeldelser",
+};
 
 type Payload = {
   source: "listing" | "placeholder";
   title?: string;
   location?: string;
+  price?: string;
+  guests?: string;
+  beds?: string;
+  baths?: string;
+  rating?: string;
+  reviews?: string;
   scenes: Scene[];
 };
 
@@ -86,7 +103,7 @@ export async function GET() {
     });
   }
 
-  let payload: Payload = { source: "placeholder", scenes: PHOTO_FALLBACK };
+  let payload: Payload = { source: "placeholder", scenes: PHOTO_FALLBACK, ...DEMO_META };
 
   try {
     const result = await Promise.race([
@@ -100,9 +117,10 @@ export async function GET() {
       const scenes = buildScenes(result.data.imageUrls);
       if (scenes.length >= 4) {
         payload = {
+          ...DEMO_META,
           source: "listing",
-          title: result.data.title,
-          location: result.data.location,
+          title: result.data.title ?? DEMO_META.title,
+          location: result.data.location ?? DEMO_META.location,
           scenes,
         };
       }

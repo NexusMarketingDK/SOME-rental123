@@ -125,6 +125,7 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
   const [activeIdx, setActiveIdx] = useState(0);
   const [title, setTitle] = useState("Villa · Valencia, Spanien");
   const [filterKey, setFilterKey] = useState<FilterKey>("none");
+  const [meta, setMeta] = useState<{ price?: string; guests?: string; beds?: string; baths?: string; rating?: string; reviews?: string }>({});
 
   const activeFilter = FILTERS.find((f) => f.key === filterKey) ?? FILTERS[0];
 
@@ -164,13 +165,14 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
     // photo placeholders) — only swapped in once fully preloaded.
     fetch("/api/walkthrough-images")
       .then((r) => (r.ok ? r.json() : null))
-      .then(async (data: { title?: string; scenes?: Scene[] } | null) => {
+      .then(async (data: { title?: string; scenes?: Scene[]; price?: string; guests?: string; beds?: string; baths?: string; rating?: string; reviews?: string } | null) => {
         if (cancelled || !data?.scenes || data.scenes.length < 4) return;
         const loaded = await preloadScenes(data.scenes);
         if (cancelled || loaded.length < 4) return;
         setScenes(loaded);
         setReady(true);
         if (data.title) setTitle(data.title.slice(0, 60));
+        setMeta({ price: data.price, guests: data.guests, beds: data.beds, baths: data.baths, rating: data.rating, reviews: data.reviews });
         tRef.current = Math.min(tRef.current, totalDuration(loaded.length) - 0.01);
         roomRef.current = Math.min(roomRef.current, loaded.length - 1);
         dirtyRef.current = true;
@@ -602,6 +604,30 @@ export function CinematicWalkthrough({ locale = "da" }: { locale?: Locale }) {
             >
               <Play size={26} className="ml-0.5 text-white" fill="white" />
             </button>
+          )}
+
+          {/* Property info panel */}
+          {ready && (meta.price || meta.rating) && (
+            <div className="pointer-events-none absolute left-0 right-0 bottom-10 px-3">
+              <div className="flex items-end justify-between gap-2">
+                {/* Left: price + guests */}
+                <div className="rounded-xl border border-white/10 bg-black/50 px-2.5 py-1.5 backdrop-blur-md">
+                  {meta.price && <p className="text-[11px] font-bold text-white">{meta.price}</p>}
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {meta.beds && <span className="text-[9px] text-white/60">🛏 {meta.beds}</span>}
+                    {meta.baths && <span className="text-[9px] text-white/60">🚿 {meta.baths}</span>}
+                    {meta.guests && <span className="text-[9px] text-white/60">👥 {meta.guests}</span>}
+                  </div>
+                </div>
+                {/* Right: rating */}
+                {meta.rating && (
+                  <div className="rounded-xl border border-white/10 bg-black/50 px-2.5 py-1.5 backdrop-blur-md text-right">
+                    <p className="text-[11px] font-bold text-white">⭐ {meta.rating}</p>
+                    {meta.reviews && <p className="text-[9px] text-white/60">{meta.reviews}</p>}
+                  </div>
+                )}
+              </div>
+            </div>
           )}
 
           {/* Bottom controls: play/pause + scrubber + status */}
