@@ -5,7 +5,7 @@ import type { RoomKey, Scene } from "@/components/walkthrough/cinematic-walkthro
 // Demo listing for the landing-page walkthrough prototype.
 // Hardcoded server-side so this endpoint can't be used as an open scrape proxy.
 const LISTING_URL =
-  "https://www.airbnb.es/rooms/1183079345536437587";
+  "https://www.ferieboliger.dk/feriebolig-90-4813?fromdate=25.07.2026&todate=01.08.2026";
 
 const SCRAPE_TIMEOUT_MS = 15_000;
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
