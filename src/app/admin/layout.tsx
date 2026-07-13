@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-const ADMIN_EMAILS = ["kontakt@nexusmarketing.dk", "kontakt.nexusmarketing@gmail.com"];
+const ADMIN_EMAILS = ["mail@somevideopost.com"];
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient();

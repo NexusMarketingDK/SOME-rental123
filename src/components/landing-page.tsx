@@ -2,7 +2,7 @@ import Link from "next/link";
 import {
   CalendarDays, Share2, Sparkles, Video, Clock, CheckCircle2,
   ArrowRight, Home, Zap, Image as ImageIcon, Star, Users,
-  TrendingUp, Play, Globe,
+  TrendingUp, Play, Globe, Link2,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 import { LANDING, LOCALE_FLAGS, LOCALE_LABELS, LOCALE_PATHS, LOCALES } from "@/lib/i18n";
@@ -494,6 +494,62 @@ export function LandingPage({ locale }: { locale: Locale }) {
                 {t.plan3OrderBtn}
               </Link>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── "So easy" illustrated band + CTA ── */}
+      <section className="border-t border-slate-100 bg-gradient-to-b from-white to-slate-50 py-24">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="mb-14 text-center">
+            <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-bold uppercase tracking-widest text-orange-600">
+              <Sparkles size={12} /> {t.demoStep2}
+            </span>
+            <h2 className="text-3xl font-bold text-[#1B3F7A] md:text-4xl">{t.easyTitle}</h2>
+            <p className="mx-auto mt-3 max-w-xl text-slate-500">{t.easySub}</p>
+          </div>
+
+          <div className="grid items-stretch gap-4 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
+            {([
+              { icon: Link2, color: "#1B3F7A", bg: "#EEF3FB", n: "1", title: t.demoStep1, desc: t.step1Desc },
+              { icon: Sparkles, color: "#FF6B4A", bg: "#FFF4F1", n: "2", title: t.demoStep2, desc: t.step2Desc },
+              { icon: Share2, color: "#7C3AED", bg: "#F5F0FF", n: "3", title: t.demoStep4, desc: t.step3Desc },
+            ] as const).flatMap((s, i) => {
+              const card = (
+                <div key={s.n} className="flex flex-col items-center rounded-2xl border border-slate-100 bg-white p-6 text-center shadow-sm">
+                  <div className="relative mb-4">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: s.bg }}>
+                      <s.icon size={26} style={{ color: s.color }} />
+                    </div>
+                    <span className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white shadow" style={{ background: s.color }}>
+                      {s.n}
+                    </span>
+                  </div>
+                  <h3 className="mb-1.5 font-bold text-slate-900">{s.title}</h3>
+                  <p className="text-sm leading-relaxed text-slate-500">{s.desc}</p>
+                </div>
+              );
+              if (i === 2) return [card];
+              return [
+                card,
+                <div key={`arrow-${i}`} className="flex items-center justify-center">
+                  <ArrowRight size={22} className="hidden text-slate-300 md:block" />
+                  <div className="h-6 w-px bg-slate-200 md:hidden" />
+                </div>,
+              ];
+            })}
+          </div>
+
+          {/* Call to action */}
+          <div className="mt-12 flex flex-col items-center">
+            <Link
+              href="/signup"
+              className="inline-flex items-center gap-2 rounded-xl px-8 py-4 text-base font-bold text-white shadow-lg transition-opacity hover:opacity-90"
+              style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}
+            >
+              {t.easyCtaBtn} <ArrowRight size={18} />
+            </Link>
+            <p className="mt-3 text-sm text-slate-400">{t.ctaNoCard}</p>
           </div>
         </div>
       </section>

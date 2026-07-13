@@ -101,6 +101,7 @@ export type LandingT = {
   aiOnetimeLabel: string; aiOrderBtn: string;
   // how it works
   howTitle: string; howSub: string;
+  easyTitle: string; easySub: string; easyCtaBtn: string;
   how1Title: string; how1Desc: string;
   how2Title: string; how2Desc: string;
   how3Title: string; how3Desc: string;
@@ -168,6 +169,7 @@ export const LANDING: Record<Locale, LandingT> = {
     aiFeats: ["Novasol, Airbnb & Booking.com integration","Upload dine egne billeder","Cinematiske kamerabevægelser","Automatisk baggrundsmusik","Leveret på under 15 minutter","9:16 optimeret til Reels & TikTok"],
     aiOnetimeLabel: "Engangspris", aiOrderBtn: "Bestil video →",
     howTitle: "Klar til brug på 3 minutter", howSub: "Ingen teknisk viden påkrævet",
+    easyTitle: "Så nemt er det", easySub: "Fra boliglink til færdigt opslag og video — på tre enkle trin. Prøv det gratis, uden kreditkort.", easyCtaBtn: "Kom gratis i gang nu",
     how1Title: "Tilføj din bolig", how1Desc: "Upload billeder eller indsæt dit Novasol, Airbnb eller Booking.com link. Synkroniser din eksisterende bookingkalender automatisk.",
     how2Title: "AI laver din præsentationsvideo", how2Desc: "SOME Video Post laver en professionel virtuel fremvisning med musik og cinematiske kamerabevægelser — klar på under 15 minutter.",
     how3Title: "Del automatisk på sociale medier", how3Desc: "SOME Video Post poster din video og indhold til Facebook, Instagram, TikTok og LinkedIn — automatisk og på det rigtige tidspunkt.",
@@ -233,6 +235,7 @@ export const LANDING: Record<Locale, LandingT> = {
     aiFeats: ["Novasol, Airbnb & Booking.com integration","Upload your own photos","Cinematic camera transitions","Automatic background music","Delivered in under 15 minutes","9:16 optimised for Reels & TikTok"],
     aiOnetimeLabel: "One-time price", aiOrderBtn: "Order video →",
     howTitle: "Up and running in 3 minutes", howSub: "No technical knowledge required",
+    easyTitle: "It's this easy", easySub: "From property link to finished post and video — in three simple steps. Try it free, no credit card.", easyCtaBtn: "Get started free now",
     how1Title: "Add your property", how1Desc: "Upload photos or paste your Novasol, Airbnb or Booking.com link. Sync your existing booking calendar automatically.",
     how2Title: "AI creates your presentation video", how2Desc: "SOME Video Post creates a professional virtual showing with music and cinematic camera movements — ready in under 15 minutes.",
     how3Title: "Share automatically on social media", how3Desc: "SOME Video Post posts your video and content to Facebook, Instagram, TikTok and LinkedIn — automatically and at the right time.",
@@ -298,6 +301,7 @@ export const LANDING: Record<Locale, LandingT> = {
     aiFeats: ["Integración con Novasol, Airbnb & Booking.com","Sube tus propias fotos","Transiciones de cámara cinematográficas","Música de fondo automática","Entregado en menos de 15 minutos","9:16 optimizado para Reels & TikTok"],
     aiOnetimeLabel: "Precio único", aiOrderBtn: "Pedir vídeo →",
     howTitle: "Listo en 3 minutos", howSub: "Sin conocimientos técnicos necesarios",
+    easyTitle: "Así de fácil es", easySub: "Del enlace de tu propiedad a la publicación y el vídeo terminados — en tres sencillos pasos. Pruébalo gratis, sin tarjeta.", easyCtaBtn: "Empieza gratis ahora",
     how1Title: "Añade tu propiedad", how1Desc: "Sube fotos o pega tu enlace de Novasol, Airbnb o Booking.com. Sincroniza tu calendario de reservas existente automáticamente.",
     how2Title: "La IA crea tu vídeo de presentación", how2Desc: "SOME Video Post crea una visita virtual profesional con música y movimientos de cámara cinematográficos — lista en menos de 15 minutos.",
     how3Title: "Comparte automáticamente en redes sociales", how3Desc: "SOME Video Post publica tu vídeo y contenido en Facebook, Instagram, TikTok y LinkedIn — automáticamente y en el momento adecuado.",
@@ -363,6 +367,7 @@ export const LANDING: Record<Locale, LandingT> = {
     aiFeats: ["Novasol, Airbnb & Booking.com Integration","Eigene Fotos hochladen","Kinematische Kameraübergänge","Automatische Hintergrundmusik","In unter 15 Minuten geliefert","9:16 für Reels & TikTok optimiert"],
     aiOnetimeLabel: "Einmalpreis", aiOrderBtn: "Video bestellen →",
     howTitle: "In 3 Minuten einsatzbereit", howSub: "Keine technischen Kenntnisse erforderlich",
+    easyTitle: "So einfach ist das", easySub: "Vom Immobilienlink zum fertigen Beitrag und Video — in drei einfachen Schritten. Kostenlos testen, ohne Kreditkarte.", easyCtaBtn: "Jetzt kostenlos starten",
     how1Title: "Deine Immobilie hinzufügen", how1Desc: "Fotos hochladen oder deinen Novasol, Airbnb oder Booking.com Link einfügen. Deinen bestehenden Buchungskalender automatisch synchronisieren.",
     how2Title: "KI erstellt dein Präsentationsvideo", how2Desc: "SOME Video Post erstellt eine professionelle virtuelle Besichtigung mit Musik und kinematischen Kamerabewegungen — fertig in unter 15 Minuten.",
     how3Title: "Automatisch in sozialen Medien teilen", how3Desc: "SOME Video Post postet dein Video und deine Inhalte auf Facebook, Instagram, TikTok und LinkedIn — automatisch und zur richtigen Zeit.",
