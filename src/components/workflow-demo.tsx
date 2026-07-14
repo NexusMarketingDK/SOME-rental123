@@ -106,7 +106,7 @@ export function WorkflowDemo({ t }: WorkflowDemoProps) {
   }, [step, t.demoSampleText]);
 
   return (
-    <div className="w-full rounded-2xl border border-white/10 bg-[#0e1f3d] p-4 shadow-2xl">
+    <div className="w-full rounded-2xl border border-blue-400/30 bg-[#0a1430] p-4 shadow-[0_0_40px_rgba(59,130,246,0.2)]">
       {/* Step indicator */}
       <div className="mb-4 flex items-center justify-between gap-2">
         {STEPS.map((s, i) => {
