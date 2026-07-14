@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Check, X, Sparkles, Zap, Building2, CreditCard } from "lucide-react";
+import { Check, X, Sparkles, Zap, Building2, CreditCard, Video } from "lucide-react";
 import { getCurrency } from "@/lib/locale-server";
 import { formatPriceKey } from "@/lib/currency";
 import { MobileNav } from "@/components/layout/mobile-nav";
@@ -23,26 +23,27 @@ export const metadata: Metadata = {
   },
 };
 
-const FEATURES = [
+const FEATURES: { label: string; starter: string | boolean; pro: string | boolean; business: string | boolean }[] = [
+  { label: "Præsentationsvideoer inkluderet pr. måned", starter: "1", pro: "2", business: "6" },
+  { label: "Del opslag direkte på sociale medier", starter: true, pro: true, business: true },
   { label: "Generér SOME opslag (AI)", starter: true, pro: true, business: true },
-  { label: "Generér præsentationsvideoer", starter: true, pro: true, business: true },
-  { label: "Download", starter: true, pro: true, business: true },
-  { label: "Web Share (del via telefonens delingsmenu)", starter: true, pro: true, business: true },
-  { label: "Kopiér link", starter: true, pro: true, business: true },
+  { label: "Download i alle formater", starter: true, pro: true, business: true },
+  { label: "Forbind Facebook / Instagram-konto", starter: true, pro: true, business: true },
   { label: "Blog & guides", starter: true, pro: true, business: true },
   { label: "Planlæg opslag", starter: false, pro: true, business: true },
-  { label: "Forbind Facebook / Instagram-konto", starter: false, pro: true, business: true },
-  { label: "Direkte publicering til Facebook", starter: false, pro: true, business: true },
-  { label: "Direkte publicering til Instagram Business*", starter: false, pro: true, business: true },
   { label: "Analytics", starter: false, pro: true, business: true },
   { label: "Flere brands / projekter", starter: false, pro: true, business: true },
+  { label: "Ekstra præsentationsvideo (tilkøb)", starter: "€50/stk.", pro: "€50/stk.", business: "€50/stk." },
+  { label: "Meta-integration for annoncering", starter: false, pro: false, business: true },
   { label: "Flere brugere / teamadgang", starter: false, pro: false, business: true },
-  { label: "API-adgang", starter: false, pro: false, business: true },
   { label: "Prioriteret support", starter: false, pro: false, business: true },
 ];
 
-function Tick({ yes }: { yes: boolean }) {
-  return yes ? (
+function Tick({ value }: { value: string | boolean }) {
+  if (typeof value === "string") {
+    return <span className="text-sm font-semibold text-slate-900">{value}</span>;
+  }
+  return value ? (
     <Check size={16} className="mx-auto text-emerald-500" strokeWidth={2.5} />
   ) : (
     <X size={16} className="mx-auto text-slate-300" strokeWidth={2} />
@@ -62,8 +63,8 @@ export default async function PriserPage() {
   const currency = await getCurrency();
   const starterPrice = formatPriceKey("starter", currency);
   const proPrice = formatPriceKey("pro", currency);
-  const businessMinPrice = formatPriceKey("businessMin", currency);
-  const businessMaxPrice = formatPriceKey("businessMax", currency);
+  const businessPrice = formatPriceKey("business", currency);
+  const videoPrice = formatPriceKey("video", currency);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -106,29 +107,30 @@ export default async function PriserPage() {
             Vælg den plan der passer til dig
           </h1>
           <p className="mt-3 text-base text-slate-500 max-w-xl mx-auto">
-            Alle planer inkluderer credits der kan bruges til SOME opslag og præsentationsvideoer. Ingen skjulte gebyrer.
+            Alle pakker inkluderer direkte deling til sociale medier og et fast antal præsentationsvideoer hver måned. Ingen skjulte gebyrer, ingen binding.
           </p>
         </div>
       </div>
 
       <div className="mx-auto max-w-6xl px-6 py-14 space-y-16">
 
-        {/* Credits explanation */}
+        {/* How it works */}
         <div className="rounded-2xl border border-blue-100 bg-blue-50 p-6 md:p-8">
           <div className="flex items-start gap-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100">
               <Sparkles size={20} className="text-blue-600" />
             </div>
             <div className="flex-1">
-              <h2 className="text-lg font-bold text-slate-900 mb-1">Hvad er credits?</h2>
+              <h2 className="text-lg font-bold text-slate-900 mb-1">Sådan fungerer det</h2>
               <p className="text-sm text-slate-600 leading-relaxed max-w-2xl">
-                1 credit svarer til 1 euro i værdi og trækkes fra det månedlige beløb du betaler. Hvert SOME opslag koster 1 credit, og hver præsentationsvideo koster 1 credit. Bruger du flere end din plan inkluderer, kan du tilkøbe ekstra credits — minimum 10 credits ad gangen.
+                Vælg en månedlig pakke der passer til, hvor meget du deler. Hver pakke inkluderer et fast antal AI-præsentationsvideoer om måneden og giver dig mulighed for at dele opslag direkte på dine sociale medier. Har du brug for flere videoer, kan du tilkøbe dem for {videoPrice}/stk.
               </p>
               <div className="mt-4 flex flex-wrap gap-3">
                 {[
-                  { label: "1 SOME opslag", credits: "1 credit" },
-                  { label: "1 præsentationsvideo", credits: "1 credit" },
-                  { label: "Ekstra credits", credits: "min. 10 ad gangen" },
+                  { label: "Starter", credits: "1 video/md." },
+                  { label: "Pro", credits: "2 videoer/md." },
+                  { label: "Business", credits: "6 videoer/md." },
+                  { label: "Ekstra video", credits: `${videoPrice}/stk.` },
                 ].map((item) => (
                   <div key={item.label} className="flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-3 py-2">
                     <span className="text-xs font-semibold text-slate-900">{item.label}</span>
@@ -153,14 +155,13 @@ export default async function PriserPage() {
               <span className="text-slate-500 text-sm">/md.</span>
             </div>
             <p className="mt-1 text-xs text-slate-400">Faktureres månedligt · inkl. moms</p>
-            <p className="mt-3 text-sm text-slate-600">Del nemt til dine sociale medier med AI-genererede opslag og videoer.</p>
+            <p className="mt-3 text-sm text-slate-600">Kom i gang med direkte deling til sociale medier og din første video hver måned.</p>
             <ul className="my-6 flex flex-col gap-2.5">
+              <CheckItem><strong>1 præsentationsvideo</strong> pr. måned inkluderet</CheckItem>
+              <CheckItem>Del opslag direkte på sociale medier</CheckItem>
               <CheckItem>AI-generering af SOME opslag</CheckItem>
-              <CheckItem>AI-generering af præsentationsvideoer</CheckItem>
-              <CheckItem>Download til enheden</CheckItem>
-              <CheckItem>Web Share (del via telefonens delingsmenu)</CheckItem>
-              <CheckItem>Kopiér link til deling</CheckItem>
-              <CheckItem>Grundlæggende boligoversigt</CheckItem>
+              <CheckItem>Download i alle formater</CheckItem>
+              <CheckItem>Op til 5 boliger</CheckItem>
             </ul>
             <div className="mt-auto">
               <Link
@@ -185,11 +186,11 @@ export default async function PriserPage() {
               <span className="text-slate-500 text-sm">/md.</span>
             </div>
             <p className="mt-1 text-xs text-slate-400">Faktureres månedligt · inkl. moms</p>
-            <p className="mt-3 text-sm text-slate-600">Publicér direkte fra platformen og administrér dine sociale medier.</p>
+            <p className="mt-3 text-sm text-slate-600">Til den aktive udlejer der deler mere og vil have overblik og indsigt.</p>
             <ul className="my-6 flex flex-col gap-2.5">
+              <CheckItem><strong>2 præsentationsvideoer</strong> pr. måned inkluderet</CheckItem>
               <CheckItem>Alt i Starter</CheckItem>
-              <CheckItem>Forbind Facebook / Instagram via OAuth</CheckItem>
-              <CheckItem>Direkte publicering (hvor API&apos;er tillader det)</CheckItem>
+              <CheckItem>Del direkte på alle kanaler</CheckItem>
               <CheckItem>Planlægning af opslag</CheckItem>
               <CheckItem>Analytics og indsigt</CheckItem>
               <CheckItem>Flere brands / projekter</CheckItem>
@@ -211,28 +212,41 @@ export default async function PriserPage() {
               <Building2 size={12} /> Business
             </div>
             <div className="mt-4 flex items-baseline gap-1">
-              <span className="text-4xl font-extrabold text-slate-900">{businessMinPrice}</span>
-              <span className="text-slate-500 text-sm">–{businessMaxPrice}/md.</span>
+              <span className="text-4xl font-extrabold text-slate-900">{businessPrice}</span>
+              <span className="text-slate-500 text-sm">/md.</span>
             </div>
-            <p className="mt-1 text-xs text-slate-400">Bureauer og større virksomheder</p>
-            <p className="mt-3 text-sm text-slate-600">Skalerbar løsning til teams med avancerede behov og prioriteret support.</p>
+            <p className="mt-1 text-xs text-slate-400">Alt inkluderet · prioriteret support</p>
+            <p className="mt-3 text-sm text-slate-600">Den komplette løsning med annoncering via Meta og prioriteret support.</p>
             <ul className="my-6 flex flex-col gap-2.5">
-              <CheckItem>Alt i Pro</CheckItem>
-              <CheckItem>Flere brugere og teamadgang</CheckItem>
-              <CheckItem>Flere brands under ét abonnement</CheckItem>
-              <CheckItem>Teamfunktioner og rollestyring</CheckItem>
-              <CheckItem>API-adgang</CheckItem>
+              <CheckItem><strong>6 præsentationsvideoer</strong> pr. måned inkluderet</CheckItem>
+              <CheckItem>Alt inkluderet — alt i Pro</CheckItem>
+              <CheckItem>Meta-integration for annoncering</CheckItem>
               <CheckItem>Prioriteret support</CheckItem>
+              <CheckItem>Team og flere brugere</CheckItem>
             </ul>
             <div className="mt-auto">
-              <a
-                href="mailto:mail@somevideopost.com"
+              <Link
+                href="/signup"
                 className="block w-full rounded-xl py-3 text-center text-sm font-bold text-white transition-opacity hover:opacity-90"
                 style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}
               >
-                Kontakt os
-              </a>
+                Vælg Business
+              </Link>
             </div>
+          </div>
+
+          {/* Extra video add-on */}
+          <div className="mt-6 flex flex-col items-center justify-between gap-4 rounded-2xl border border-orange-200 bg-orange-50/60 px-6 py-5 sm:flex-row">
+            <div className="flex items-center gap-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-orange-600">
+                <Video size={20} />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-900">Ekstra præsentationsvideo</p>
+                <p className="text-sm text-slate-500">Brug for flere videoer end din pakke inkluderer? Tilkøb efter behov.</p>
+              </div>
+            </div>
+            <p className="text-2xl font-extrabold text-slate-900 whitespace-nowrap">{videoPrice} <span className="text-sm font-normal text-slate-500">/ stk.</span></p>
           </div>
         </div>
 
@@ -253,37 +267,45 @@ export default async function PriserPage() {
                 {FEATURES.map((f, i) => (
                   <tr key={f.label} className={i % 2 === 0 ? "bg-white" : "bg-slate-50/60"}>
                     <td className="py-3 pl-6 pr-4 text-slate-700">{f.label}</td>
-                    <td className="px-4 py-3 text-center"><Tick yes={f.starter} /></td>
-                    <td className="px-4 py-3 text-center"><Tick yes={f.pro} /></td>
-                    <td className="px-4 py-3 text-center"><Tick yes={f.business} /></td>
+                    <td className="px-4 py-3 text-center"><Tick value={f.starter} /></td>
+                    <td className="px-4 py-3 text-center"><Tick value={f.pro} /></td>
+                    <td className="px-4 py-3 text-center"><Tick value={f.business} /></td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="mt-3 text-xs text-slate-400">* Direkte publicering til Instagram Business kræver godkendt Meta Business-konto og er underlagt Metas API-begrænsninger.</p>
+          <p className="mt-3 text-xs text-slate-400">Meta-integration for annoncering (Business) kræver en godkendt Meta Business-konto og er underlagt Metas API-begrænsninger.</p>
         </div>
 
-        {/* FAQ / extra credits */}
+        {/* FAQ */}
         <div className="rounded-2xl border border-slate-200 bg-white p-8">
           <h2 className="text-xl font-bold text-slate-900 mb-6">Ofte stillede spørgsmål</h2>
           <div className="grid gap-6 md:grid-cols-2">
             {[
               {
-                q: "Hvad sker der hvis jeg bruger alle mine credits?",
-                a: "Du kan til enhver tid tilkøbe ekstra credits i pakker af minimum 10 credits. De trækkes direkte fra din konto og udløber ikke.",
+                q: "Hvor mange videoer er inkluderet?",
+                a: `Starter inkluderer 1 præsentationsvideo om måneden, Pro inkluderer 2, og Business inkluderer 6. Har du brug for flere, tilkøber du dem for ${videoPrice}/stk.`,
               },
               {
-                q: "Kan jeg skifte plan?",
-                a: "Ja, du kan opgradere eller nedgradere din plan når som helst. Ændringen træder i kraft ved næste faktureringsperiode.",
+                q: "Kan jeg dele direkte på sociale medier?",
+                a: "Ja. Alle pakker giver dig mulighed for at dele opslag direkte på dine sociale medier fra dashboardet.",
               },
               {
-                q: "Hvad koster ekstra credits?",
-                a: "1 credit svarer til 1 euro i værdi. Du køber minimum 10 credits ad gangen. Præcis pris afhænger af din valgte plan.",
+                q: "Hvad koster en ekstra præsentationsvideo?",
+                a: `En ekstra præsentationsvideo koster ${videoPrice} pr. styk, ud over det din pakke inkluderer hver måned.`,
+              },
+              {
+                q: "Kan jeg skifte pakke?",
+                a: "Ja, du kan opgradere eller nedgradere din pakke når som helst. Ændringen træder i kraft ved næste faktureringsperiode.",
+              },
+              {
+                q: "Hvad er Meta-integration for annoncering?",
+                a: "Business-pakken giver adgang til Meta-integration, så du kan bruge dine videoer og opslag til annoncering på Facebook og Instagram — sammen med prioriteret support.",
               },
               {
                 q: "Er der binding?",
-                a: "Nej. Alle planer er månedlige uden binding. Du kan opsige når som helst, og adgang fortsætter til slutningen af den betalte periode.",
+                a: "Nej. Alle pakker er månedlige uden binding. Du kan opsige når som helst, og adgang fortsætter til slutningen af den betalte periode.",
               },
             ].map((item) => (
               <div key={item.q}>
@@ -302,7 +324,7 @@ export default async function PriserPage() {
           <div className="grid items-center gap-10 md:grid-cols-2">
             <div>
               <span className="mb-3 inline-block rounded-full border border-orange-400/30 bg-orange-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-orange-400">Live demo</span>
-              <h2 className="text-2xl font-bold mb-3">Se hvad du får for 1 credit</h2>
+              <h2 className="text-2xl font-bold mb-3">Se hvad en præsentationsvideo indeholder</h2>
               <p className="text-sm leading-relaxed text-slate-300 mb-5 max-w-md">
                 Sådan ser en AI-genereret præsentationsvideo ud. Indsæt et link til din annonce — AI&apos;en henter billederne, bygger fotoruten og leverer en cinematisk video i 9:16 til Reels & TikTok.
               </p>

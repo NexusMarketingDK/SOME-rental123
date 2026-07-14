@@ -52,8 +52,8 @@ const FAQ = [
     a: "Nej. Hele pointen med somevideopost.com er, at du ikke behøver teknisk viden eller videoredigering. AI klarer det tunge arbejde, og det brugervenlige dashboard gør resten til få klik.",
   },
   {
-    q: "Hvad koster det at komme i gang?",
-    a: "Du kan oprette en gratis konto og prøve platformen uden kreditkort. De første opslag er gratis, og du betaler kun for det, du bruger derefter. Se de aktuelle priser på prissiden.",
+    q: "Hvad koster det?",
+    a: "Vi har tre månedlige pakker: Starter til €50/md. med 1 præsentationsvideo inkluderet, Pro til €99/md. med 2 videoer, og Business til €299/md. med 6 videoer, Meta-integration for annoncering og prioriteret support. Alle pakker inkluderer direkte deling til sociale medier, og ekstra videoer koster €50/stk. Se detaljerne på prissiden.",
   },
 ];
 
@@ -118,7 +118,13 @@ export default function WhySomeVideoPostPage() {
       url: BASE,
       description:
         "AI-platform der laver præsentationsvideoer og sælgende opslag til udlejere og deler dem automatisk på sociale medier.",
-      offers: { "@type": "Offer", price: "0", priceCurrency: "DKK" },
+      offers: {
+        "@type": "AggregateOffer",
+        priceCurrency: "EUR",
+        lowPrice: "50",
+        highPrice: "299",
+        offerCount: "3",
+      },
       featureList: [
         "AI-genererede præsentationsvideoer",
         "Automatisk deling på Facebook, Instagram, TikTok, LinkedIn og YouTube",
@@ -440,7 +446,7 @@ export default function WhySomeVideoPostPage() {
         <div className="relative mx-auto max-w-3xl px-6 text-center">
           <h2 className="text-3xl font-bold md:text-4xl">Klar til at markedsføre din bolig på autopilot?</h2>
           <p className="mx-auto mt-4 max-w-lg text-slate-300">
-            Gå fra boliglink til færdig video og opslag på minutter. Ingen kreditkort — de første opslag er gratis.
+            Gå fra boliglink til færdig video og opslag på minutter. Pakker fra €50/md. med præsentationsvideoer inkluderet.
           </p>
           <Link href="/signup" className="mt-8 inline-flex items-center gap-2 rounded-xl px-8 py-4 text-base font-bold text-white shadow-[0_0_35px_rgba(255,107,74,0.4)] transition-opacity hover:opacity-90" style={{ background: ORANGE_GRADIENT }}>
             Start gratis i dag <ArrowRight size={18} />
