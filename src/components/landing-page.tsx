@@ -1,8 +1,8 @@
 import Link from "next/link";
 import {
   CalendarDays, Share2, Sparkles, Video, Clock, CheckCircle2,
-  ArrowRight, Home, Zap, Image as ImageIcon, Star, Users,
-  TrendingUp, Play, Globe,
+  ArrowRight, Home, Zap, Star, Users,
+  TrendingUp, Play, Globe, Link2,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 import { LANDING, LOCALE_FLAGS, LOCALE_LABELS, LOCALE_PATHS, LOCALES } from "@/lib/i18n";
@@ -11,9 +11,26 @@ import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthr
 import { WorkflowDemo } from "@/components/workflow-demo";
 import { MobileNav } from "@/components/layout/mobile-nav";
 
+/* Shared brand tokens for the midnight-blue design */
+const ORANGE_GRADIENT = "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)";
+const PAGE_BG = "#050d24";
+const CARD_BG = "#0a1430";
+const ELECTRIC_BLUE = "#4d8dff";
+
+function Wordmark({ className = "text-base" }: { className?: string }) {
+  return (
+    <span className={`font-bold lowercase tracking-tight ${className}`}>
+      <span className="text-white">some</span>
+      <span style={{ color: ELECTRIC_BLUE }}>video</span>
+      <span className="text-orange-400">post</span>
+      <span className="text-slate-400">.com</span>
+    </span>
+  );
+}
+
 function Pill({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/90">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-400/25 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-100">
       {children}
     </span>
   );
@@ -21,75 +38,155 @@ function Pill({ children }: { children: React.ReactNode }) {
 
 function FeatureCard({ icon: Icon, title, desc, accent }: { icon: React.ElementType; title: string; desc: string; accent: string }) {
   return (
-    <div className="group rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
+    <div className="group rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm transition-all hover:-translate-y-1 hover:border-blue-400/40 hover:shadow-[0_0_35px_rgba(59,130,246,0.2)]">
       <div className={`mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl ${accent}`}>
         <Icon size={20} />
       </div>
-      <h3 className="mb-2 font-semibold text-slate-900">{title}</h3>
-      <p className="text-sm leading-relaxed text-slate-500">{desc}</p>
+      <h3 className="mb-2 font-semibold text-white">{title}</h3>
+      <p className="text-sm leading-relaxed text-slate-400">{desc}</p>
     </div>
   );
 }
 
 function Check({ children }: { children: React.ReactNode }) {
   return (
-    <li className="flex items-start gap-2 text-sm text-slate-700">
-      <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-emerald-500" />
+    <li className="flex items-start gap-2 text-sm text-slate-300">
+      <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-emerald-400" />
       {children}
     </li>
   );
 }
 
-function DashboardMockup({ t }: { t: ReturnType<typeof LANDING[Locale]["mockupLabel"] extends string ? () => typeof LANDING[Locale] : never> }) {
+function FacebookIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+  );
+}
+
+function InstagramIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+  );
+}
+
+function LinkedInIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>
+  );
+}
+
+/* Channel row with glowing border — mirrors the somevideopost.com hero banner */
+function ChannelRow({ icon, name, iconBg, borderColor, glow }: {
+  icon: React.ReactNode; name: string; iconBg: string; borderColor: string; glow: string;
+}) {
+  return (
+    <div
+      className="flex items-center gap-3 rounded-xl border bg-white/[0.03] px-4 py-3 backdrop-blur-sm"
+      style={{ borderColor, boxShadow: `0 0 18px ${glow}, inset 0 0 12px ${glow}` }}
+    >
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white" style={{ background: iconBg }}>
+        {icon}
+      </div>
+      <span className="flex-1 text-sm font-medium text-white">{name}</span>
+      <CheckCircle2 size={17} className="text-emerald-400" />
+    </div>
+  );
+}
+
+/* Dashboard mockup styled after the banner: icon toolbar, channel rows,
+   property video card and a "Bookings +3" trend tile */
+function HeroMockup() {
   return (
     <div className="relative mx-auto w-full max-w-lg select-none">
-      <div className="absolute -inset-4 rounded-3xl bg-white/10 blur-2xl" />
-      <div className="relative rounded-2xl border border-white/20 bg-[#0e1f3d] p-4 shadow-2xl">
+      <div className="absolute -inset-6 rounded-[2rem] bg-blue-500/20 blur-3xl" />
+      <div
+        className="relative rounded-2xl border border-blue-400/30 p-4"
+        style={{ background: CARD_BG, boxShadow: "0 0 60px rgba(59,130,246,0.25), 0 25px 50px -12px rgba(0,0,0,0.6)" }}
+      >
         <div className="mb-3 flex items-center gap-1.5">
-          <div className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
-          <div className="h-2.5 w-2.5 rounded-full bg-yellow-400/70" />
-          <div className="h-2.5 w-2.5 rounded-full bg-emerald-400/70" />
+          <div className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
+          <div className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
+          <div className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
           <div className="ml-3 h-4 flex-1 rounded bg-white/5" />
         </div>
-        <div className="mb-3 grid grid-cols-3 gap-2">
-          {[
-            { label: "Posts today", val: "12" },
-            { label: "Reach", val: "4.2k" },
-            { label: "Bookings", val: "+3" },
-          ].map((s) => (
-            <div key={s.label} className="rounded-lg bg-white/5 p-2.5">
-              <p className="text-xs text-white/40">{s.label}</p>
-              <p className="mt-0.5 text-lg font-bold text-white">{s.val}</p>
-            </div>
-          ))}
-        </div>
-        <div className="space-y-2">
-          {[
-            { platform: "Instagram", time: "Now · live", color: "#E1306C", letter: "IG" },
-            { platform: "Facebook", time: "In 2 hours", color: "#1877F2", letter: "FB" },
-            { platform: "TikTok", time: "Tomorrow 09:00", color: "#010101", letter: "TT" },
-          ].map((p) => (
-            <div key={p.platform} className="flex items-center gap-3 rounded-lg bg-white/5 px-3 py-2">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: p.color }}>
-                {p.letter}
-              </div>
-              <div className="flex-1">
-                <p className="text-xs font-medium text-white">{p.platform}</p>
-                <p className="text-[10px] text-white/40">{p.time}</p>
-              </div>
-              <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            </div>
-          ))}
-        </div>
-        <div className="mt-3 flex items-center gap-3 rounded-xl border border-orange-400/20 bg-orange-400/5 p-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-400/20">
-            <Play size={14} className="text-orange-300" fill="currentColor" />
+
+        {/* Icon toolbar */}
+        <div className="mb-4 flex items-center gap-3 rounded-xl bg-white/[0.04] p-2.5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-white shadow-[0_0_14px_rgba(59,130,246,0.5)]">
+            <Link2 size={15} />
           </div>
-          <div className="flex-1">
-            <p className="text-xs font-medium text-white">AI video ready ✓</p>
-            <p className="text-[10px] text-white/40">Seaside cottage · 45 sec</p>
+          <div className="flex h-9 w-9 items-center justify-center rounded-full text-[11px] font-bold text-white shadow-[0_0_14px_rgba(255,107,74,0.45)]" style={{ background: ORANGE_GRADIENT }}>
+            Ai
           </div>
-          <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[9px] font-semibold text-emerald-400">READY</span>
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 text-white shadow-[0_0_14px_rgba(16,185,129,0.45)]">
+            <CheckCircle2 size={15} />
+          </div>
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-600 text-white shadow-[0_0_14px_rgba(124,58,237,0.45)]">
+            <Share2 size={14} />
+          </div>
+        </div>
+
+        {/* Channel rows */}
+        <div className="space-y-2.5">
+          <ChannelRow
+            icon={<FacebookIcon />}
+            name="Facebook"
+            iconBg="#1877F2"
+            borderColor="rgba(77,141,255,0.45)"
+            glow="rgba(59,130,246,0.18)"
+          />
+          <ChannelRow
+            icon={<InstagramIcon />}
+            name="Instagram"
+            iconBg="linear-gradient(45deg, #F58529, #DD2A7B, #8134AF)"
+            borderColor="rgba(221,42,123,0.5)"
+            glow="rgba(221,42,123,0.16)"
+          />
+          <ChannelRow
+            icon={<LinkedInIcon />}
+            name="LinkedIn"
+            iconBg="#0A66C2"
+            borderColor="rgba(77,141,255,0.45)"
+            glow="rgba(59,130,246,0.18)"
+          />
+        </div>
+
+        {/* Bottom row: calendar, trend chart, bookings tile */}
+        <div className="mt-4 grid grid-cols-3 gap-2.5">
+          <div className="flex items-center justify-center rounded-xl bg-white/[0.04] p-3">
+            <CalendarDays size={22} className="text-slate-400" />
+          </div>
+          <div className="flex items-end rounded-xl bg-white/[0.04] p-3">
+            <svg viewBox="0 0 80 34" className="h-full w-full" fill="none" aria-hidden>
+              <polyline points="2,30 16,24 28,27 42,16 54,20 68,8 78,12" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx="68" cy="8" r="2.5" fill="#34d399" />
+            </svg>
+          </div>
+          <div className="rounded-xl bg-white/[0.04] p-3">
+            <p className="text-[10px] text-slate-400">Bookings</p>
+            <div className="flex items-center justify-between">
+              <p className="text-xl font-bold text-white">+3</p>
+              <TrendingUp size={15} className="text-emerald-400" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Floating property video card */}
+      <div className="absolute -right-6 -bottom-8 hidden w-44 overflow-hidden rounded-xl border border-blue-400/30 shadow-[0_0_40px_rgba(59,130,246,0.3)] xl:block">
+        <div className="relative aspect-[4/5]" style={{ background: "linear-gradient(160deg, #0a1f4d 0%, #071233 100%)" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=80"
+            alt=""
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050d24]/80 via-transparent to-transparent" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/25 backdrop-blur-sm ring-1 ring-white/40">
+              <Play size={16} className="ml-0.5 text-white" fill="currentColor" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -98,16 +195,16 @@ function DashboardMockup({ t }: { t: ReturnType<typeof LANDING[Locale]["mockupLa
 
 function Testimonial({ name, role, quote }: { name: string; role: string; quote: string }) {
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm">
       <div className="mb-3 flex">
         {[...Array(5)].map((_, i) => <Star key={i} size={13} className="fill-orange-400 text-orange-400" />)}
       </div>
-      <p className="text-sm leading-relaxed text-slate-600 italic">&ldquo;{quote}&rdquo;</p>
+      <p className="text-sm leading-relaxed text-slate-300 italic">&ldquo;{quote}&rdquo;</p>
       <div className="mt-4 flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1B3F7A] text-xs font-bold text-white">{name[0]}</div>
+        <div className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: ORANGE_GRADIENT }}>{name[0]}</div>
         <div>
-          <p className="text-sm font-semibold text-slate-900">{name}</p>
-          <p className="text-xs text-slate-400">{role}</p>
+          <p className="text-sm font-semibold text-white">{name}</p>
+          <p className="text-xs text-slate-500">{role}</p>
         </div>
       </div>
     </div>
@@ -117,21 +214,21 @@ function Testimonial({ name, role, quote }: { name: string; role: string; quote:
 function LanguageSwitcher({ current }: { current: Locale }) {
   return (
     <div className="relative group">
-      <button className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:border-slate-300 transition-colors">
+      <button className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300 hover:border-blue-400/40 hover:text-white transition-colors">
         <Globe size={12} />
         <span>{LOCALE_FLAGS[current]} {LOCALE_LABELS[current]}</span>
-        <span className="text-slate-400">▾</span>
+        <span className="text-slate-500">▾</span>
       </button>
-      <div className="absolute right-0 top-full mt-1 hidden group-hover:block z-50 min-w-[140px] rounded-xl border border-slate-200 bg-white shadow-lg py-1">
+      <div className="absolute right-0 top-full mt-1 hidden group-hover:block z-50 min-w-[140px] rounded-xl border border-white/10 bg-[#0a1430] shadow-xl shadow-black/40 py-1">
         {LOCALES.map((loc) => (
           <a
             key={loc}
             href={LOCALE_PATHS[loc]}
-            className={`flex items-center gap-2 px-3 py-2 text-xs hover:bg-slate-50 transition-colors ${loc === current ? "font-semibold text-[#1B3F7A]" : "text-slate-600"}`}
+            className={`flex items-center gap-2 px-3 py-2 text-xs hover:bg-white/5 transition-colors ${loc === current ? "font-semibold text-blue-300" : "text-slate-300"}`}
           >
             <span>{LOCALE_FLAGS[loc]}</span>
             <span>{LOCALE_LABELS[loc]}</span>
-            {loc === current && <span className="ml-auto text-[#1B3F7A]">✓</span>}
+            {loc === current && <span className="ml-auto text-blue-300">✓</span>}
           </a>
         ))}
       </div>
@@ -144,32 +241,31 @@ export function LandingPage({ locale }: { locale: Locale }) {
   const currency = currencyForLocale(locale);
 
   return (
-    <div className="flex min-h-screen flex-col bg-white text-slate-900">
+    <div className="flex min-h-screen flex-col text-slate-100" style={{ background: PAGE_BG }}>
 
       {/* ── Nav ── */}
-      <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur">
+      <header className="sticky top-0 z-50 border-b border-white/10 backdrop-blur" style={{ background: "rgba(5,13,36,0.9)" }}>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
           <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-bold text-sm text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>S</span>
-            <span className="font-bold uppercase tracking-tight text-[#1B3F7A]">
-              <span className="text-base sm:hidden">SOME</span>
-              <span className="hidden text-base sm:inline">SOME VIDEO <span className="text-orange-500">POST</span></span>
-            </span>
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-bold text-sm text-white" style={{ background: ORANGE_GRADIENT }}>s</span>
+            <span className="sm:hidden"><span className="text-base font-bold text-white">some</span></span>
+            <span className="hidden sm:inline"><Wordmark /></span>
           </div>
-          <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
-            <a href="#" className="hover:text-[#1B3F7A] transition-colors">{t.navHome}</a>
-            <a href="#features" className="hover:text-[#1B3F7A] transition-colors">{t.navFeatures}</a>
-            <a href="#ai" className="hover:text-[#1B3F7A] transition-colors">{t.navVideo}</a>
-            <Link href="/blog" className="hover:text-[#1B3F7A] transition-colors">Blog</Link>
-            <Link href="/priser" className="hover:text-[#1B3F7A] transition-colors">{t.navPricing}</Link>
+          <nav className="hidden items-center gap-6 text-sm font-medium text-slate-300 md:flex">
+            <a href="#" className="hover:text-white transition-colors">{t.navHome}</a>
+            <a href="#features" className="hover:text-white transition-colors">{t.navFeatures}</a>
+            <a href="#ai" className="hover:text-white transition-colors">{t.navVideo}</a>
+            <Link href="/hvorfor-somevideopost" className="hover:text-white transition-colors">Hvorfor os</Link>
+            <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
+            <Link href="/priser" className="hover:text-white transition-colors">{t.navPricing}</Link>
           </nav>
           <div className="flex items-center gap-3">
             <LanguageSwitcher current={locale} />
-            <Link href="/login" className="hidden sm:inline text-sm font-medium text-slate-600 hover:text-[#1B3F7A] transition-colors">{t.navLogin}</Link>
-            <Link href="/signup" className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>
+            <Link href="/login" className="hidden sm:inline text-sm font-medium text-slate-300 hover:text-white transition-colors">{t.navLogin}</Link>
+            <Link href="/signup" className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ background: ORANGE_GRADIENT }}>
               {t.navStart}
             </Link>
-            <MobileNav links={[
+            <MobileNav dark links={[
               { href: LOCALE_PATHS[locale], label: t.navHome },
               { href: `${LOCALE_PATHS[locale]}#features`, label: t.navFeatures, external: true },
               { href: `${LOCALE_PATHS[locale]}#ai`, label: t.navVideo, external: true },
@@ -182,15 +278,20 @@ export function LandingPage({ locale }: { locale: Locale }) {
       </header>
 
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden py-20 md:py-28" style={{ background: "linear-gradient(135deg, #0d1f3c 0%, #1B3F7A 60%, #1e4f9a 100%)" }}>
-        <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
-        <div className="absolute -left-32 top-0 h-96 w-96 rounded-full bg-orange-400/10 blur-3xl" />
-        <div className="absolute -right-32 bottom-0 h-96 w-96 rounded-full bg-blue-400/10 blur-3xl" />
+      <section className="relative overflow-hidden py-20 md:py-28" style={{ background: "linear-gradient(135deg, #040a1c 0%, #071233 55%, #0a1f4d 100%)" }}>
+        {/* Dot grid, top-left like the banner */}
+        <div className="absolute left-0 top-0 h-64 w-64 opacity-20" style={{ backgroundImage: "radial-gradient(circle, #4d8dff 1px, transparent 1px)", backgroundSize: "22px 22px" }} />
+        {/* Glowing blue arcs */}
+        <div className="pointer-events-none absolute -right-48 -top-48 h-[600px] w-[600px] rounded-full border border-blue-400/25" style={{ boxShadow: "0 0 80px rgba(59,130,246,0.25), inset 0 0 80px rgba(59,130,246,0.1)" }} />
+        <div className="pointer-events-none absolute -bottom-64 -left-40 h-[500px] w-[700px] rounded-[100%] border-t border-blue-400/20" style={{ boxShadow: "0 -20px 60px rgba(59,130,246,0.15)" }} />
+        <div className="absolute -left-32 top-0 h-96 w-96 rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="absolute -right-32 bottom-0 h-96 w-96 rounded-full bg-orange-400/10 blur-3xl" />
+
         <div className="relative mx-auto max-w-6xl px-6">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
               <div className="mb-5 flex flex-wrap gap-2">
-                <Pill><Sparkles size={11} className="text-yellow-300" /> AI-powered</Pill>
+                <Pill><Sparkles size={11} className="text-orange-300" /> AI-powered</Pill>
                 <Pill><Globe size={11} /> Social media</Pill>
                 <Pill><Video size={11} /> Presentation videos</Pill>
               </div>
@@ -198,16 +299,16 @@ export function LandingPage({ locale }: { locale: Locale }) {
                 {t.heroLine1}<br />{t.heroLine2}<br />
                 <span style={{ background: "linear-gradient(90deg, #FFB36B, #FF6B4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{t.heroAccent}</span>
               </h1>
-              <p className="mt-5 max-w-lg text-base leading-relaxed text-blue-100">{t.heroSub}</p>
+              <p className="mt-5 max-w-lg text-base leading-relaxed text-slate-300">{t.heroSub}</p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link href="/signup" className="inline-flex items-center justify-center gap-2 rounded-xl px-7 py-3.5 text-sm font-bold text-slate-900 shadow-lg transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>
+                <Link href="/signup" className="inline-flex items-center justify-center gap-2 rounded-xl px-7 py-3.5 text-sm font-bold text-white shadow-[0_0_30px_rgba(255,107,74,0.35)] transition-opacity hover:opacity-90" style={{ background: ORANGE_GRADIENT }}>
                   {t.heroCta} <ArrowRight size={16} />
                 </Link>
-                <a href="#pricing" className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 px-7 py-3.5 text-sm font-medium text-white hover:bg-white/10 transition-colors">
+                <a href="#pricing" className="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-400/40 px-7 py-3.5 text-sm font-medium text-white shadow-[0_0_20px_rgba(59,130,246,0.15)] hover:bg-blue-500/10 transition-colors">
                   {t.heroCta2}
                 </a>
               </div>
-              <p className="mt-3 text-xs text-blue-300">{t.heroNoCard}</p>
+              <p className="mt-3 text-xs text-slate-400">{t.heroNoCard}</p>
               <div className="mt-8 flex flex-wrap gap-6 border-t border-white/10 pt-6">
                 {[
                   { icon: Users, val: t.stat1Val, label: t.stat1Label },
@@ -218,7 +319,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
                     <s.icon size={15} className="text-orange-300" />
                     <div>
                       <p className="text-sm font-bold text-white">{s.val}</p>
-                      <p className="text-[11px] text-blue-300">{s.label}</p>
+                      <p className="text-[11px] text-slate-400">{s.label}</p>
                     </div>
                   </div>
                 ))}
@@ -230,45 +331,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
                 <div className="mb-4">
                   <WorkflowDemo t={t} />
                 </div>
-                <div className="absolute -inset-4 rounded-3xl bg-white/10 blur-2xl" />
-                <div className="relative rounded-2xl border border-white/20 bg-[#0e1f3d] p-4 shadow-2xl">
-                  <div className="mb-3 flex items-center gap-1.5">
-                    <div className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
-                    <div className="h-2.5 w-2.5 rounded-full bg-yellow-400/70" />
-                    <div className="h-2.5 w-2.5 rounded-full bg-emerald-400/70" />
-                    <div className="ml-3 h-4 flex-1 rounded bg-white/5" />
-                  </div>
-                  <div className="mb-3 grid grid-cols-3 gap-2">
-                    {[{ label: "Posts today", val: "12" }, { label: "Reach", val: "4.2k" }, { label: "Bookings", val: "+3" }].map((s) => (
-                      <div key={s.label} className="rounded-lg bg-white/5 p-2.5">
-                        <p className="text-xs text-white/40">{s.label}</p>
-                        <p className="mt-0.5 text-lg font-bold text-white">{s.val}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="space-y-2">
-                    {[{ platform: "Instagram", time: "Now · live", color: "#E1306C", letter: "IG" }, { platform: "Facebook", time: "In 2 hours", color: "#1877F2", letter: "FB" }, { platform: "TikTok", time: "Tomorrow 09:00", color: "#010101", letter: "TT" }].map((p) => (
-                      <div key={p.platform} className="flex items-center gap-3 rounded-lg bg-white/5 px-3 py-2">
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ backgroundColor: p.color }}>{p.letter}</div>
-                        <div className="flex-1">
-                          <p className="text-xs font-medium text-white">{p.platform}</p>
-                          <p className="text-[10px] text-white/40">{p.time}</p>
-                        </div>
-                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-3 flex items-center gap-3 rounded-xl border border-orange-400/20 bg-orange-400/5 p-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-400/20">
-                      <Play size={14} className="text-orange-300" fill="currentColor" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xs font-medium text-white">AI video ready ✓</p>
-                      <p className="text-[10px] text-white/40">Seaside cottage · 45 sec</p>
-                    </div>
-                    <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[9px] font-semibold text-emerald-400">READY</span>
-                  </div>
-                </div>
+                <HeroMockup />
               </div>
             </div>
           </div>
@@ -276,40 +339,41 @@ export function LandingPage({ locale }: { locale: Locale }) {
       </section>
 
       {/* ── Logo bar ── */}
-      <div className="border-y border-slate-100 bg-slate-50 py-4">
+      <div className="border-y border-white/5 py-4" style={{ background: "#071130" }}>
         <div className="mx-auto max-w-5xl px-6">
-          <p className="mb-3 text-center text-xs font-semibold uppercase tracking-widest text-slate-400">{t.worksWith}</p>
+          <p className="mb-3 text-center text-xs font-semibold uppercase tracking-widest text-slate-500">{t.worksWith}</p>
           <div className="flex flex-wrap items-center justify-center gap-6">
             {["Airbnb", "Booking.com", "Novasol", "Facebook", "Instagram", "TikTok", "LinkedIn", "YouTube"].map((p) => (
-              <span key={p} className="text-sm font-semibold text-slate-400 hover:text-slate-600 transition-colors">{p}</span>
+              <span key={p} className="text-sm font-semibold text-slate-500 hover:text-slate-300 transition-colors">{p}</span>
             ))}
           </div>
         </div>
       </div>
 
       {/* ── Features ── */}
-      <section id="features" className="py-24">
-        <div className="mx-auto max-w-6xl px-6">
+      <section id="features" className="relative overflow-hidden py-24">
+        <div className="absolute -right-40 top-20 h-96 w-96 rounded-full bg-blue-500/5 blur-3xl" />
+        <div className="relative mx-auto max-w-6xl px-6">
           <div className="mb-14 text-center">
-            <h2 className="text-3xl font-bold text-[#1B3F7A] md:text-4xl">{t.featTitle}</h2>
-            <p className="mx-auto mt-3 max-w-xl text-slate-500">{t.featSub}</p>
+            <h2 className="text-3xl font-bold text-white md:text-4xl">{t.featTitle}</h2>
+            <p className="mx-auto mt-3 max-w-xl text-slate-400">{t.featSub}</p>
           </div>
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            <FeatureCard icon={Video} title={t.feat1Title} desc={t.feat1Desc} accent="bg-orange-50 text-orange-600" />
-            <FeatureCard icon={Share2} title={t.feat2Title} desc={t.feat2Desc} accent="bg-blue-50 text-blue-600" />
-            <FeatureCard icon={CalendarDays} title={t.feat3Title} desc={t.feat3Desc} accent="bg-emerald-50 text-emerald-600" />
-            <FeatureCard icon={Sparkles} title={t.feat4Title} desc={t.feat4Desc} accent="bg-purple-50 text-purple-600" />
-            <FeatureCard icon={Home} title={t.feat5Title} desc={t.feat5Desc} accent="bg-pink-50 text-pink-600" />
-            <FeatureCard icon={Zap} title={t.feat6Title} desc={t.feat6Desc} accent="bg-yellow-50 text-yellow-600" />
+            <FeatureCard icon={Video} title={t.feat1Title} desc={t.feat1Desc} accent="bg-orange-500/15 text-orange-400" />
+            <FeatureCard icon={Share2} title={t.feat2Title} desc={t.feat2Desc} accent="bg-blue-500/15 text-blue-400" />
+            <FeatureCard icon={CalendarDays} title={t.feat3Title} desc={t.feat3Desc} accent="bg-emerald-500/15 text-emerald-400" />
+            <FeatureCard icon={Sparkles} title={t.feat4Title} desc={t.feat4Desc} accent="bg-violet-500/15 text-violet-400" />
+            <FeatureCard icon={Home} title={t.feat5Title} desc={t.feat5Desc} accent="bg-pink-500/15 text-pink-400" />
+            <FeatureCard icon={Zap} title={t.feat6Title} desc={t.feat6Desc} accent="bg-yellow-500/15 text-yellow-400" />
           </div>
         </div>
       </section>
 
       {/* ── AI Video section ── */}
-      <section id="ai" className="relative overflow-hidden py-28" style={{ background: "linear-gradient(160deg, #0a0f1e 0%, #0f1f3d 50%, #0a0f1e 100%)" }}>
+      <section id="ai" className="relative overflow-hidden py-28" style={{ background: "linear-gradient(160deg, #040a1c 0%, #0a1f4d 50%, #040a1c 100%)" }}>
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -left-40 top-20 h-[500px] w-[500px] rounded-full opacity-20 blur-[120px]" style={{ background: "radial-gradient(circle, #FF6B4A, transparent 70%)" }} />
-          <div className="absolute -right-40 bottom-20 h-[400px] w-[400px] rounded-full opacity-15 blur-[100px]" style={{ background: "radial-gradient(circle, #FFB36B, transparent 70%)" }} />
+          <div className="absolute -right-40 bottom-20 h-[400px] w-[400px] rounded-full opacity-20 blur-[100px]" style={{ background: "radial-gradient(circle, #4d8dff, transparent 70%)" }} />
         </div>
         <div className="relative mx-auto max-w-6xl px-6">
           <div className="mb-16 text-center">
@@ -332,11 +396,11 @@ export function LandingPage({ locale }: { locale: Locale }) {
                 <div className="relative mx-auto w-full max-w-[300px] md:max-w-[340px]">
                   <CinematicWalkthrough locale={locale} />
                 </div>
-                <div className="absolute -right-8 top-12 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md">
+                <div className="absolute -right-8 top-12 rounded-xl border border-blue-400/30 bg-blue-500/10 px-3 py-2 backdrop-blur-md shadow-[0_0_20px_rgba(59,130,246,0.2)]">
                   <p className="text-[10px] font-semibold text-white">9:16 format</p>
                   <p className="text-[9px] text-slate-400">Reels & TikTok</p>
                 </div>
-                <div className="absolute -left-10 top-80 rounded-xl border border-white/10 bg-white/5 px-3 py-2 backdrop-blur-md">
+                <div className="absolute -left-10 top-80 rounded-xl border border-blue-400/30 bg-blue-500/10 px-3 py-2 backdrop-blur-md shadow-[0_0_20px_rgba(59,130,246,0.2)]">
                   <p className="text-[10px] font-semibold text-emerald-400">{t.walkthroughReadyIn}</p>
                   <p className="text-[9px] text-slate-400">{t.walkthroughAiGenerates}</p>
                 </div>
@@ -397,23 +461,23 @@ export function LandingPage({ locale }: { locale: Locale }) {
       <section className="py-24">
         <div className="mx-auto max-w-5xl px-6">
           <div className="mb-14 text-center">
-            <h2 className="text-3xl font-bold text-[#1B3F7A] md:text-4xl">{t.howTitle}</h2>
-            <p className="mt-3 text-slate-500">{t.howSub}</p>
+            <h2 className="text-3xl font-bold text-white md:text-4xl">{t.howTitle}</h2>
+            <p className="mt-3 text-slate-400">{t.howSub}</p>
           </div>
           <div className="relative grid gap-10 md:grid-cols-3">
-            <div className="absolute left-1/6 right-1/6 top-7 hidden h-px bg-gradient-to-r from-[#1B3F7A]/20 via-[#1B3F7A]/40 to-[#1B3F7A]/20 md:block" />
+            <div className="absolute left-1/6 right-1/6 top-7 hidden h-px bg-gradient-to-r from-blue-400/10 via-blue-400/40 to-blue-400/10 md:block" />
             {([
               { n: "1", icon: Home, title: t.how1Title, desc: t.how1Desc },
               { n: "2", icon: Video, title: t.how2Title, desc: t.how2Desc },
               { n: "3", icon: Zap, title: t.how3Title, desc: t.how3Desc },
             ] as const).map((s) => (
               <div key={s.n} className="relative text-center">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full text-xl font-bold text-white shadow-lg" style={{ background: "linear-gradient(135deg, #1B3F7A, #2a5298)" }}>
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full text-xl font-bold text-white shadow-[0_0_25px_rgba(59,130,246,0.35)]" style={{ background: "linear-gradient(135deg, #1e4f9a, #4d8dff)" }}>
                   {s.n}
                 </div>
-                <s.icon size={22} className="mx-auto mb-2 text-[#1B3F7A]" />
-                <h3 className="mb-2 font-semibold text-slate-900">{s.title}</h3>
-                <p className="text-sm leading-relaxed text-slate-500">{s.desc}</p>
+                <s.icon size={22} className="mx-auto mb-2 text-blue-300" />
+                <h3 className="mb-2 font-semibold text-white">{s.title}</h3>
+                <p className="text-sm leading-relaxed text-slate-400">{s.desc}</p>
               </div>
             ))}
           </div>
@@ -421,11 +485,11 @@ export function LandingPage({ locale }: { locale: Locale }) {
       </section>
 
       {/* ── Testimonials ── */}
-      <section className="bg-slate-50 py-24">
+      <section className="py-24" style={{ background: "#071130" }}>
         <div className="mx-auto max-w-5xl px-6">
           <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold text-[#1B3F7A]">{t.testTitle}</h2>
-            <p className="mt-3 text-slate-500">{t.testSub}</p>
+            <h2 className="text-3xl font-bold text-white">{t.testTitle}</h2>
+            <p className="mt-3 text-slate-400">{t.testSub}</p>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
             <Testimonial name={t.test1Name} role={t.test1Role} quote={t.test1Quote} />
@@ -439,101 +503,118 @@ export function LandingPage({ locale }: { locale: Locale }) {
       <section id="pricing" className="py-24">
         <div className="mx-auto max-w-5xl px-6">
           <div className="mb-14 text-center">
-            <h2 className="text-3xl font-bold text-[#1B3F7A] md:text-4xl">{t.priceTitle}</h2>
-            <p className="mt-3 text-slate-500">{t.priceSub}</p>
+            <h2 className="text-3xl font-bold text-white md:text-4xl">{t.priceTitle}</h2>
+            <p className="mt-3 text-slate-400">{t.priceSub}</p>
           </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            <div className="relative rounded-2xl border-2 border-[#1B3F7A] bg-white p-8 shadow-xl md:col-span-1">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                <span className="rounded-full px-4 py-1 text-xs font-bold text-white" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}>{t.mostPopular}</span>
-              </div>
-              <div className="mb-2 inline-flex items-center gap-2 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
-                <Share2 size={12} /> {t.plan1Name}
+          <div className="grid items-start gap-6 md:grid-cols-3">
+            {/* Starter */}
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-sm">
+              <div className="mb-2 inline-flex items-center gap-2 rounded-lg bg-blue-500/15 px-2.5 py-1 text-xs font-semibold text-blue-300">
+                <Zap size={12} /> {t.plan1Name}
               </div>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-[#1B3F7A]">{formatPriceKey("subscription", currency)}</span>
-                <span className="text-slate-500">/mo</span>
+                <span className="text-4xl font-bold text-white">{formatPriceKey("starter", currency)}</span>
+                <span className="text-slate-400">{t.perMonth}</span>
               </div>
-              <p className="text-xs text-slate-400">incl. VAT</p>
+              <p className="text-xs text-slate-500">incl. VAT</p>
               <ul className="my-7 flex flex-col gap-2.5">
                 {t.plan1Items.map((item) => <Check key={item}>{item}</Check>)}
               </ul>
-              <Link href="/signup" className="block w-full rounded-xl py-3 text-center text-sm font-bold text-white transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #1B3F7A, #2a5298)" }}>
+              <Link href="/signup" className="block w-full rounded-xl border border-white/20 py-3 text-center text-sm font-bold text-slate-200 transition-colors hover:border-blue-400/50 hover:text-white">
                 {t.startFreeBtn}
               </Link>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8">
-              <div className="mb-2 inline-flex items-center gap-2 rounded-lg bg-pink-50 px-2.5 py-1 text-xs font-semibold text-pink-600">
-                <ImageIcon size={12} /> {t.plan2Name}
+
+            {/* Pro — most popular */}
+            <div className="relative rounded-2xl border border-blue-400/50 bg-white/[0.05] p-8 shadow-[0_0_45px_rgba(59,130,246,0.25)] backdrop-blur-sm">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                <span className="rounded-full px-4 py-1 text-xs font-bold text-white whitespace-nowrap" style={{ background: ORANGE_GRADIENT }}>{t.mostPopular}</span>
+              </div>
+              <div className="mb-2 inline-flex items-center gap-2 rounded-lg bg-blue-500/15 px-2.5 py-1 text-xs font-semibold text-blue-300">
+                <Sparkles size={12} /> {t.plan2Name}
               </div>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-slate-900">{formatPriceKey("aiPost", currency, { decimals: true })}</span>
-                <span className="text-slate-500">/each</span>
+                <span className="text-4xl font-bold text-white">{formatPriceKey("pro", currency)}</span>
+                <span className="text-slate-400">{t.perMonth}</span>
               </div>
-              <p className="text-xs text-slate-400">{t.plan2PayLabel}</p>
+              <p className="text-xs text-slate-500">incl. VAT</p>
               <ul className="my-7 flex flex-col gap-2.5">
                 {t.plan2Items.map((item) => <Check key={item}>{item}</Check>)}
               </ul>
-              <Link href="/signup" className="block w-full rounded-xl border-2 border-slate-300 py-3 text-center text-sm font-bold text-slate-700 transition-colors hover:border-[#1B3F7A] hover:text-[#1B3F7A]">
-                {t.plan2StartBtn}
+              <Link href="/signup" className="block w-full rounded-xl py-3 text-center text-sm font-bold text-white shadow-[0_0_20px_rgba(59,130,246,0.35)] transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #1e4f9a, #4d8dff)" }}>
+                {t.planProCta}
               </Link>
             </div>
-            <div className="rounded-2xl border border-orange-200 bg-orange-50/50 p-8">
-              <div className="mb-2 inline-flex items-center gap-2 rounded-lg bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-700">
-                <Video size={12} /> {t.plan3Name}
+
+            {/* Business */}
+            <div className="rounded-2xl border border-orange-500/25 bg-orange-500/[0.06] p-8 backdrop-blur-sm">
+              <div className="mb-2 inline-flex items-center gap-2 rounded-lg bg-orange-500/15 px-2.5 py-1 text-xs font-semibold text-orange-400">
+                <Sparkles size={12} /> {t.plan3Name}
               </div>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-slate-900">{formatPriceKey("video", currency)}</span>
-                <span className="text-slate-500">/video</span>
+                <span className="text-4xl font-bold text-white">{formatPriceKey("business", currency)}</span>
+                <span className="text-slate-400">{t.perMonth}</span>
               </div>
-              <p className="text-xs text-slate-400">{t.plan3OnetimeLabel}</p>
+              <p className="text-xs text-slate-500">incl. VAT</p>
               <ul className="my-7 flex flex-col gap-2.5">
                 {t.plan3Items.map((item) => <Check key={item}>{item}</Check>)}
               </ul>
-              <Link href="/signup" className="block w-full rounded-xl py-3 text-center text-sm font-bold text-white transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}>
+              <Link href="/priser" className="block w-full rounded-xl py-3 text-center text-sm font-bold text-white transition-opacity hover:opacity-90" style={{ background: ORANGE_GRADIENT }}>
                 {t.plan3OrderBtn}
               </Link>
             </div>
+          </div>
+
+          {/* Extra video add-on */}
+          <div className="mt-6 flex flex-col items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-4 backdrop-blur-sm sm:flex-row">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/15 text-orange-400">
+                <Video size={18} />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">{t.videoAddonLabel}</p>
+                <p className="text-xs text-slate-400">{t.videoAddonSub}</p>
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-white">{formatPriceKey("video", currency)} <span className="text-sm font-normal text-slate-400">{t.videoAddonPer}</span></p>
           </div>
         </div>
       </section>
 
       {/* ── Final CTA ── */}
-      <section className="py-20 text-white" style={{ background: "linear-gradient(135deg, #0d1f3c 0%, #1B3F7A 100%)" }}>
-        <div className="mx-auto max-w-3xl px-6 text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium">
-            <Sparkles size={11} className="text-yellow-300" /> {t.ctaBadge}
+      <section className="relative overflow-hidden py-20 text-white" style={{ background: "linear-gradient(135deg, #040a1c 0%, #0a1f4d 100%)" }}>
+        <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full border border-blue-400/20" style={{ boxShadow: "0 0 60px rgba(59,130,246,0.2)" }} />
+        <div className="relative mx-auto max-w-3xl px-6 text-center">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-400/25 bg-blue-500/10 px-3 py-1 text-xs font-medium">
+            <Sparkles size={11} className="text-orange-300" /> {t.ctaBadge}
           </div>
           <h2 className="text-3xl font-bold md:text-4xl">{t.ctaTitle1}<br />{t.ctaTitle2}</h2>
-          <p className="mx-auto mt-4 max-w-lg text-blue-100">{t.ctaSub}</p>
-          <Link href="/signup" className="mt-8 inline-flex items-center gap-2 rounded-xl px-8 py-4 text-base font-bold text-slate-900 shadow-lg transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}>
+          <p className="mx-auto mt-4 max-w-lg text-slate-300">{t.ctaSub}</p>
+          <Link href="/signup" className="mt-8 inline-flex items-center gap-2 rounded-xl px-8 py-4 text-base font-bold text-white shadow-[0_0_35px_rgba(255,107,74,0.4)] transition-opacity hover:opacity-90" style={{ background: ORANGE_GRADIENT }}>
             {t.ctaBtn} <ArrowRight size={18} />
           </Link>
-          <p className="mt-3 text-sm text-blue-300">{t.ctaNoCard}</p>
+          <p className="mt-3 text-sm text-slate-400">{t.ctaNoCard}</p>
         </div>
       </section>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-slate-200 bg-[#0d1f3c]">
+      <footer className="border-t border-white/5" style={{ background: "#04091c" }}>
         <div className="mx-auto max-w-6xl px-6 py-16">
           <div className="grid gap-12 md:grid-cols-4">
             <div className="md:col-span-1">
               <div className="flex items-center gap-2">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>S</span>
-                <span className="font-bold uppercase tracking-tight text-white">
-                  <span className="text-base sm:hidden">SOME</span>
-                  <span className="hidden text-base sm:inline">SOME VIDEO <span className="text-orange-400">POST</span></span>
-                </span>
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white" style={{ background: ORANGE_GRADIENT }}>s</span>
+                <Wordmark />
               </div>
               <p className="mt-4 text-sm leading-relaxed text-slate-400">{t.footerDesc}</p>
               <div className="mt-5 flex gap-3">
-                <a href="#" aria-label="Facebook" className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-colors hover:border-orange-400/40 hover:text-orange-400">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                <a href="#" aria-label="Facebook" className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-colors hover:border-blue-400/40 hover:text-blue-300">
+                  <FacebookIcon size={15} />
                 </a>
-                <a href="#" aria-label="Instagram" className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-colors hover:border-orange-400/40 hover:text-orange-400">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+                <a href="#" aria-label="Instagram" className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-colors hover:border-blue-400/40 hover:text-blue-300">
+                  <InstagramIcon size={15} />
                 </a>
-                <a href="#" aria-label="TikTok" className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-colors hover:border-orange-400/40 hover:text-orange-400">
+                <a href="#" aria-label="TikTok" className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-colors hover:border-blue-400/40 hover:text-blue-300">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.17 8.17 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg>
                 </a>
               </div>
@@ -543,6 +624,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
               <ul className="flex flex-col gap-3 text-sm text-slate-400">
                 <li><a href="#features" className="transition-colors hover:text-white">{t.footerFeatures}</a></li>
                 <li><a href="#ai" className="transition-colors hover:text-white">{t.footerAiVideo}</a></li>
+                <li><Link href="/hvorfor-somevideopost" className="transition-colors hover:text-white">Hvorfor somevideopost.com</Link></li>
                 <li><Link href="/priser" className="transition-colors hover:text-white">{t.footerPricing}</Link></li>
                 <li><Link href="/blog" className="transition-colors hover:text-white">Blog</Link></li>
                 <li><Link href="/signup" className="transition-colors hover:text-white">{t.footerCreateAccount}</Link></li>
@@ -566,7 +648,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
               <div className="mt-6 rounded-xl border border-orange-500/20 bg-orange-500/10 p-4">
                 <p className="text-xs font-semibold text-orange-400">{t.footerTryFree}</p>
                 <p className="mt-1 text-xs text-slate-400">{t.footerNoCard}</p>
-                <Link href="/signup" className="mt-3 block w-full rounded-lg py-2 text-center text-xs font-bold text-white transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }}>
+                <Link href="/signup" className="mt-3 block w-full rounded-lg py-2 text-center text-xs font-bold text-white transition-opacity hover:opacity-90" style={{ background: ORANGE_GRADIENT }}>
                   {t.footerStartBtn}
                 </Link>
               </div>

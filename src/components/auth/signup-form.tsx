@@ -40,11 +40,28 @@ const CHANNELS = [
   { value: "youtube", label: "YouTube", color: "#FF0000" },
 ];
 
+// Language used for the AI-generated posts (can differ from the app language,
+// e.g. a Danish host writing English posts for international guests).
+const POST_LANGUAGES: { value: string; label: string }[] = [
+  { value: "da", label: "🇩🇰 Dansk" },
+  { value: "en", label: "🇬🇧 English" },
+  { value: "de", label: "🇩🇪 Deutsch" },
+  { value: "es", label: "🇪🇸 Español" },
+  { value: "fr", label: "🇫🇷 Français" },
+  { value: "it", label: "🇮🇹 Italiano" },
+  { value: "nl", label: "🇳🇱 Nederlands" },
+  { value: "sv", label: "🇸🇪 Svenska" },
+  { value: "no", label: "🇳🇴 Norsk" },
+  { value: "pt", label: "🇵🇹 Português" },
+];
+
 export function SignupForm() {
   const [state, formAction, isPending] = useActionState(signUpAction, initialState);
 
   const [locale, setLocale] = useState<Locale>("da");
   const [currency, setCurrency] = useState<Currency>("dkk");
+  const [postLanguage, setPostLanguage] = useState<string>("da");
+  const [postLanguageTouched, setPostLanguageTouched] = useState(false);
   const [postsPerWeek, setPostsPerWeek] = useState("3-5");
   const [videosPerWeek, setVideosPerWeek] = useState("1-2");
   const [channels, setChannels] = useState<Set<string>>(new Set(["facebook", "instagram"]));
@@ -52,6 +69,9 @@ export function SignupForm() {
   function onLocaleChange(next: Locale) {
     setLocale(next);
     setCurrency(currencyForLocale(next));
+    // Keep the post language in sync with the site language until the user
+    // explicitly picks a different one.
+    if (!postLanguageTouched) setPostLanguage(next);
   }
 
   function toggleChannel(value: string) {
@@ -86,6 +106,61 @@ export function SignupForm() {
       </p>
 
       <form action={formAction} className="mt-6 flex flex-col gap-4">
+        {/* Language settings — first choice on the page */}
+        <div className="flex flex-col gap-3 rounded-xl border border-[#E7E2D9] bg-[#FBF9F5] p-4">
+          <p className="text-sm font-semibold text-[#1B1B1F]">Sprogindstillinger</p>
+
+          {/* Site language + currency */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="locale" className="text-sm font-medium text-[#1B1B1F]">Sprog til siden</label>
+            <div className="flex gap-3">
+              <select
+                id="locale"
+                name="locale"
+                value={locale}
+                onChange={(e) => onLocaleChange(e.target.value as Locale)}
+                className={`${fieldClass} flex-1`}
+              >
+                {LOCALES.map((loc) => (
+                  <option key={loc} value={loc}>
+                    {LOCALE_FLAGS[loc]} {LOCALE_LABELS[loc]}
+                  </option>
+                ))}
+              </select>
+              <select
+                id="currency"
+                name="currency"
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value as Currency)}
+                aria-label="Valuta"
+                className={`${fieldClass} w-32`}
+              >
+                {CURRENCIES.map((cur) => (
+                  <option key={cur} value={cur}>{CURRENCY_LABELS[cur]}</option>
+                ))}
+              </select>
+            </div>
+            <p className="text-xs text-[#6B6B76]">Hele appen vises på det valgte sprog, når du er logget ind.</p>
+          </div>
+
+          {/* Post language */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="post_language" className="text-sm font-medium text-[#1B1B1F]">Sprog til opslag</label>
+            <select
+              id="post_language"
+              name="post_language"
+              value={postLanguage}
+              onChange={(e) => { setPostLanguage(e.target.value); setPostLanguageTouched(true); }}
+              className={fieldClass}
+            >
+              {POST_LANGUAGES.map((lang) => (
+                <option key={lang.value} value={lang.value}>{lang.label}</option>
+              ))}
+            </select>
+            <p className="text-xs text-[#6B6B76]">Sproget dine AI-genererede opslag skrives på — kan afvige fra sidens sprog.</p>
+          </div>
+        </div>
+
         {/* Name */}
         <div className="flex flex-col gap-1.5">
           <label htmlFor="name" className="text-sm font-medium text-[#1B1B1F]">Navn</label>
@@ -220,40 +295,6 @@ export function SignupForm() {
           {[...channels].map((c) => (
             <input key={c} type="hidden" name="channels" value={c} />
           ))}
-        </div>
-
-        {/* Language + currency */}
-        <div className="flex gap-3">
-          <div className="flex flex-1 flex-col gap-1.5">
-            <label htmlFor="locale" className="text-sm font-medium text-[#1B1B1F]">Sprog</label>
-            <select
-              id="locale"
-              name="locale"
-              value={locale}
-              onChange={(e) => onLocaleChange(e.target.value as Locale)}
-              className={fieldClass}
-            >
-              {LOCALES.map((loc) => (
-                <option key={loc} value={loc}>
-                  {LOCALE_FLAGS[loc]} {LOCALE_LABELS[loc]}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex flex-1 flex-col gap-1.5">
-            <label htmlFor="currency" className="text-sm font-medium text-[#1B1B1F]">Valuta</label>
-            <select
-              id="currency"
-              name="currency"
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value as Currency)}
-              className={fieldClass}
-            >
-              {CURRENCIES.map((cur) => (
-                <option key={cur} value={cur}>{CURRENCY_LABELS[cur]}</option>
-              ))}
-            </select>
-          </div>
         </div>
 
         {state?.error && (

@@ -21,6 +21,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     ...landingPages,
     {
+      url: `${BASE}/hvorfor-somevideopost`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
       url: `${BASE}/priser`,
       lastModified: now,
       changeFrequency: "monthly",

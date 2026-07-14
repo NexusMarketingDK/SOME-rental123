@@ -3,7 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Clock, CalendarDays } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { JsonLd } from "@/components/seo/json-ld";
 import { POSTS, getPost, getCategory, formatDate, articleBody } from "@/lib/blog";
+
+const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.somevideopost.com";
 
 export function generateStaticParams() {
   return POSTS.map((p) => ({ id: String(p.id) }));
@@ -40,8 +44,39 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ id
   // Related posts from the same category (excluding the current one)
   const related = POSTS.filter((p) => p.category === post.category && p.id !== post.id).slice(0, 3);
 
+  const url = `${BASE}/blog/${post.id}`;
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: post.title,
+      description: post.excerpt,
+      datePublished: post.date,
+      dateModified: post.date,
+      articleSection: cat?.label,
+      author: { "@type": "Organization", name: "somevideopost.com", url: BASE },
+      publisher: {
+        "@type": "Organization",
+        name: "somevideopost.com",
+        url: BASE,
+      },
+      mainEntityOfPage: { "@type": "WebPage", "@id": url },
+      url,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Forside", item: BASE },
+        { "@type": "ListItem", position: 2, name: "Blog", item: `${BASE}/blog` },
+        { "@type": "ListItem", position: 3, name: post.title, item: url },
+      ],
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-slate-50">
+      <JsonLd data={jsonLd} />
       <SiteHeader active="blog" />
 
       <article className="mx-auto max-w-3xl px-6 py-12">
@@ -92,7 +127,10 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ id
         >
           <h2 className="text-xl font-bold">Prøv SOME VIDEO POST gratis</h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-blue-200">
-            Gå fra boliglink til færdigt opslag og cinematisk video på minutter. Intet kreditkort påkrævet.
+            Gå fra boliglink til færdigt opslag og cinematisk video på minutter. Intet kreditkort påkrævet.{" "}
+            <Link href="/hvorfor-somevideopost" className="font-semibold text-white underline underline-offset-2">
+              Læs hvorfor udlejere vælger somevideopost.com
+            </Link>.
           </p>
           <Link
             href="/signup"
@@ -121,6 +159,8 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ id
           </div>
         )}
       </article>
+
+      <SiteFooter />
     </div>
   );
 }

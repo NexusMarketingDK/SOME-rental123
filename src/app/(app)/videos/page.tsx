@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Plus, Sparkles, Share2, TrendingUp, Star, Zap, Play, Clapperboard, Download, Users, ChevronDown } from "lucide-react";
 import { Topbar } from "@/components/layout/topbar";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrency } from "@/lib/locale-server";
+import { formatPriceKey } from "@/lib/currency";
 import type { VideoOrder } from "@/types/database";
 import { VideoDemo } from "@/components/video-demo";
 import { VideoListPoller } from "@/components/video-list-poller";
@@ -109,7 +111,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Kan jeg bestille flere videoer til samme bolig?",
-    a: "Ja, du kan bestille så mange videoer du ønsker. Hver video koster 499 kr og produceres uafhængigt — perfekt til at fremhæve forskellige rum eller årstider.",
+    a: "Ja. Din pakke inkluderer et fast antal videoer hver måned (1 på Starter, 2 på Pro, 6 på Business), og ekstra videoer kan altid tilkøbes — perfekt til at fremhæve forskellige rum eller årstider.",
   },
   {
     q: "Hvad hvis jeg ikke er tilfreds med videoen?",
@@ -151,7 +153,8 @@ function StatPill({ value, label }: { value: string; label: string }) {
 }
 
 export default async function VideosPage() {
-  const orders = await getVideoOrders();
+  const [orders, currency] = await Promise.all([getVideoOrders(), getCurrency()]);
+  const videoPrice = formatPriceKey("video", currency);
 
   return (
     <>
@@ -216,7 +219,7 @@ export default async function VideosPage() {
               <div className="mx-auto mt-8 grid max-w-5xl grid-cols-3 gap-4">
                 <StatPill value="3×" label="Flere bookingforespørgsler" />
                 <StatPill value="15 min" label="Gennemsnitlig leveringstid" />
-                <StatPill value="499 kr" label="Pr. video — ingen abonnement" />
+                <StatPill value={videoPrice} label="Pr. ekstra video" />
               </div>
             </section>
 
@@ -368,9 +371,9 @@ export default async function VideosPage() {
                   href="/videos/new"
                   className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-sm font-bold text-[#1B3F7A] shadow-xl transition-opacity hover:opacity-90"
                 >
-                  <Sparkles size={16} /> Bestil video — kun 499 kr
+                  <Sparkles size={16} /> Bestil ekstra video — {videoPrice}
                 </Link>
-                <p className="mt-4 text-xs text-blue-300">Ingen abonnement · Leveres på under 15 minutter · Download direkte i appen</p>
+                <p className="mt-4 text-xs text-blue-300">Inkluderet i din pakke · Leveres på under 15 minutter · Download direkte i appen</p>
               </div>
             </section>
 

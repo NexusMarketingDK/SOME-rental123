@@ -40,14 +40,15 @@ export function currencyForLocale(locale: Locale): Currency {
  * Amounts are in the currency's minor unit (øre for DKK, cents for EUR).
  */
 export const PRICES = {
-  subscription: { dkk: 29900, eur: 4000 },  // 299 kr. / €40 per month
-  aiPost:       { dkk: 500,   eur: 67 },     // 5 kr. / €0.67 per AI post/image
-  video:        { dkk: 49900, eur: 6700 },   // 499 kr. / €67 per video
-  // Marketing tiers shown on /priser
-  starter:      { dkk: 19900, eur: 2700 },   // 199 kr. / €27
-  pro:          { dkk: 79900, eur: 10700 },  // 799 kr. / €107
-  businessMin:  { dkk: 99900, eur: 13400 },  // 999 kr. / €134
-  businessMax:  { dkk: 299900, eur: 40200 }, // 2.999 kr. / €402
+  // Subscription tiers (shown on /priser and the landing page)
+  starter:      { dkk: 37500,  eur: 5000 },   // 375 kr. / €50 per month — 1 video/mo
+  pro:          { dkk: 73900,  eur: 9900 },   // 739 kr. / €99 per month — 2 videos/mo
+  business:     { dkk: 222900, eur: 29900 },  // 2.229 kr. / €299 per month — 6 videos/mo
+  // Extra presentation video beyond what a plan includes
+  video:        { dkk: 37500,  eur: 5000 },   // 375 kr. / €50 per video
+  // The entry subscription drives in-app checkout; kept in sync with Starter.
+  subscription: { dkk: 37500,  eur: 5000 },   // 375 kr. / €50 per month
+  aiPost:       { dkk: 500,    eur: 67 },     // 5 kr. / €0.67 — internal credit unit
 } as const;
 
 export type PriceKey = keyof typeof PRICES;
