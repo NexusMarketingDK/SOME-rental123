@@ -255,6 +255,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
             <a href="#" className="hover:text-white transition-colors">{t.navHome}</a>
             <a href="#features" className="hover:text-white transition-colors">{t.navFeatures}</a>
             <a href="#ai" className="hover:text-white transition-colors">{t.navVideo}</a>
+            <Link href="/hvorfor-somevideopost" className="hover:text-white transition-colors">Hvorfor os</Link>
             <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
             <Link href="/priser" className="hover:text-white transition-colors">{t.navPricing}</Link>
           </nav>
@@ -604,6 +605,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
               <ul className="flex flex-col gap-3 text-sm text-slate-400">
                 <li><a href="#features" className="transition-colors hover:text-white">{t.footerFeatures}</a></li>
                 <li><a href="#ai" className="transition-colors hover:text-white">{t.footerAiVideo}</a></li>
+                <li><Link href="/hvorfor-somevideopost" className="transition-colors hover:text-white">Hvorfor somevideopost.com</Link></li>
                 <li><Link href="/priser" className="transition-colors hover:text-white">{t.footerPricing}</Link></li>
                 <li><Link href="/blog" className="transition-colors hover:text-white">Blog</Link></li>
                 <li><Link href="/signup" className="transition-colors hover:text-white">{t.footerCreateAccount}</Link></li>

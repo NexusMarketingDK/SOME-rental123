@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { MobileNav } from "@/components/layout/mobile-nav";
 
-type NavKey = "home" | "features" | "blog" | "pricing";
+type NavKey = "home" | "features" | "why" | "blog" | "pricing";
 
 const NAV_LINKS: { key: NavKey; href: string; label: string; external?: boolean }[] = [
   { key: "home", href: "/", label: "Forside" },
   { key: "features", href: "/#features", label: "Funktioner", external: true },
+  { key: "why", href: "/hvorfor-somevideopost", label: "Hvorfor os" },
   { key: "blog", href: "/blog", label: "Blog" },
   { key: "pricing", href: "/priser", label: "Priser" },
 ];

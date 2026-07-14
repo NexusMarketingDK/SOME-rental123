@@ -3,7 +3,10 @@ import Link from "next/link";
 import { BookOpen } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
 import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
+import { JsonLd } from "@/components/seo/json-ld";
 import { CATEGORIES, POSTS, formatDate } from "@/lib/blog";
+
+const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.somevideopost.com";
 
 export const metadata: Metadata = {
   title: "Blog & guides — SOME VIDEO POST | AI-video og sociale medier til udlejere",
@@ -23,8 +26,36 @@ export const metadata: Metadata = {
 };
 
 export default function BlogPage() {
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Blog",
+      name: "SOME VIDEO POST — Blog & guides",
+      description:
+        "Guides om AI-genererede præsentationsvideoer, sociale medier og markedsføring af ferieboliger.",
+      url: `${BASE}/blog`,
+      publisher: { "@type": "Organization", name: "somevideopost.com", url: BASE },
+      blogPost: POSTS.map((p) => ({
+        "@type": "BlogPosting",
+        headline: p.title,
+        description: p.excerpt,
+        datePublished: p.date,
+        url: `${BASE}/blog/${p.id}`,
+      })),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Forside", item: BASE },
+        { "@type": "ListItem", position: 2, name: "Blog", item: `${BASE}/blog` },
+      ],
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-slate-50">
+      <JsonLd data={jsonLd} />
       {/* Nav */}
       <SiteHeader active="blog" />
 
@@ -144,6 +175,34 @@ export default function BlogPage() {
             </div>
           </div>
         </div>
+
+        {/* SEO content section */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-8 md:p-10">
+          <h2 className="text-2xl font-bold text-slate-900">
+            AI-video og sociale medier til udlejere — samlet ét sted
+          </h2>
+          <div className="mt-4 flex flex-col gap-4 text-[15px] leading-relaxed text-slate-600">
+            <p>
+              somevideopost.com hjælper udlejere af ferieboliger, private lejligheder og hoteller med at
+              markedsføre deres bolig professionelt uden teknisk viden. Du indsætter et link til din annonce
+              fra Airbnb, Booking.com eller Novasol — eller uploader dine egne fotos — og AI skaber automatisk
+              en cinematisk præsentationsvideo og et sælgende opslag, tilpasset hver platform.
+            </p>
+            <p>
+              Fra det samme brugervenlige dashboard deler du dine videoer og opslag automatisk på Facebook,
+              Instagram, TikTok, LinkedIn og YouTube — eller downloader videoen i 9:16, 1:1 og 16:9, så den
+              passer til Reels, feed, YouTube og din hjemmeside. Vores guides nedenfor giver dig konkrete tips
+              til prissætning, valg af platform, det bedste tidspunkt at poste og hvordan
+              præsentationsvideoer øger dine bookinger.
+            </p>
+            <p>
+              <Link href="/hvorfor-somevideopost" className="font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-800">
+                Læs hvorfor tusindvis af udlejere vælger somevideopost.com
+              </Link>{" "}
+              — eller <Link href="/signup" className="font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-800">opret en gratis konto</Link> og prøv selv.
+            </p>
+          </div>
+        </section>
       </div>
     </div>
   );
