@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Clock, CalendarDays } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
 import { JsonLd } from "@/components/seo/json-ld";
 import { POSTS, getPost, getCategory, formatDate, articleBody } from "@/lib/blog";
 
@@ -158,6 +159,8 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ id
           </div>
         )}
       </article>
+
+      <SiteFooter />
     </div>
   );
 }

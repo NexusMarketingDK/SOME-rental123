@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
 import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
 import { JsonLd } from "@/components/seo/json-ld";
 import { CATEGORIES, POSTS, formatDate } from "@/lib/blog";
@@ -204,6 +205,8 @@ export default function BlogPage() {
           </div>
         </section>
       </div>
+
+      <SiteFooter />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { Check, X, Sparkles, Zap, Building2, CreditCard, Video } from "lucide-re
 import { getCurrency } from "@/lib/locale-server";
 import { formatPriceKey } from "@/lib/currency";
 import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
 import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
 import { MetaAdsSection } from "@/components/meta-ads-section";
 
@@ -355,6 +356,8 @@ export default async function PriserPage() {
           </div>
         </div>
       </div>
+
+      <SiteFooter />
     </div>
   );
 }

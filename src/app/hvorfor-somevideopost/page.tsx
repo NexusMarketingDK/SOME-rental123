@@ -8,6 +8,7 @@ import {
 import { JsonLd } from "@/components/seo/json-ld";
 import { WorkflowDemo } from "@/components/workflow-demo";
 import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
 import { LANDING } from "@/lib/i18n";
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.somevideopost.com";
@@ -428,6 +429,8 @@ export default function WhySomeVideoPostPage() {
           </p>
         </div>
       </section>
+
+      <SiteFooter />
     </div>
   );
 }
