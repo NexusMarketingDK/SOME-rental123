@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { JsonLd } from "@/components/seo/json-ld";
 import { WorkflowDemo } from "@/components/workflow-demo";
+import { SiteHeader } from "@/components/layout/site-header";
 import { LANDING } from "@/lib/i18n";
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.somevideopost.com";
@@ -64,17 +65,6 @@ const SOCIALS = [
   { name: "LinkedIn", color: "#0A66C2", letter: "in" },
   { name: "YouTube", color: "#FF0000", letter: "YT" },
 ];
-
-function Wordmark() {
-  return (
-    <span className="font-bold lowercase tracking-tight text-base">
-      <span className="text-white">some</span>
-      <span className="text-[#4d8dff]">video</span>
-      <span className="text-orange-400">post</span>
-      <span className="text-slate-400">.com</span>
-    </span>
-  );
-}
 
 function Step({ n, icon: Icon, title, desc }: { n: string; icon: React.ElementType; title: string; desc: string }) {
   return (
@@ -157,25 +147,7 @@ export default function WhySomeVideoPostPage() {
       <JsonLd data={jsonLd} />
 
       {/* ── Nav ── */}
-      <header className="sticky top-0 z-50 border-b border-white/10 backdrop-blur" style={{ background: "rgba(5,13,36,0.9)" }}>
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-bold text-sm text-white" style={{ background: ORANGE_GRADIENT }}>s</span>
-            <Wordmark />
-          </Link>
-          <nav className="hidden items-center gap-6 text-sm font-medium text-slate-300 md:flex">
-            <Link href="/" className="hover:text-white transition-colors">Forside</Link>
-            <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
-            <Link href="/priser" className="hover:text-white transition-colors">Priser</Link>
-          </nav>
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="hidden sm:inline text-sm font-medium text-slate-300 hover:text-white transition-colors">Log ind</Link>
-            <Link href="/signup" className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ background: ORANGE_GRADIENT }}>
-              Kom i gang gratis
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SiteHeader active="why" />
 
       {/* ── Hero ── */}
       <section className="relative overflow-hidden py-20 md:py-28" style={{ background: "linear-gradient(135deg, #040a1c 0%, #071233 55%, #0a1f4d 100%)" }}>
