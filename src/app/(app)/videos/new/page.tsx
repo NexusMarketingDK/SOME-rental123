@@ -7,7 +7,7 @@ import { createVideoOrderCheckout } from "@/services/billing";
 import {
   Upload, Link as LinkIcon, X, Loader2, Sparkles, CheckCircle2, Clock,
   Star, ChevronLeft, ChevronRight, Plus, AlertCircle, MapPin, Tag,
-  Maximize2, Download, Share2, Users, Image as ImageIcon,
+  Maximize2, Download, Share2, Users,
 } from "lucide-react";
 import { scrapePropertyUrl, type ScrapedProperty } from "@/services/scrape-property";
 import { ScreenshotImporter } from "@/components/screenshot-importer";
@@ -24,13 +24,6 @@ const BENEFITS = [
   "Professionelle kamerabevægelser og overgange",
   "Klar på 5-15 minutter — leveres direkte i appen",
   "Del direkte på sociale medier",
-];
-
-const MOBILE_STEPS = [
-  { id: 1, label: "Link" },
-  { id: 2, label: "Oplysninger" },
-  { id: 3, label: "Billeder" },
-  { id: 4, label: "Opret" },
 ];
 
 function PhotoTour({
@@ -161,8 +154,6 @@ export default function NewVideoPage() {
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState("");
 
-  const [mobileStep, setMobileStep] = useState(1);
-
   async function handleUrlImport() {
     if (!importUrl.trim()) return;
     setImporting(true);
@@ -215,190 +206,6 @@ export default function NewVideoPage() {
 
   const canSubmit = title.trim().length > 0;
 
-  function canProceed(step: number) {
-    if (step === 1) return !!scraped || imageUrls.length > 0;
-    if (step === 2) return title.trim().length > 0;
-    if (step === 3) return imageUrls.length > 0;
-    return true;
-  }
-
-  // ── Shared sections ────────────────────────────────────────────────────────
-
-  function SectionLink() {
-    return (
-      <div className="flex flex-col gap-4">
-        <div>
-          <h3 className="mb-1 text-base font-bold text-slate-900">Indsæt link til annonce</h3>
-          <p className="text-sm text-slate-500">Fx Airbnb, Booking.com, Novasol eller din egen hjemmeside.</p>
-        </div>
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="url"
-              value={importUrl}
-              onChange={(e) => { setImportUrl(e.target.value); setImportError(""); }}
-              onKeyDown={(e) => e.key === "Enter" && handleUrlImport()}
-              placeholder="https://www.airbnb.dk/rooms/…"
-              className="w-full rounded-xl border border-slate-200 py-3 pl-9 pr-3 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-            />
-          </div>
-          <button
-            type="button"
-            onClick={handleUrlImport}
-            disabled={importing || !importUrl.trim()}
-            className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white transition disabled:opacity-50"
-            style={{ background: "linear-gradient(135deg,#1B3F7A,#3B6DC9)" }}
-          >
-            {importing ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-            {importing ? "Henter…" : "Hent billeder"}
-          </button>
-        </div>
-        {importError && (
-          <p className="flex items-start gap-2 text-sm text-red-600">
-            <AlertCircle size={14} className="mt-0.5 shrink-0" /> {importError}
-          </p>
-        )}
-        {scraped && (
-          <div className="flex flex-wrap gap-2">
-            {scraped.location && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800">
-                <MapPin size={11} /> {scraped.location}
-              </span>
-            )}
-            {scraped.price && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800">
-                <Tag size={11} /> {scraped.price}
-              </span>
-            )}
-            {scraped.size && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800">
-                <Maximize2 size={11} /> {scraped.size}
-              </span>
-            )}
-            {scraped.title && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
-                <CheckCircle2 size={11} /> {scraped.title.slice(0, 40)}{scraped.title.length > 40 ? "…" : ""}
-              </span>
-            )}
-          </div>
-        )}
-        <div className="border-t border-slate-100 pt-3">
-          <p className="mb-2 text-xs text-slate-500">Eller importer fra screenshot (Airbnb, alle sider)</p>
-          <ScreenshotImporter onImport={handleScreenshotImport} />
-        </div>
-      </div>
-    );
-  }
-
-  function SectionInfo() {
-    return (
-      <div className="flex flex-col gap-4">
-        <div>
-          <h3 className="mb-1 text-base font-bold text-slate-900">Oplysninger om din bolig</h3>
-          <p className="text-sm text-slate-500">Titel bruges i videoen og er påkrævet.</p>
-        </div>
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">
-            Titel <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            name="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="f.eks. Charmerende sommerhus ved havet"
-            required
-            className="w-full rounded-xl border border-slate-200 px-3.5 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-          />
-        </div>
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">
-            Booking-link <span className="text-xs font-normal text-slate-400">(valgfrit)</span>
-          </label>
-          <div className="relative">
-            <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="url"
-              name="booking_url"
-              value={bookingUrl}
-              onChange={(e) => setBookingUrl(e.target.value)}
-              placeholder="https://www.airbnb.com/rooms/..."
-              className="w-full rounded-xl border border-slate-200 pl-9 pr-3 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  function SectionImages() {
-    return (
-      <div className="flex flex-col gap-4">
-        <div>
-          <h3 className="mb-1 text-base font-bold text-slate-900">Vælg billeder til video</h3>
-          <p className="text-sm text-slate-500">Rækkefølgen bestemmer fotoruten i videoen.</p>
-        </div>
-        {imageUrls.length > 0 ? (
-          <PhotoTour
-            images={imageUrls}
-            onRemove={removeImage}
-            onAdd={() => fileRef.current?.click()}
-            fileRef={fileRef}
-            uploading={uploading}
-          />
-        ) : (
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-            className="flex w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-200 py-12 text-sm text-slate-500 hover:border-[#FF6B4A]/40 hover:bg-orange-50/30 transition-colors disabled:opacity-50"
-          >
-            {uploading ? <Loader2 size={28} className="animate-spin text-[#FF6B4A]" /> : <ImageIcon size={28} className="text-slate-300" />}
-            <span>{uploading ? "Uploader billeder..." : "Tryk for at uploade billeder"}</span>
-            <span className="text-xs text-slate-400">eller hent automatisk via link ovenfor</span>
-          </button>
-        )}
-        <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} />
-      </div>
-    );
-  }
-
-  function SectionSubmit() {
-    return (
-      <div className="flex flex-col gap-4">
-        <div>
-          <h3 className="mb-1 text-base font-bold text-slate-900">Opret video</h3>
-          <p className="text-sm text-slate-500">AI genererer en professionel præsentationsvideo.</p>
-        </div>
-        {/* Summary */}
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-600">Titel</span>
-            <span className="font-medium text-slate-900 max-w-[60%] truncate text-right">{title || "—"}</span>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-600">Billeder</span>
-            <span className="font-medium text-slate-900">{imageUrls.length} valgt</span>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-600">Pris</span>
-            <span className="font-semibold text-slate-900">1 credit</span>
-          </div>
-        </div>
-        <button
-          type="submit"
-          disabled={!canSubmit}
-          className="w-full rounded-xl py-4 text-base font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
-        >
-          {canSubmit ? "Opret præsentationsvideo" : "Udfyld titel for at fortsætte"}
-        </button>
-        <p className="text-center text-xs text-slate-400">Video leveres inden for 15 minutter</p>
-      </div>
-    );
-  }
-
   return (
     <>
       <Topbar title="Bestil præsentationsvideo" description="AI-genereret video af din bolig — klar på minutter." />
@@ -414,76 +221,13 @@ export default function NewVideoPage() {
         </div>
       </div>
 
-      {/* ── MOBILE WIZARD ── */}
-      <div className="flex flex-1 flex-col md:hidden">
-        {/* Progress bar */}
-        <div className="sticky top-0 z-10 border-b border-slate-200 bg-white px-4 pt-4 pb-3 shadow-sm">
-          <div className="flex items-center justify-between">
-            {MOBILE_STEPS.map((s, i) => (
-              <div key={s.id} className="flex flex-1 flex-col items-center">
-                <div className="flex w-full items-center">
-                  {i > 0 && <div className={`h-0.5 flex-1 transition-colors ${mobileStep > s.id - 1 ? "bg-orange-400" : "bg-slate-200"}`} />}
-                  <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors ${
-                    mobileStep === s.id ? "bg-orange-500 text-white" : mobileStep > s.id ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-500"
-                  }`}>
-                    {mobileStep > s.id ? <CheckCircle2 size={14} /> : s.id}
-                  </div>
-                  {i < MOBILE_STEPS.length - 1 && <div className={`h-0.5 flex-1 transition-colors ${mobileStep > s.id ? "bg-orange-400" : "bg-slate-200"}`} />}
-                </div>
-                <span className={`mt-1 text-[10px] font-medium ${mobileStep === s.id ? "text-orange-500" : "text-slate-400"}`}>{s.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Step content */}
-        <form action={createVideoOrderCheckout} className="flex flex-1 flex-col">
-          {imageUrls.map((url, i) => <input key={i} type="hidden" name="image_urls[]" value={url} />)}
-          {imageUrls.map((_, i) => <input key={`label-${i}`} type="hidden" name="room_labels[]" value={ROOM_LABELS[i] ?? `Billede ${i + 1}`} />)}
-          <input type="hidden" name="title" value={title} />
-          <input type="hidden" name="booking_url" value={bookingUrl} />
-
-          <div className="flex-1 px-4 py-6">
-            {mobileStep === 1 && <SectionLink />}
-            {mobileStep === 2 && <SectionInfo />}
-            {mobileStep === 3 && <SectionImages />}
-            {mobileStep === 4 && <SectionSubmit />}
-          </div>
-
-          {/* Bottom nav */}
-          <div className="sticky bottom-0 border-t border-slate-200 bg-white px-4 py-3">
-            <div className="flex gap-3">
-              {mobileStep > 1 && (
-                <button type="button" onClick={() => setMobileStep((s) => s - 1)}
-                  className="flex items-center gap-1.5 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700">
-                  <ChevronLeft size={16} /> Tilbage
-                </button>
-              )}
-              {mobileStep < 4 ? (
-                <button type="button" onClick={() => setMobileStep((s) => s + 1)} disabled={!canProceed(mobileStep)}
-                  className="flex flex-1 items-center justify-center gap-1.5 rounded-xl py-3 text-sm font-semibold text-white transition disabled:opacity-40"
-                  style={{ background: "linear-gradient(135deg,#FFB36B,#FF6B4A)" }}>
-                  Næste <ChevronRight size={16} />
-                </button>
-              ) : (
-                <button type="submit" disabled={!canSubmit}
-                  className="flex flex-1 items-center justify-center rounded-xl py-3 text-sm font-bold text-white transition disabled:opacity-40"
-                  style={{ background: "linear-gradient(135deg,#FFB36B,#FF6B4A)" }}>
-                  Opret video
-                </button>
-              )}
-            </div>
-          </div>
-        </form>
-      </div>
-
-      {/* ── DESKTOP LAYOUT ── */}
-      <div className="hidden flex-1 px-8 py-8 md:flex">
+      {/* ── LAYOUT (same design on mobile and web) ── */}
+      <div className="flex flex-1 px-4 py-6 md:px-8 md:py-8">
         <div className="mx-auto w-full max-w-5xl">
-          <div className="grid grid-cols-5 gap-8">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-5 md:gap-8">
 
             {/* Left sidebar */}
-            <div className="col-span-2 space-y-6">
+            <div className="space-y-6 md:col-span-2">
               <div className="rounded-2xl p-6 text-white" style={{ background: "linear-gradient(135deg, #1B3F7A 0%, #14306b 100%)" }}>
                 <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-orange-400/30 bg-orange-400/10 px-2.5 py-1 text-xs font-semibold text-orange-300">
                   <Sparkles size={11} /> AI-drevet
@@ -544,7 +288,7 @@ export default function NewVideoPage() {
             </div>
 
             {/* Right form */}
-            <div className="col-span-3">
+            <div className="md:col-span-3">
               <form action={createVideoOrderCheckout} className="space-y-5">
                 {imageUrls.map((url, i) => <input key={i} type="hidden" name="image_urls[]" value={url} />)}
                 {imageUrls.map((_, i) => <input key={`label-${i}`} type="hidden" name="room_labels[]" value={ROOM_LABELS[i] ?? `Billede ${i + 1}`} />)}
@@ -553,7 +297,7 @@ export default function NewVideoPage() {
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                   <h3 className="mb-1 text-base font-bold text-slate-900">1. Indsæt link til annonce</h3>
                   <p className="mb-4 text-sm text-slate-500">Fx Airbnb, Booking.com, Novasol — henter billeder og oplysninger automatisk.</p>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row">
                     <div className="relative flex-1">
                       <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
@@ -569,7 +313,7 @@ export default function NewVideoPage() {
                       type="button"
                       onClick={handleUrlImport}
                       disabled={importing || !importUrl.trim()}
-                      className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition disabled:opacity-50"
+                      className="flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition disabled:opacity-50"
                       style={{ background: "linear-gradient(135deg,#1B3F7A,#3B6DC9)" }}
                     >
                       {importing ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}

@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   Link as LinkIcon, Loader2, Sparkles, CheckCircle2, Clock, Star,
   RefreshCw, AlertCircle, MapPin, Tag, Maximize2, ShoppingCart,
-  Pencil, ChevronRight, ChevronLeft, Image as ImageIcon,
+  Pencil,
 } from "lucide-react";
 import { Topbar } from "@/components/layout/topbar";
 import { scrapePropertyUrl, type ScrapedProperty } from "@/services/scrape-property";
@@ -62,13 +62,6 @@ const BENEFITS = [
   "De første 5 opslag er gratis",
 ];
 
-const MOBILE_STEPS = [
-  { id: 1, label: "Link" },
-  { id: 2, label: "Tekst" },
-  { id: 3, label: "Billede" },
-  { id: 4, label: "Udgiv" },
-];
-
 type Account = Awaited<ReturnType<typeof getSocialAccounts>>[number];
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -101,9 +94,6 @@ export default function GeneratePostPage() {
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
   const [scheduledAt, setScheduledAt] = useState("");
   const [saving, setSaving] = useState(false);
-
-  // Mobile wizard step (1-5)
-  const [mobileStep, setMobileStep] = useState(1);
 
   // ── Scrape ─────────────────────────────────────────────────────────────────
 
@@ -196,299 +186,6 @@ export default function GeneratePostPage() {
     await createPostAction(formData);
   }
 
-  // ── Shared section content ─────────────────────────────────────────────────
-
-  function SectionLink() {
-    return (
-      <div className="flex flex-col gap-4">
-        <div>
-          <h3 className="mb-1 text-base font-bold text-slate-900">Indsæt link til annonce</h3>
-          <p className="text-sm text-slate-500">Fx Airbnb, Booking.com, Novasol eller din egen hjemmeside.</p>
-        </div>
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleScrape()}
-              placeholder="https://www.airbnb.dk/rooms/…"
-              className="w-full rounded-xl border border-slate-200 py-3 pl-9 pr-3 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-            />
-          </div>
-          <button
-            type="button"
-            onClick={handleScrape}
-            disabled={scraping || generating || !url.trim()}
-            className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white transition disabled:opacity-50"
-            style={{ background: "linear-gradient(135deg,#1B3F7A,#3B6DC9)" }}
-          >
-            {(scraping || generating) ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-            {scraping ? "Henter…" : generating ? "Genererer…" : "Generer SOME opslag"}
-          </button>
-        </div>
-        {scrapeError && (
-          <p className="flex items-start gap-2 text-sm text-red-600">
-            <AlertCircle size={14} className="mt-0.5 shrink-0" /> {scrapeError}
-          </p>
-        )}
-        {generateError && (
-          <p className="flex items-start gap-2 text-sm text-red-600">
-            <AlertCircle size={14} className="mt-0.5 shrink-0" /> {generateError}
-          </p>
-        )}
-        {noCredits && (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-            <p className="text-sm font-semibold text-amber-800">Ingen credits tilbage</p>
-            <Link href="/billing" className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 underline">
-              <ShoppingCart size={11} /> Køb credits
-            </Link>
-          </div>
-        )}
-        {scraped && (
-          <div className="flex flex-wrap gap-2">
-            {scraped.location && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800">
-                <MapPin size={11} /> {scraped.location}
-              </span>
-            )}
-            {scraped.price && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800">
-                <Tag size={11} /> {scraped.price}
-              </span>
-            )}
-            {scraped.size && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800">
-                <Maximize2 size={11} /> {scraped.size}
-              </span>
-            )}
-            {scraped.title && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
-                <CheckCircle2 size={11} /> {scraped.title.slice(0, 40)}{scraped.title.length > 40 ? "…" : ""}
-              </span>
-            )}
-          </div>
-        )}
-        {scraped && (
-          <div>
-            <label className="mb-1 block text-xs font-medium text-slate-600">Link i opslaget (kan ændres)</label>
-            <input
-              type="url"
-              value={listingUrl}
-              onChange={(e) => setListingUrl(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-800 focus:border-blue-500 focus:outline-none"
-            />
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  function SectionText() {
-    return (
-      <div className="flex flex-col gap-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-base font-bold text-slate-900">Rediger tekst</h3>
-            {wasFree && (
-              <span className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-emerald-700">
-                <CheckCircle2 size={11} /> Dette opslag var gratis
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setEditingText((v) => !v)}
-              className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${editingText ? "border-blue-400 bg-blue-50 text-blue-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"}`}
-            >
-              <Pencil size={11} />
-              {editingText ? "Luk" : "Rediger"}
-            </button>
-            <button
-              type="button"
-              onClick={handleRegenerate}
-              disabled={generating}
-              className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
-            >
-              {generating ? <Loader2 size={11} className="animate-spin" /> : <RefreshCw size={11} />}
-              Ny
-            </button>
-          </div>
-        </div>
-        {editingText ? (
-          <>
-            <textarea
-              value={generatedText}
-              onChange={(e) => setGeneratedText(e.target.value)}
-              rows={12}
-              autoFocus
-              className="w-full rounded-xl border border-blue-300 px-3 py-3 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-            />
-            <p className="text-right text-xs text-slate-400">{generatedText.length} tegn</p>
-          </>
-        ) : (
-          <div
-            className="group relative cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"
-            onClick={() => setEditingText(true)}
-          >
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-800">{generatedText}</p>
-            <div className="absolute right-3 top-3 rounded-lg border border-slate-200 bg-white p-1.5 opacity-0 shadow-sm transition group-hover:opacity-100">
-              <Pencil size={13} className="text-slate-500" />
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  function SectionImages() {
-    return (
-      <div className="flex flex-col gap-4">
-        <div>
-          <h3 className="mb-1 text-base font-bold text-slate-900">Vælg opslagsbillede</h3>
-          <p className="text-sm text-slate-500">Billeder hentet fra annoncen. Tap for at vælge (valgfrit).</p>
-        </div>
-        {images.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-slate-200 py-10 text-center">
-            <ImageIcon size={28} className="text-slate-300" />
-            <p className="text-sm text-slate-400">Ingen billeder fundet i annoncen</p>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
-              {images.map((src, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setSelectedImage(selectedImage === src ? null : src)}
-                  className={`group relative aspect-square overflow-hidden rounded-xl border-2 transition ${
-                    selectedImage === src ? "border-blue-500 shadow-md" : "border-transparent hover:border-slate-300"
-                  }`}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={src} alt={`Billede ${i + 1}`} className="h-full w-full object-cover" />
-                  {selectedImage === src && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-blue-600/20">
-                      <CheckCircle2 size={24} className="text-white drop-shadow" />
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-slate-400">
-              {selectedImage ? "✓ Billede valgt — følger med i opslaget" : "Tap et billede for at vælge det"}
-            </p>
-          </>
-        )}
-      </div>
-    );
-  }
-
-  function SectionPublish() {
-    return (
-      <div className="flex flex-col gap-5">
-        <div>
-          <h3 className="mb-1 text-base font-bold text-slate-900">Vælg platform og udgiv</h3>
-          <p className="text-sm text-slate-500">Tilpas tone — eller gem som kladde.</p>
-        </div>
-
-        <div className="grid grid-cols-3 gap-2">
-          {PLATFORMS.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => setPlatform(p.id)}
-              className={`flex flex-col items-center gap-2 rounded-xl border-2 px-2 py-4 text-center transition ${
-                platform === p.id ? "border-current shadow-sm" : "border-slate-200 hover:border-slate-300"
-              }`}
-              style={platform === p.id ? { borderColor: p.color, background: `${p.color}0d` } : {}}
-            >
-              {p.icon}
-              <span className="text-xs font-semibold text-slate-800">{p.label}</span>
-              <span className="hidden text-[10px] text-slate-400 leading-tight sm:block">{p.desc}</span>
-            </button>
-          ))}
-        </div>
-
-        {selectedImage && (
-          <div className="flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 p-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={selectedImage} alt="Valgt billede" className="h-14 w-14 rounded-lg object-cover" />
-            <div className="flex-1">
-              <p className="text-xs font-semibold text-blue-800">Opslagsbillede valgt</p>
-              <p className="text-xs text-blue-600">Følger med opslaget ved deling</p>
-            </div>
-            <button type="button" onClick={() => setSelectedImage(null)} className="rounded-lg p-1.5 text-blue-400 hover:bg-blue-100">✕</button>
-          </div>
-        )}
-
-        <div>
-          <p className="mb-2 text-xs font-medium text-slate-600">Udgiv til konto</p>
-          {accounts.length === 0 ? (
-            <p className="text-sm text-slate-400">
-              Ingen konti tilsluttet.{" "}
-              <Link href="/accounts/connect" className="underline text-blue-600">Tilslut en konto.</Link>
-            </p>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {accounts.map((a) => (
-                <label
-                  key={a.id}
-                  className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition ${
-                    selectedAccounts.includes(a.id) ? "border-blue-400 bg-blue-50" : "border-slate-200"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedAccounts.includes(a.id)}
-                    onChange={(e) =>
-                      setSelectedAccounts((prev) =>
-                        e.target.checked ? [...prev, a.id] : prev.filter((id) => id !== a.id)
-                      )
-                    }
-                    className="accent-blue-600"
-                  />
-                  <span className="text-sm text-slate-800">{a.account_name}</span>
-                  <span className="ml-auto text-xs capitalize text-slate-400">{a.platform}</span>
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-600">Planlæg (valgfrit)</label>
-          <input
-            type="datetime-local"
-            value={scheduledAt}
-            onChange={(e) => setScheduledAt(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
-          />
-        </div>
-
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={saving || !generatedText}
-          className="flex w-full items-center justify-center gap-2 rounded-xl py-4 text-base font-semibold text-white transition disabled:opacity-50"
-          style={{ background: "linear-gradient(135deg,#1B3F7A,#3B6DC9)" }}
-        >
-          {saving ? <Loader2 size={16} className="animate-spin" /> : null}
-          {saving ? "Gemmer…" : "Gem og udgiv opslag"}
-        </button>
-      </div>
-    );
-  }
-
-  // ── Mobile step can proceed? ───────────────────────────────────────────────
-
-  function canProceed(step: number) {
-    if (step === 1) return !!generatedText;
-    return true;
-  }
-
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
@@ -502,83 +199,13 @@ export default function GeneratePostPage() {
         </p>
       </div>
 
-      {/* ── MOBILE WIZARD (hidden on md+) ── */}
-      <div className="flex flex-1 flex-col md:hidden">
-
-        {/* Step progress bar */}
-        <div className="sticky top-0 z-10 border-b border-slate-200 bg-white px-4 pt-4 pb-3 shadow-sm">
-          <div className="flex items-center justify-between">
-            {MOBILE_STEPS.map((s, i) => (
-              <div key={s.id} className="flex flex-1 flex-col items-center">
-                <div className="flex w-full items-center">
-                  {i > 0 && (
-                    <div className={`h-0.5 flex-1 transition-colors ${mobileStep > s.id - 1 ? "bg-blue-500" : "bg-slate-200"}`} />
-                  )}
-                  <div
-                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors ${
-                      mobileStep === s.id
-                        ? "bg-blue-600 text-white"
-                        : mobileStep > s.id
-                        ? "bg-emerald-500 text-white"
-                        : "bg-slate-200 text-slate-500"
-                    }`}
-                  >
-                    {mobileStep > s.id ? <CheckCircle2 size={14} /> : s.id}
-                  </div>
-                  {i < MOBILE_STEPS.length - 1 && (
-                    <div className={`h-0.5 flex-1 transition-colors ${mobileStep > s.id ? "bg-blue-500" : "bg-slate-200"}`} />
-                  )}
-                </div>
-                <span className={`mt-1 text-[10px] font-medium ${mobileStep === s.id ? "text-blue-600" : "text-slate-400"}`}>
-                  {s.label}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Step content */}
-        <div className="flex-1 px-4 py-6">
-          {mobileStep === 1 && <SectionLink />}
-          {mobileStep === 2 && <SectionText />}
-          {mobileStep === 3 && <SectionImages />}
-          {mobileStep === 4 && <SectionPublish />}
-        </div>
-
-        {/* Bottom nav */}
-        <div className="sticky bottom-0 border-t border-slate-200 bg-white px-4 py-3">
-          <div className="flex gap-3">
-            {mobileStep > 1 && (
-              <button
-                type="button"
-                onClick={() => setMobileStep((s) => s - 1)}
-                className="flex items-center gap-1.5 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700"
-              >
-                <ChevronLeft size={16} /> Tilbage
-              </button>
-            )}
-            {mobileStep < 5 && (
-              <button
-                type="button"
-                onClick={() => setMobileStep((s) => s + 1)}
-                disabled={!canProceed(mobileStep)}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl py-3 text-sm font-semibold text-white transition disabled:opacity-40"
-                style={{ background: "linear-gradient(135deg,#1B3F7A,#3B6DC9)" }}
-              >
-                Næste <ChevronRight size={16} />
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ── DESKTOP LAYOUT (hidden on mobile) ── */}
-      <div className="hidden flex-1 px-6 py-8 md:flex">
+      {/* ── LAYOUT (same design on mobile and web) ── */}
+      <div className="flex flex-1 px-4 py-6 md:px-6 md:py-8">
         <div className="mx-auto w-full max-w-6xl">
-          <div className="grid grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-5 md:gap-6">
 
             {/* Left sidebar */}
-            <div className="col-span-2 flex flex-col gap-4">
+            <div className="flex flex-col gap-4 md:col-span-2">
               <div
                 className="relative overflow-hidden rounded-2xl p-6 text-white"
                 style={{ background: "linear-gradient(160deg,#1B3F7A 0%,#14306b 100%)" }}
@@ -638,13 +265,13 @@ export default function GeneratePostPage() {
             </div>
 
             {/* Right form area */}
-            <div className="col-span-3 flex flex-col gap-4">
+            <div className="flex flex-col gap-4 md:col-span-3">
 
               {/* 1. URL */}
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <h3 className="mb-1 text-base font-bold text-slate-900">1. Indsæt link til annonce</h3>
                 <p className="mb-4 text-sm text-slate-500">Fx Airbnb, Booking.com, Novasol eller din egen hjemmeside.</p>
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   <div className="relative flex-1">
                     <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
@@ -660,7 +287,7 @@ export default function GeneratePostPage() {
                     type="button"
                     onClick={handleScrape}
                     disabled={scraping || generating || !url.trim()}
-                    className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition disabled:opacity-50"
+                    className="flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition disabled:opacity-50"
                     style={{ background: "linear-gradient(135deg,#1B3F7A,#3B6DC9)" }}
                   >
                     {(scraping || generating) ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
@@ -671,6 +298,19 @@ export default function GeneratePostPage() {
                   <p className="mt-3 flex items-start gap-2 text-sm text-red-600">
                     <AlertCircle size={14} className="mt-0.5 shrink-0" /> {scrapeError}
                   </p>
+                )}
+                {generateError && (
+                  <p className="mt-3 flex items-start gap-2 text-sm text-red-600">
+                    <AlertCircle size={14} className="mt-0.5 shrink-0" /> {generateError}
+                  </p>
+                )}
+                {noCredits && (
+                  <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                    <p className="text-sm font-semibold text-amber-800">Ingen credits tilbage</p>
+                    <Link href="/billing" className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 underline">
+                      <ShoppingCart size={11} /> Køb credits
+                    </Link>
+                  </div>
                 )}
                 {scraped && (
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -771,7 +411,7 @@ export default function GeneratePostPage() {
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                   <h3 className="mb-1 text-base font-bold text-slate-900">4. Vælg opslagsbillede</h3>
                   <p className="mb-4 text-sm text-slate-500">Billeder hentet fra annoncen. Klik for at vælge ét (valgfrit).</p>
-                  <div className="grid grid-cols-5 gap-2">
+                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
                     {images.map((src, i) => (
                       <button
                         key={i}
@@ -815,7 +455,7 @@ export default function GeneratePostPage() {
                       >
                         {p.icon}
                         <span className="text-xs font-semibold text-slate-800">{p.label}</span>
-                        <span className="text-[10px] text-slate-400 leading-tight">{p.desc}</span>
+                        <span className="hidden text-[10px] text-slate-400 leading-tight sm:block">{p.desc}</span>
                       </button>
                     ))}
                   </div>
