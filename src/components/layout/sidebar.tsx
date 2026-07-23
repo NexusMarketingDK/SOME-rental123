@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { signOutAction } from "@/services/auth";
 import type { SocialAccount } from "@/types/database";
-import { APP_LABELS, LOCALE_FLAGS, LOCALE_LABELS, LOCALE_PATHS, LOCALES, type Locale as I18nLocale } from "@/lib/i18n";
+import { APP_LABELS, LOCALE_FLAGS, LOCALE_LABELS, LOCALES, localeSwitchHref, type Locale as I18nLocale } from "@/lib/i18n";
 
 const PLATFORM_COLORS: Record<string, string> = {
   facebook: "#1877F2",
@@ -67,7 +67,7 @@ function LangSwitcher({ current }: { current: Locale }) {
           {LOCALES.map((loc) => (
             <a
               key={loc}
-              href={LOCALE_PATHS[loc]}
+              href={localeSwitchHref(loc)}
               className={`flex items-center gap-2 px-3 py-2 text-xs transition-colors hover:bg-white/10 ${loc === current ? "text-white font-semibold" : "text-slate-400"}`}
             >
               <span>{LOCALE_FLAGS[loc]}</span>

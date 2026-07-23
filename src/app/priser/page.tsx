@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
 import { MetaAdsSection } from "@/components/meta-ads-section";
+import { FreePostsShowcase } from "@/components/pricing/free-posts-showcase";
 
 export const metadata: Metadata = {
   title: "Priser — SOME VIDEO POST | AI-video og sociale medier til udlejere",
@@ -30,7 +31,9 @@ const ORANGE_GRADIENT = "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)";
 const FEATURES: { label: string; starter: string | boolean; pro: string | boolean; business: string | boolean }[] = [
   { label: "Præsentationsvideoer inkluderet pr. måned", starter: "1", pro: "2", business: "6" },
   { label: "Del opslag direkte på sociale medier", starter: true, pro: true, business: true },
-  { label: "Generér SOME opslag (AI)", starter: true, pro: true, business: true },
+  { label: "AI-genererede opslag", starter: "50", pro: "100/md.", business: "Ubegrænset" },
+  { label: "AI-tekst genereret automatisk via link eller egen prompt", starter: true, pro: true, business: true },
+  { label: "Del opslag med dine foretrukne billeder", starter: true, pro: true, business: true },
   { label: "Download i alle formater", starter: true, pro: true, business: true },
   { label: "Forbind Facebook / Instagram-konto", starter: true, pro: true, business: true },
   { label: "Blog & guides", starter: true, pro: true, business: true },
@@ -93,6 +96,9 @@ export default async function PriserPage() {
 
       <div className="mx-auto max-w-6xl px-6 py-16 space-y-16">
 
+        {/* Free AI posts showcase — the near-free headline feature */}
+        <FreePostsShowcase />
+
         {/* How it works */}
         <div className="rounded-2xl border border-blue-400/20 bg-blue-500/[0.06] p-6 md:p-8 backdrop-blur-sm">
           <div className="flex items-start gap-4">
@@ -102,7 +108,7 @@ export default async function PriserPage() {
             <div className="flex-1">
               <h2 className="text-lg font-bold text-white mb-1">Sådan fungerer det</h2>
               <p className="text-sm text-slate-300 leading-relaxed max-w-2xl">
-                Vælg en månedlig pakke der passer til, hvor meget du deler. Hver pakke inkluderer et fast antal AI-præsentationsvideoer om måneden og giver dig mulighed for at dele opslag direkte på dine sociale medier. Har du brug for flere videoer, kan du tilkøbe dem for {videoPrice}/stk.
+                Vælg en månedlig pakke der passer til, hvor meget du deler. Hver pakke inkluderer et fast antal AI-præsentationsvideoer om måneden og giver dig mulighed for at dele opslag direkte på dine sociale medier. Den fangende salgstekst til at udleje din bolig genereres automatisk — indsæt blot et link til din annonce eller skriv din egen prompt, og du vælger selv de billeder, opslaget deles med. Har du brug for flere videoer, kan du tilkøbe dem for {videoPrice}/stk.
               </p>
               <div className="mt-4 flex flex-wrap gap-3">
                 {[
@@ -137,8 +143,8 @@ export default async function PriserPage() {
             <p className="mt-3 text-sm text-slate-300">Kom i gang med direkte deling til sociale medier og din første video hver måned.</p>
             <ul className="my-6 flex flex-col gap-2.5">
               <CheckItem><strong className="text-white">1 præsentationsvideo</strong> pr. måned inkluderet</CheckItem>
+              <CheckItem><strong className="text-white">50 gratis AI-genererede opslag</strong> — del med dine foretrukne billeder</CheckItem>
               <CheckItem>Del opslag direkte på sociale medier</CheckItem>
-              <CheckItem>AI-generering af SOME opslag</CheckItem>
               <CheckItem>Download i alle formater</CheckItem>
               <CheckItem>Op til 5 boliger</CheckItem>
             </ul>
@@ -169,6 +175,7 @@ export default async function PriserPage() {
             <ul className="my-6 flex flex-col gap-2.5">
               <CheckItem><strong className="text-white">2 præsentationsvideoer</strong> pr. måned inkluderet</CheckItem>
               <CheckItem>Alt i Starter</CheckItem>
+              <CheckItem><strong className="text-white">100 AI-genererede opslag</strong> pr. måned</CheckItem>
               <CheckItem>Del direkte på alle kanaler</CheckItem>
               <CheckItem>Planlægning af opslag</CheckItem>
               <CheckItem>Analytics og indsigt</CheckItem>
@@ -199,6 +206,7 @@ export default async function PriserPage() {
             <ul className="my-6 flex flex-col gap-2.5">
               <CheckItem><strong className="text-white">6 præsentationsvideoer</strong> pr. måned inkluderet</CheckItem>
               <CheckItem>Alt inkluderet — alt i Pro</CheckItem>
+              <CheckItem><strong className="text-white">Ubegrænsede AI-genererede opslag</strong></CheckItem>
               <CheckItem>Meta-integration for annoncering</CheckItem>
               <CheckItem>Prioriteret support</CheckItem>
               <CheckItem>Team og flere brugere</CheckItem>
@@ -268,6 +276,10 @@ export default async function PriserPage() {
               {
                 q: "Hvor mange videoer er inkluderet?",
                 a: `Starter inkluderer 1 præsentationsvideo om måneden, Pro inkluderer 2, og Business inkluderer 6. Har du brug for flere, tilkøber du dem for ${videoPrice}/stk.`,
+              },
+              {
+                q: "Hvor mange AI-genererede opslag er inkluderet?",
+                a: "Starter inkluderer 50 gratis AI-genererede opslag, Pro giver 100 om måneden, og Business har ubegrænset antal. Den fangende salgstekst til din bolig genereres automatisk — enten ved at indsætte et link til din annonce eller ud fra din egen prompt — og du vælger selv de billeder, opslaget deles med.",
               },
               {
                 q: "Kan jeg dele direkte på sociale medier?",
