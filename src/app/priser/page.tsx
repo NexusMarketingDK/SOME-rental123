@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
 import { MetaAdsSection } from "@/components/meta-ads-section";
+import { FreePostsShowcase } from "@/components/pricing/free-posts-showcase";
 
 export const metadata: Metadata = {
   title: "Priser — SOME VIDEO POST | AI-video og sociale medier til udlejere",
@@ -94,6 +95,9 @@ export default async function PriserPage() {
       </div>
 
       <div className="mx-auto max-w-6xl px-6 py-16 space-y-16">
+
+        {/* Free AI posts showcase — the near-free headline feature */}
+        <FreePostsShowcase />
 
         {/* How it works */}
         <div className="rounded-2xl border border-blue-400/20 bg-blue-500/[0.06] p-6 md:p-8 backdrop-blur-sm">
