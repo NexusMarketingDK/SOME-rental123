@@ -33,6 +33,22 @@ function setLocaleCookie(res: NextResponse, locale: Locale) {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Explicit language choice via ?lang=xx from the language switcher. Danish
+  // lives at "/", which has no locale prefix, so without this the stale
+  // `locale` cookie would immediately redirect "/" back to the previously
+  // chosen language — making it impossible to switch back to Danish. Persist
+  // the new choice and redirect to the clean locale path.
+  const langParam = request.nextUrl.searchParams.get("lang");
+  if (langParam && langParam in LOCALE_PATHS) {
+    const locale = langParam as Locale;
+    const url = request.nextUrl.clone();
+    url.pathname = LOCALE_PATHS[locale];
+    url.searchParams.delete("lang");
+    const redirect = NextResponse.redirect(url);
+    setLocaleCookie(redirect, locale);
+    return redirect;
+  }
+
   // Explicit locale routes — persist cookie and continue
   for (const [locale, prefix] of Object.entries(LOCALE_PATHS) as [Locale, string][]) {
     if (prefix !== "/" && (pathname === prefix || pathname.startsWith(prefix + "/"))) {
