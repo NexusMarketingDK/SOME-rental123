@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Fraunces } from "next/font/google";
 import { cookies } from "next/headers";
 import "./globals.css";
+import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -58,6 +59,11 @@ export const metadata: Metadata = {
     },
   },
   manifest: "/manifest.webmanifest",
+  // Google Search Console — set GOOGLE_SITE_VERIFICATION to the token from the
+  // "HTML tag" verification method; the meta tag is emitted only when present.
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+  },
 };
 
 export default async function RootLayout({
@@ -76,6 +82,7 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-white">
         {children}
+        <GoogleAnalytics />
       </body>
     </html>
   );
