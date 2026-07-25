@@ -10,6 +10,7 @@ import { currencyForLocale, formatPriceKey } from "@/lib/currency";
 import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
 import { WorkflowDemo } from "@/components/workflow-demo";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { PresentationVideo } from "@/components/presentation-video";
 
 /* Shared brand tokens for the midnight-blue design */
 const ORANGE_GRADIENT = "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)";
@@ -578,6 +579,22 @@ export function LandingPage({ locale }: { locale: Locale }) {
             </div>
             <p className="text-2xl font-bold text-white">{formatPriceKey("video", currency)} <span className="text-sm font-normal text-slate-400">{t.videoAddonPer}</span></p>
           </div>
+        </div>
+      </section>
+
+      {/* ── Product presentation video ── */}
+      <section className="relative overflow-hidden py-24" style={{ background: "#071130" }}>
+        <div className="pointer-events-none absolute -left-40 top-10 h-96 w-96 rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-40 bottom-10 h-96 w-96 rounded-full bg-orange-400/10 blur-3xl" />
+        <div className="relative mx-auto max-w-4xl px-6">
+          <div className="mb-10 text-center">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-400/25 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-100">
+              <Play size={11} className="text-orange-300" /> {t.presentationBadge}
+            </div>
+            <h2 className="text-3xl font-bold text-white md:text-4xl">{t.presentationTitle}</h2>
+            <p className="mx-auto mt-3 max-w-xl text-slate-400">{t.presentationSub}</p>
+          </div>
+          <PresentationVideo />
         </div>
       </section>
 

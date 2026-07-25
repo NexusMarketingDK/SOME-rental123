@@ -117,6 +117,8 @@ export type LandingT = {
   plan3Name: string; plan3Items: string[]; plan3OnetimeLabel: string; plan3OrderBtn: string;
   planProCta: string; videoAddonLabel: string; videoAddonPer: string; videoAddonSub: string;
   startFreeBtn: string;
+  // presentation video
+  presentationBadge: string; presentationTitle: string; presentationSub: string;
   // cta
   ctaBadge: string; ctaTitle1: string; ctaTitle2: string; ctaSub: string;
   ctaBtn: string; ctaNoCard: string;
@@ -188,6 +190,7 @@ export const LANDING: Record<Locale, LandingT> = {
     plan3OrderBtn: "Vælg Business",
     planProCta: "Vælg Pro", videoAddonLabel: "Ekstra præsentationsvideo", videoAddonPer: "/ stk.", videoAddonSub: "Ud over det din plan inkluderer",
     startFreeBtn: "Start gratis i dag",
+    presentationBadge: "Se det i aktion", presentationTitle: "Sådan fungerer SOME Video Post", presentationSub: "Fra boliglink til færdig video og opslag — se hele flowet på under et minut.",
     ctaBadge: "Spar tid fra dag 1", ctaTitle1: "Klar til at markedsføre din", ctaTitle2: "bolig på autopilot?",
     ctaSub: "Bliv en del af hundredvis af udlejere, der allerede bruger SOME Video Post til at nå ud til flere gæster — professionelt og automatisk.",
     ctaBtn: "Start gratis i dag", ctaNoCard: "Intet kreditkort · Afmeld når som helst",
@@ -254,6 +257,7 @@ export const LANDING: Record<Locale, LandingT> = {
     plan3OrderBtn: "Choose Business",
     planProCta: "Choose Pro", videoAddonLabel: "Extra presentation video", videoAddonPer: "/ each", videoAddonSub: "Beyond what your plan includes",
     startFreeBtn: "Start free today",
+    presentationBadge: "See it in action", presentationTitle: "How SOME Video Post works", presentationSub: "From property link to finished video and post — watch the whole flow in under a minute.",
     ctaBadge: "Save time from day 1", ctaTitle1: "Ready to market your", ctaTitle2: "property on autopilot?",
     ctaSub: "Join hundreds of hosts already using SOME Video Post to reach more guests — professionally and automatically.",
     ctaBtn: "Start free today", ctaNoCard: "No credit card · Cancel anytime",
@@ -320,6 +324,7 @@ export const LANDING: Record<Locale, LandingT> = {
     plan3OrderBtn: "Elegir Business",
     planProCta: "Elegir Pro", videoAddonLabel: "Vídeo de presentación extra", videoAddonPer: "/ ud.", videoAddonSub: "Además de lo que incluye tu plan",
     startFreeBtn: "Empezar gratis hoy",
+    presentationBadge: "Míralo en acción", presentationTitle: "Cómo funciona SOME Video Post", presentationSub: "Del enlace de la propiedad al vídeo y la publicación finales: mira todo el proceso en menos de un minuto.",
     ctaBadge: "Ahorra tiempo desde el día 1", ctaTitle1: "¿Listo para comercializar tu", ctaTitle2: "propiedad en piloto automático?",
     ctaSub: "Únete a cientos de anfitriones que ya usan SOME Video Post para llegar a más huéspedes — de forma profesional y automática.",
     ctaBtn: "Empezar gratis hoy", ctaNoCard: "Sin tarjeta de crédito · Cancela cuando quieras",
@@ -386,6 +391,7 @@ export const LANDING: Record<Locale, LandingT> = {
     plan3OrderBtn: "Business wählen",
     planProCta: "Pro wählen", videoAddonLabel: "Zusätzliches Präsentationsvideo", videoAddonPer: "/ Stk.", videoAddonSub: "Zusätzlich zu den in deinem Plan enthaltenen",
     startFreeBtn: "Heute kostenlos starten",
+    presentationBadge: "In Aktion sehen", presentationTitle: "So funktioniert SOME Video Post", presentationSub: "Vom Immobilienlink zum fertigen Video und Beitrag — sieh dir den gesamten Ablauf in unter einer Minute an.",
     ctaBadge: "Zeit sparen ab Tag 1", ctaTitle1: "Bereit, deine Immobilie auf", ctaTitle2: "Autopilot zu vermarkten?",
     ctaSub: "Schließe dich Hunderten von Gastgebern an, die SOME Video Post bereits nutzen, um mehr Gäste zu erreichen — professionell und automatisch.",
     ctaBtn: "Heute kostenlos starten", ctaNoCard: "Keine Kreditkarte · Jederzeit kündigen",
