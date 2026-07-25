@@ -14,7 +14,14 @@ export const metadata: Metadata = {
       "Save hours every week. Post to all social media at once, sync your booking calendar and let AI generate your posts and presentation videos automatically.",
     type: "website",
     siteName: "somevideopost.com",
+    locale: "en_GB",
     url: "https://www.somevideopost.com/en",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SOME VIDEO POST — Automated social media & AI video for vacation rental hosts",
+    description:
+      "Save hours every week. Post to all social media at once, sync your booking calendar and let AI generate your posts and presentation videos automatically.",
   },
   alternates: {
     canonical: "https://www.somevideopost.com/en",
@@ -23,6 +30,7 @@ export const metadata: Metadata = {
       "en": "https://www.somevideopost.com/en",
       "es": "https://www.somevideopost.com/es",
       "de": "https://www.somevideopost.com/de",
+      "x-default": "https://www.somevideopost.com",
     },
   },
 };

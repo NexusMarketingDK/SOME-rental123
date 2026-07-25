@@ -6,7 +6,8 @@ import {
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 import { LANDING, LOCALE_FLAGS, LOCALE_LABELS, LOCALE_PATHS, LOCALES } from "@/lib/i18n";
-import { currencyForLocale, formatPriceKey } from "@/lib/currency";
+import { currencyForLocale, formatPriceKey, priceAmount } from "@/lib/currency";
+import { JsonLd } from "@/components/seo/json-ld";
 import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
 import { WorkflowDemo } from "@/components/workflow-demo";
 import { MobileNav } from "@/components/layout/mobile-nav";
@@ -237,12 +238,56 @@ function LanguageSwitcher({ current }: { current: Locale }) {
   );
 }
 
+const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.somevideopost.com";
+
 export function LandingPage({ locale }: { locale: Locale }) {
   const t = LANDING[locale];
   const currency = currencyForLocale(locale);
+  const pageUrl = locale === "da" ? BASE : `${BASE}${LOCALE_PATHS[locale]}`;
+  const priceCurrency = currency.toUpperCase();
+  const starterPrice = (priceAmount("starter", currency) / 100).toFixed(2);
+
+  // Structured data for rich results: who we are, the site, and the product.
+  const structuredData = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "@id": `${BASE}/#organization`,
+      name: "somevideopost.com",
+      url: BASE,
+      logo: { "@type": "ImageObject", url: `${BASE}/opengraph-image` },
+      email: "mail@somevideopost.com",
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "@id": `${BASE}/#website`,
+      name: "somevideopost.com",
+      url: BASE,
+      inLanguage: locale,
+      publisher: { "@id": `${BASE}/#organization` },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: "SOME VIDEO POST",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      url: pageUrl,
+      description: t.heroSub,
+      offers: {
+        "@type": "Offer",
+        price: starterPrice,
+        priceCurrency,
+        availability: "https://schema.org/InStock",
+      },
+      publisher: { "@id": `${BASE}/#organization` },
+    },
+  ];
 
   return (
     <div className="flex min-h-screen flex-col text-slate-100" style={{ background: PAGE_BG }}>
+      <JsonLd data={structuredData} />
 
       {/* ── Nav ── */}
       <header className="sticky top-0 z-50 border-b border-white/10 backdrop-blur" style={{ background: "rgba(5,13,36,0.9)" }}>

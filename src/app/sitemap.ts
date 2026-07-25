@@ -7,14 +7,31 @@ const LOCALES = ["en", "es", "de"] as const;
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
+  // hreflang cluster shared by every localised landing URL, so Google serves
+  // the right language variant and avoids duplicate-content penalties.
+  const landingLanguages = {
+    da: BASE,
+    en: `${BASE}/en`,
+    es: `${BASE}/es`,
+    de: `${BASE}/de`,
+    "x-default": BASE,
+  };
+
   // Localised landing pages (da is the root, en/es/de are prefixed)
   const landingPages: MetadataRoute.Sitemap = [
-    { url: BASE, lastModified: now, changeFrequency: "weekly", priority: 1 },
+    {
+      url: BASE,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 1,
+      alternates: { languages: landingLanguages },
+    },
     ...LOCALES.map((loc) => ({
       url: `${BASE}/${loc}`,
       lastModified: now,
       changeFrequency: "weekly" as const,
       priority: 0.9,
+      alternates: { languages: landingLanguages },
     })),
   ];
 

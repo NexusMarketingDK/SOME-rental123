@@ -27,7 +27,14 @@ export const metadata: Metadata = {
       "Spar timer hver uge. Post på alle sociale medier på én gang, synkroniser din bookingkalender og lad AI generere dine opslag og præsentationsvideoer automatisk.",
     type: "website",
     siteName: "somevideopost.com",
+    locale: "da_DK",
     url: "https://www.somevideopost.com",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SOME VIDEO POST — Automatisk sociale medier og AI-video til udlejere",
+    description:
+      "Spar timer hver uge. Post på alle sociale medier på én gang, synkroniser din bookingkalender og lad AI generere dine opslag og præsentationsvideoer automatisk.",
   },
   alternates: {
     canonical: "https://www.somevideopost.com",
@@ -36,8 +43,21 @@ export const metadata: Metadata = {
       "en": "https://www.somevideopost.com/en",
       "es": "https://www.somevideopost.com/es",
       "de": "https://www.somevideopost.com/de",
+      "x-default": "https://www.somevideopost.com",
     },
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  manifest: "/manifest.webmanifest",
 };
 
 export default async function RootLayout({

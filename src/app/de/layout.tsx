@@ -12,11 +12,17 @@ export const metadata: Metadata = {
     description: "Spare jede Woche Stunden. Poste auf allen sozialen Medien gleichzeitig, synchronisiere deinen Buchungskalender und lass die KI deine Beiträge und Präsentationsvideos automatisch generieren.",
     type: "website",
     siteName: "somevideopost.com",
+    locale: "de_DE",
     url: "https://www.somevideopost.com/de",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SOME VIDEO POST — Automatisiertes Social-Media-Marketing & KI-Video für Ferienvermieter",
+    description: "Spare jede Woche Stunden. Poste auf allen sozialen Medien gleichzeitig, synchronisiere deinen Buchungskalender und lass die KI deine Beiträge und Präsentationsvideos automatisch generieren.",
   },
   alternates: {
     canonical: "https://www.somevideopost.com/de",
-    languages: { da: "https://www.somevideopost.com", en: "https://www.somevideopost.com/en", es: "https://www.somevideopost.com/es", de: "https://www.somevideopost.com/de" },
+    languages: { da: "https://www.somevideopost.com", en: "https://www.somevideopost.com/en", es: "https://www.somevideopost.com/es", de: "https://www.somevideopost.com/de", "x-default": "https://www.somevideopost.com" },
   },
 };
 
