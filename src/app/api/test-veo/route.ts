@@ -3,8 +3,10 @@ import { createClient } from "@/lib/supabase/server";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? "";
 const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta";
+const VEO_MODEL = process.env.VEO_MODEL || "veo-3.0-generate-001";
 
-// Simple test: list available models to verify API key works
+// Diagnostic: verify the API key works and that the configured Veo model is
+// available to this key/project. Visit /api/test-veo while logged in.
 export async function GET() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -16,16 +18,19 @@ export async function GET() {
 
   try {
     const res = await fetch(
-      `${GEMINI_BASE}/models?key=${GEMINI_API_KEY}&pageSize=50`
+      `${GEMINI_BASE}/models?key=${GEMINI_API_KEY}&pageSize=100`
     );
     const data = await res.json();
 
     const models: string[] = (data.models ?? []).map((m: { name?: string }) => m.name ?? "");
     const veoModels = models.filter((m) => m.toLowerCase().includes("veo"));
+    const configuredModelAvailable = veoModels.some((m) => m.endsWith(VEO_MODEL));
 
     return NextResponse.json({
       apiKeySet: true,
       apiKeyPrefix: GEMINI_API_KEY.slice(0, 8) + "...",
+      configuredModel: VEO_MODEL,
+      configuredModelAvailable,
       veoModels,
       allModelCount: models.length,
       rawResponse: veoModels.length === 0 ? data : undefined,
