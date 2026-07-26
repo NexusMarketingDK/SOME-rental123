@@ -99,7 +99,7 @@ export async function restartVideoOrder(orderId: string): Promise<{ error?: stri
     const jobIds = await startVideoGeneration(imageUrls, order.title ?? "Bolig fremvisning");
     if (!jobIds.length) {
       await supabase.from("video_orders").update({ status: "failed" }).eq("id", orderId);
-      return { error: "Ingen videoer blev startet — tjek at GEMINI_API_KEY er korrekt og har adgang til Veo 2" };
+      return { error: "Ingen videoer blev startet — tjek at GEMINI_API_KEY er korrekt og har adgang til Veo 3" };
     }
     await supabase.from("video_orders").update({
       higgsfield_job_id: jobIds[0] ?? null,
