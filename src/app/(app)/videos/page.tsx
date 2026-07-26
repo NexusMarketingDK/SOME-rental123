@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Sparkles, Share2, TrendingUp, Star, Zap, Play, Clapperboard, Download, Users, ChevronDown } from "lucide-react";
+import { Plus, Sparkles, Share2, TrendingUp, Star, Zap, Play, Clapperboard, Download, Users, ChevronDown, UploadCloud } from "lucide-react";
 import { Topbar } from "@/components/layout/topbar";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrency } from "@/lib/locale-server";
@@ -163,13 +163,21 @@ export default async function VideosPage() {
         description="AI-genererede præsentationsvideoer af dine boliger."
         action={
           orders.length > 0 ? (
-            <Link
-              href="/videos/new"
-              className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-              style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
-            >
-              <Plus size={16} /> Bestil ny video
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/videos/upload"
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+              >
+                <UploadCloud size={16} /> Upload færdig video
+              </Link>
+              <Link
+                href="/videos/new"
+                className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
+              >
+                <Plus size={16} /> Bestil ny video
+              </Link>
+            </div>
           ) : null
         }
       />
@@ -277,6 +285,12 @@ export default async function VideosPage() {
                   >
                     <Plus size={16} /> Bestil din første video
                   </Link>
+                  <p className="mt-4 text-sm text-slate-500">
+                    Har du allerede lavet en video?{" "}
+                    <Link href="/videos/upload" className="font-semibold text-[#FF6B4A] hover:underline">
+                      Upload den her
+                    </Link>
+                  </p>
                 </div>
               </div>
             </section>
