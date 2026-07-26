@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Link as LinkIcon, UploadCloud, Film, Loader2, AlertCircle, CheckCircle2, X,
+  Link as LinkIcon, UploadCloud, Film, Loader2, AlertCircle, CheckCircle2, X, Home,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -16,12 +16,21 @@ type Mode = "link" | "file";
 
 const MAX_FILE_BYTES = 300 * 1024 * 1024; // 300 MB
 
-export function UploadVideoForm({ propertyId }: { propertyId?: string }) {
+export type PropertyOption = { id: string; title: string; location: string | null };
+
+export function UploadVideoForm({
+  propertyId,
+  properties = [],
+}: {
+  propertyId?: string;
+  properties?: PropertyOption[];
+}) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("link");
   const [title, setTitle] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [propertyIdValue, setPropertyIdValue] = useState(propertyId ?? "");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -38,7 +47,7 @@ export function UploadVideoForm({ propertyId }: { propertyId?: string }) {
     const fd = new FormData();
     fd.set("title", title);
     fd.set("video_url", videoUrl.trim());
-    if (propertyId) fd.set("property_id", propertyId);
+    if (propertyIdValue) fd.set("property_id", propertyIdValue);
     const res = await createVideoFromLink(fd);
     if (res.error || !res.orderId) throw new Error(res.error ?? "Kunne ikke oprette videoen");
     return res.orderId;
@@ -60,7 +69,7 @@ export function UploadVideoForm({ propertyId }: { propertyId?: string }) {
     const fd = new FormData();
     fd.set("title", title);
     fd.set("path", signed.path);
-    if (propertyId) fd.set("property_id", propertyId);
+    if (propertyIdValue) fd.set("property_id", propertyIdValue);
     const res = await finalizeUploadedVideo(fd);
     if (res.error || !res.orderId) throw new Error(res.error ?? "Kunne ikke oprette videoen");
     return res.orderId;
@@ -118,6 +127,30 @@ export function UploadVideoForm({ propertyId }: { propertyId?: string }) {
           className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/10"
         />
       </div>
+
+      {/* Property (optional) */}
+      {properties.length > 0 && (
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-slate-700">
+            Tilknyt bolig <span className="text-xs font-normal text-slate-400">(valgfrit)</span>
+          </label>
+          <div className="relative">
+            <Home size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <select
+              value={propertyIdValue}
+              onChange={(e) => setPropertyIdValue(e.target.value)}
+              className="w-full appearance-none rounded-lg border border-slate-200 py-2.5 pl-9 pr-8 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/10"
+            >
+              <option value="">Ingen bolig — kun i videobiblioteket</option>
+              {properties.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.title}{p.location ? ` — ${p.location}` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
 
       {/* Link mode */}
       {mode === "link" && (

@@ -2,13 +2,15 @@ import Link from "next/link";
 import { ArrowLeft, Film, ShieldCheck, Share2 } from "lucide-react";
 import { Topbar } from "@/components/layout/topbar";
 import { UploadVideoForm } from "@/components/upload-video-form";
+import { getProperties } from "@/services/properties";
 
 export default async function UploadVideoPage({
   searchParams,
 }: {
   searchParams: Promise<{ property_id?: string }>;
 }) {
-  const { property_id } = await searchParams;
+  const [{ property_id }, properties] = await Promise.all([searchParams, getProperties()]);
+  const propertyOptions = properties.map((p) => ({ id: p.id, title: p.title, location: p.location }));
 
   return (
     <>
@@ -34,7 +36,7 @@ export default async function UploadVideoPage({
                 <p className="mb-5 text-sm text-slate-500">
                   Indsæt linket til den færdige video — eller upload filen direkte. Den bliver klar til download og deling med det samme.
                 </p>
-                <UploadVideoForm propertyId={property_id} />
+                <UploadVideoForm propertyId={property_id} properties={propertyOptions} />
               </div>
             </div>
 
