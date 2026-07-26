@@ -21,6 +21,15 @@ export default async function VideoDetailPage({
 
   if (!order) notFound();
 
+  // Pull linked-property context so the AI sales text can match the listing.
+  const { data: property } = order.property_id
+    ? await supabase
+        .from("properties")
+        .select("description, location, booking_url")
+        .eq("id", order.property_id)
+        .single()
+    : { data: null };
+
   return (
     <>
       <Topbar
@@ -34,6 +43,9 @@ export default async function VideoDetailPage({
           initialVideoUrl={order.video_url ?? undefined}
           initialVideoUrls={(order as any).video_urls ?? undefined}
           title={order.title ?? ""}
+          description={property?.description ?? null}
+          location={property?.location ?? null}
+          bookingUrl={property?.booking_url ?? null}
           imageUrls={order.image_urls ?? []}
           accounts={(accounts ?? []) as SocialAccount[]}
         />
