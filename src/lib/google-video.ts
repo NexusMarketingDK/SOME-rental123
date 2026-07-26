@@ -6,7 +6,7 @@ const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta";
 // ── Veo 3 configuration ────────────────────────────────────────────────────
 // Model + render settings are env-driven so we can switch quality/cost tier
 // (e.g. veo-3.0-fast-generate-001) or bump to a newer Veo without a redeploy.
-const VEO_MODEL = process.env.VEO_MODEL || "veo-3.0-generate-001";
+const VEO_MODEL = process.env.VEO_MODEL || "veo-3.1-generate-preview";
 // 16:9 (landscape) or 9:16 (portrait — better for Reels/TikTok/Stories).
 const VEO_ASPECT_RATIO = process.env.VEO_ASPECT_RATIO || "16:9";
 // Veo 3 supports "720p" and "1080p" (1080p is 16:9 only).
@@ -79,7 +79,11 @@ async function imageToBase64(url: string): Promise<{ data: string; mimeType: str
 // ── Upload completed video to Supabase Storage ─────────────────────────────
 
 async function uploadVideoToStorage(googleFileUri: string, orderId: string, clipIndex: number): Promise<string> {
-  const downloadUrl = `${googleFileUri}?key=${GEMINI_API_KEY}&alt=media`;
+  // The Veo file URI may already include a query string (e.g. "?alt=media"),
+  // so append the key with the correct separator — a second "?" would make the
+  // key part of an unparsed value and the download would be unauthenticated.
+  const sep = googleFileUri.includes("?") ? "&" : "?";
+  const downloadUrl = `${googleFileUri}${sep}key=${GEMINI_API_KEY}&alt=media`;
   const res = await axios.get<ArrayBuffer>(downloadUrl, { responseType: "arraybuffer" });
   const buffer = Buffer.from(res.data);
 

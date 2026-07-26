@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? "";
 const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta";
-const VEO_MODEL = process.env.VEO_MODEL || "veo-3.0-generate-001";
+const VEO_MODEL = process.env.VEO_MODEL || "veo-3.1-generate-preview";
 
 // Diagnostic: verify the API key works and that the configured Veo model is
 // available to this key/project. Visit /api/test-veo while logged in.
