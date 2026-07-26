@@ -8,7 +8,17 @@ import { Sparkles, Volume2, VolumeX } from "lucide-react";
 const DEMO_VIDEO_URL =
   "https://r2.veo3ai.io/videos/ed952c81-3bcf-4d52-bdfc-f2c4a312f155-1080p-1785068502029.mp4";
 
-export function DemoVideoPhone({ label }: { label?: string }) {
+export function DemoVideoPhone({
+  label,
+  startAt = 0,
+  endAt,
+}: {
+  label?: string;
+  /** Second to start (and loop back to) — skip an intro/exterior shot. */
+  startAt?: number;
+  /** Optional second to loop back at — keeps playback on a chosen segment. */
+  endAt?: number;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
   const [error, setError] = useState(false);
@@ -21,11 +31,22 @@ export function DemoVideoPhone({ label }: { label?: string }) {
       {!error ? (
         <video
           ref={videoRef}
-          src={DEMO_VIDEO_URL}
+          src={startAt > 0 ? `${DEMO_VIDEO_URL}#t=${startAt}` : DEMO_VIDEO_URL}
           autoPlay
-          loop
+          loop={!startAt && !endAt}
           muted={muted}
           playsInline
+          onLoadedMetadata={(e) => { if (startAt > 0) e.currentTarget.currentTime = startAt; }}
+          onTimeUpdate={(e) => {
+            const v = e.currentTarget;
+            if (endAt && v.currentTime >= endAt) v.currentTime = startAt;
+          }}
+          onEnded={(e) => {
+            // Loop back to the chosen start instead of the intro frame.
+            const v = e.currentTarget;
+            v.currentTime = startAt;
+            v.play().catch(() => {});
+          }}
           onError={() => setError(true)}
           className="aspect-[9/16] w-full object-cover"
         />

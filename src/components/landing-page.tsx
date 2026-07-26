@@ -394,7 +394,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
                 <div className="absolute inset-0 scale-90 rounded-[2.5rem] opacity-40 blur-2xl" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }} />
                 {/* Toggle between the real sample video and the interactive tour */}
                 <div className="relative mx-auto w-full max-w-[300px] md:max-w-[340px]">
-                  <DemoPhoneSwitcher locale={locale} label={t.aiTitle1} />
+                  <DemoPhoneSwitcher locale={locale} label={t.aiTitle1} startAt={6} />
                 </div>
                 <div className="absolute -right-8 top-12 rounded-xl border border-blue-400/30 bg-blue-500/10 px-3 py-2 backdrop-blur-md shadow-[0_0_20px_rgba(59,130,246,0.2)]">
                   <p className="text-[10px] font-semibold text-white">9:16 format</p>

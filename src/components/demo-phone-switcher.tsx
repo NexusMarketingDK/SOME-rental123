@@ -15,7 +15,17 @@ const LABELS: Record<Locale, { video: string; tour: string }> = {
   de: { video: "Echtes Video", tour: "Interaktive Tour" },
 };
 
-export function DemoPhoneSwitcher({ locale = "da", label }: { locale?: Locale; label?: string }) {
+export function DemoPhoneSwitcher({
+  locale = "da",
+  label,
+  startAt,
+  endAt,
+}: {
+  locale?: Locale;
+  label?: string;
+  startAt?: number;
+  endAt?: number;
+}) {
   const [view, setView] = useState<View>("video");
   const l = LABELS[locale] ?? LABELS.da;
 
@@ -41,7 +51,9 @@ export function DemoPhoneSwitcher({ locale = "da", label }: { locale?: Locale; l
         ))}
       </div>
 
-      {view === "video" ? <DemoVideoPhone label={label} /> : <CinematicWalkthrough locale={locale} />}
+      {view === "video"
+        ? <DemoVideoPhone label={label} startAt={startAt} endAt={endAt} />
+        : <CinematicWalkthrough locale={locale} />}
     </div>
   );
 }
