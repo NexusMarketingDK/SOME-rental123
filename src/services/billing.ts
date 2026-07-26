@@ -119,17 +119,22 @@ export async function createVideoOrderCheckout(formData: FormData): Promise<void
     status: "processing",
   }).select("id").single();
 
-  // Start one Google Veo 2 job per image with cinematic per-room prompt
+  // Start one Google Veo 3 job per image with cinematic per-room prompt
   if (imageUrls.length >= 1 && order?.id) {
     try {
       const { startVideoGeneration } = await import("@/lib/google-video");
       const jobIds = await startVideoGeneration(imageUrls, title, roomLabels.length ? roomLabels : undefined);
+      if (!jobIds.length) throw new Error("Ingen videojobs blev startet");
       await supabase.from("video_orders").update({
         higgsfield_job_id: jobIds[0] ?? null,
         higgsfield_job_ids: jobIds,
       }).eq("id", order.id);
-    } catch (_e) {
-      // Generation start failed — order remains in processing state for retry
+    } catch (e) {
+      // Mark failed immediately so the user sees a clear error instead of a
+      // progress bar that spins for hours. The real cause (missing
+      // GEMINI_API_KEY, no Veo 3 access, quota, etc.) is logged server-side.
+      console.error("Video generation start failed:", e);
+      await supabase.from("video_orders").update({ status: "failed" }).eq("id", order.id);
     }
   }
 
