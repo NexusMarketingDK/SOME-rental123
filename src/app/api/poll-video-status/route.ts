@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getVideoJobsStatus } from "@/lib/google-video";
 
-const MAX_PROCESSING_MS = 6 * 60 * 60 * 1000; // auto-fail after 6 hours
+// A real Veo job finishes in minutes; anything still processing after this is
+// stuck, so fail it instead of showing a progress bar that lingers for hours.
+const MAX_PROCESSING_MS = 30 * 60 * 1000; // 30 minutes
+// An order that never got job IDs can never complete — fail it quickly (after a
+// short grace window covering the create→start race).
+const NO_JOB_GRACE_MS = 3 * 60 * 1000; // 3 minutes
 
 export async function POST() {
   const supabase = await createClient();
@@ -32,7 +37,8 @@ export async function POST() {
         : [];
 
       if (!jobIds.length) {
-        if (age > MAX_PROCESSING_MS) {
+        // No jobs were ever started for this order — it can never complete.
+        if (age > NO_JOB_GRACE_MS) {
           await supabase.from("video_orders").update({ status: "failed" }).eq("id", order.id);
           updated++;
         }
