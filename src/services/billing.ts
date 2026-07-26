@@ -125,16 +125,23 @@ export async function createVideoOrderCheckout(formData: FormData): Promise<void
       const { startVideoGeneration } = await import("@/lib/google-video");
       const jobIds = await startVideoGeneration(imageUrls, title, roomLabels.length ? roomLabels : undefined);
       if (!jobIds.length) throw new Error("Ingen videojobs blev startet");
-      await supabase.from("video_orders").update({
-        higgsfield_job_id: jobIds[0] ?? null,
-        higgsfield_job_ids: jobIds,
+      // If storing the job IDs fails (e.g. a schema mismatch), the order could
+      // never be polled — surface it instead of leaving it stuck "processing".
+      const { error: saveErr } = await supabase.from("video_orders").update({
+        video_job_id: jobIds[0] ?? null,
+        video_job_ids: jobIds,
       }).eq("id", order.id);
+      if (saveErr) throw new Error(`Kunne ikke gemme video-job: ${saveErr.message}`);
     } catch (e) {
       // Mark failed immediately so the user sees a clear error instead of a
       // progress bar that spins for hours. The real cause (missing
       // GEMINI_API_KEY, no Veo 3 access, quota, etc.) is logged server-side.
       console.error("Video generation start failed:", e);
-      await supabase.from("video_orders").update({ status: "failed" }).eq("id", order.id);
+      const msg = e instanceof Error ? e.message : String(e);
+      await supabase.from("video_orders").update({
+        status: "failed",
+        error_message: msg.slice(0, 500),
+      }).eq("id", order.id);
     }
   }
 
