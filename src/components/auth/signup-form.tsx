@@ -85,21 +85,21 @@ export function SignupForm() {
 
   return (
     <div>
-      {/* Free-to-start banner */}
+      {/* Get-started banner */}
       <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
         <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white">
           <Gift size={15} />
         </div>
         <div>
-          <p className="text-sm font-bold text-emerald-800">Gratis at komme i gang</p>
+          <p className="text-sm font-bold text-emerald-800">Kom i gang på få minutter</p>
           <p className="text-xs leading-relaxed text-emerald-700">
-            Opret din konto uden kreditkort og test alle funktioner gratis — generér opslag og videoer med det samme.
+            Opret din konto og få adgang til studiet — generér opslag og lav præsentationsvideoer af din bolig.
           </p>
         </div>
       </div>
 
       <h1 className="text-2xl text-[#1B1B1F]" style={{ fontFamily: "var(--font-fraunces)" }}>
-        Opret din gratis konto
+        Opret din konto
       </h1>
       <p className="mt-1 text-sm text-[#6B6B76]">
         Fortæl os lidt om dig, så tilpasser vi din oplevelse.
@@ -308,13 +308,13 @@ export function SignupForm() {
           style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
         >
           <Sparkles size={15} />
-          {isPending ? "Opretter konto…" : "Opret gratis konto"}
+          {isPending ? "Opretter konto…" : "Opret konto"}
         </button>
 
         {/* Reassurance row */}
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-[#6B6B76]">
-          <span className="inline-flex items-center gap-1"><Check size={12} className="text-emerald-500" /> Intet kreditkort</span>
-          <span className="inline-flex items-center gap-1"><Check size={12} className="text-emerald-500" /> Test gratis</span>
+          <span className="inline-flex items-center gap-1"><Check size={12} className="text-emerald-500" /> Klar på få minutter</span>
+          <span className="inline-flex items-center gap-1"><Check size={12} className="text-emerald-500" /> Opsig når som helst</span>
           <span className="inline-flex items-center gap-1"><Check size={12} className="text-emerald-500" /> Ingen binding</span>
         </div>
       </form>
