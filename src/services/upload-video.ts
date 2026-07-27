@@ -24,6 +24,8 @@ async function insertReadyOrder(
       property_id: opts.propertyId,
       title: opts.title,
       status: "ready",
+      // Uploaded videos are the user's own — no €50 generation fee.
+      paid: true,
       video_url: opts.videoUrl,
       video_urls: [opts.videoUrl],
       image_urls: [],

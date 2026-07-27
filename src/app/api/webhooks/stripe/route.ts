@@ -54,6 +54,16 @@ export async function POST(req: NextRequest) {
         });
       }
 
+      if (session.mode === "payment" && session.metadata?.type === "video_payment") {
+        const orderId = session.metadata.order_id;
+        if (orderId) {
+          await supabase.from("video_orders").update({
+            paid: true,
+            stripe_payment_id: session.payment_intent as string,
+          }).eq("id", orderId);
+        }
+      }
+
       if (session.mode === "payment" && session.metadata?.type === "video") {
         const propertyId = session.metadata.property_id || null;
         const imageUrls = session.metadata.image_urls

@@ -148,6 +148,45 @@ export async function createVideoOrderCheckout(formData: FormData): Promise<void
   redirect(`/videos/${order?.id ?? ""}?started=1`);
 }
 
+export async function createVideoPaymentCheckout(formData: FormData): Promise<void> {
+  const orderId = String(formData.get("order_id") ?? "");
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  // Verify the order belongs to the user and isn't already paid.
+  const { data: order } = await supabase
+    .from("video_orders")
+    .select("id, paid, title")
+    .eq("id", orderId)
+    .eq("user_id", user.id)
+    .single();
+  if (!order) redirect("/videos");
+  if (order.paid) redirect(`/videos/${orderId}`);
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.somevideopost.com";
+  const [locale, currency] = await Promise.all([getLocale(), getCurrency()]);
+
+  const session = await getStripe().checkout.sessions.create({
+    mode: "payment",
+    customer_email: user.email,
+    line_items: [{
+      price_data: {
+        currency,
+        product_data: { name: `Præsentationsvideo — ${order.title ?? "bolig"}` },
+        unit_amount: priceAmount("video", currency),
+      },
+      quantity: 1,
+    }],
+    success_url: `${appUrl}/videos/${orderId}?paid=1`,
+    cancel_url: `${appUrl}/videos/${orderId}`,
+    metadata: { user_id: user.id, type: "video_payment", order_id: orderId },
+    locale,
+  });
+
+  redirect(session.url!);
+}
+
 export async function createBillingPortalSession(): Promise<void> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

@@ -1,11 +1,41 @@
 "use client";
 
 import { useState, useEffect, useCallback, useTransition, useRef } from "react";
-import { CheckCircle2, Loader2, XCircle, Download, Share2, Send } from "lucide-react";
+import { CheckCircle2, Loader2, XCircle, Download, Share2, Send, Lock } from "lucide-react";
 import { pollVideoOrder } from "@/services/video-orders";
 import { shareVideoToSocial } from "@/services/share-video";
+import { createVideoPaymentCheckout } from "@/services/billing";
 import { VideoSalesText } from "@/components/video-sales-text";
 import type { SocialAccount } from "@/types/database";
+
+function PaymentPanel({ orderId, videoPrice, nearlyReady }: { orderId: string; videoPrice: string; nearlyReady?: boolean }) {
+  return (
+    <form action={createVideoPaymentCheckout} className="rounded-2xl border border-[#FF6B4A]/30 bg-gradient-to-br from-orange-50 to-white p-5 shadow-sm">
+      <input type="hidden" name="order_id" value={orderId} />
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#FF6B4A]/10">
+          <Lock size={18} className="text-[#FF6B4A]" />
+        </div>
+        <div className="flex-1">
+          <p className="font-bold text-slate-900">
+            {nearlyReady ? "Din video er næsten klar" : "Lås din video op"}
+          </p>
+          <p className="mt-0.5 text-sm text-slate-500">
+            Betal {videoPrice} for at få den fulde video i høj kvalitet — uden vandmærke — klar til download og deling.
+          </p>
+        </div>
+      </div>
+      <button
+        type="submit"
+        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white transition-opacity hover:opacity-90"
+        style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
+      >
+        <Lock size={14} /> Betal {videoPrice} og lås op
+      </button>
+      <p className="mt-2 text-center text-[11px] text-slate-400">Sikker betaling via Stripe</p>
+    </form>
+  );
+}
 
 const PLATFORM_COLORS: Record<string, string> = {
   facebook: "#1877F2", instagram: "#E1306C", tiktok: "#000000",
@@ -25,6 +55,8 @@ type Props = {
   bookingUrl?: string | null;
   imageUrls: string[];
   accounts: SocialAccount[];
+  initialPaid: boolean;
+  videoPrice: string;
 };
 
 const STEPS = [
@@ -164,7 +196,8 @@ function SharePanel({ videoUrl, accounts, caption, setCaption }: { videoUrl: str
   );
 }
 
-export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, initialVideoUrls, title, description, location, bookingUrl, imageUrls, accounts }: Props) {
+export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, initialVideoUrls, title, description, location, bookingUrl, imageUrls, accounts, initialPaid, videoPrice }: Props) {
+  const paid = initialPaid;
   const [status, setStatus] = useState<Status>(initialStatus);
   const [videoUrl, setVideoUrl] = useState<string | undefined>(initialVideoUrl);
   const [videoUrls, setVideoUrls] = useState<string[]>(initialVideoUrls ?? (initialVideoUrl ? [initialVideoUrl] : []));
@@ -191,6 +224,47 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, ini
 
   if (status === "ready" && videoUrl) {
     const clips = videoUrls.length > 0 ? videoUrls : [videoUrl];
+
+    // ── Locked: video generated, waiting for the €50 payment ──
+    if (!paid) {
+      return (
+        <div className="space-y-5">
+          <div className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
+            <Lock size={20} className="text-amber-600 shrink-0" />
+            <div>
+              <p className="font-semibold text-amber-900">Din video er klar — lås op for at hente</p>
+              <p className="text-sm text-amber-700">Se en forhåndsvisning nedenfor. Betal for at fjerne vandmærket og downloade.</p>
+            </div>
+          </div>
+
+          {/* Watermarked, non-downloadable preview */}
+          <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-black shadow-lg">
+            <video src={clips[0]} autoPlay loop muted playsInline className="w-full blur-[2px]" style={{ maxHeight: "480px" }} />
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/30">
+              <Lock size={30} className="text-white/90" />
+              <span className="rounded-full bg-black/50 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">Forhåndsvisning · lås op med betaling</span>
+            </div>
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <span className="rotate-[-20deg] text-3xl font-black uppercase tracking-widest text-white/15">SOME Video Post</span>
+            </div>
+          </div>
+
+          <PaymentPanel orderId={orderId} videoPrice={videoPrice} />
+
+          {/* They can prepare the caption while deciding. */}
+          <VideoSalesText
+            title={title}
+            description={description}
+            location={location}
+            bookingUrl={bookingUrl}
+            caption={caption}
+            setCaption={setCaption}
+          />
+        </div>
+      );
+    }
+
+    // ── Paid: full quality, downloadable, shareable ──
     return (
       <div className="space-y-5">
         <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4">
@@ -257,6 +331,11 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, ini
 
   return (
     <div className="space-y-6">
+      {/* Once generation is well underway, let the user pay so it unlocks the moment it's ready. */}
+      {progressPct >= 80 && !paid && (
+        <PaymentPanel orderId={orderId} videoPrice={videoPrice} nearlyReady />
+      )}
+
       <div className="rounded-2xl border border-blue-100 bg-blue-50 px-5 py-5">
         <div className="flex items-center gap-3 mb-4">
           <Loader2 size={20} className="text-blue-600 animate-spin shrink-0" />
