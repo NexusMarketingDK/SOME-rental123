@@ -119,21 +119,72 @@ export async function createVideoOrderCheckout(formData: FormData): Promise<void
     status: "processing",
   }).select("id").single();
 
-  // Start one Google Veo 2 job per image with cinematic per-room prompt
+  // Start one Google Veo 3 job per image with cinematic per-room prompt
   if (imageUrls.length >= 1 && order?.id) {
     try {
       const { startVideoGeneration } = await import("@/lib/google-video");
       const jobIds = await startVideoGeneration(imageUrls, title, roomLabels.length ? roomLabels : undefined);
-      await supabase.from("video_orders").update({
-        higgsfield_job_id: jobIds[0] ?? null,
-        higgsfield_job_ids: jobIds,
+      if (!jobIds.length) throw new Error("Ingen videojobs blev startet");
+      // If storing the job IDs fails (e.g. a schema mismatch), the order could
+      // never be polled — surface it instead of leaving it stuck "processing".
+      const { error: saveErr } = await supabase.from("video_orders").update({
+        video_job_id: jobIds[0] ?? null,
+        video_job_ids: jobIds,
       }).eq("id", order.id);
-    } catch (_e) {
-      // Generation start failed — order remains in processing state for retry
+      if (saveErr) throw new Error(`Kunne ikke gemme video-job: ${saveErr.message}`);
+    } catch (e) {
+      // Mark failed immediately so the user sees a clear error instead of a
+      // progress bar that spins for hours. The real cause (missing
+      // GEMINI_API_KEY, no Veo 3 access, quota, etc.) is logged server-side.
+      console.error("Video generation start failed:", e);
+      const msg = e instanceof Error ? e.message : String(e);
+      await supabase.from("video_orders").update({
+        status: "failed",
+        error_message: msg.slice(0, 500),
+      }).eq("id", order.id);
     }
   }
 
   redirect(`/videos/${order?.id ?? ""}?started=1`);
+}
+
+export async function createVideoPaymentCheckout(formData: FormData): Promise<void> {
+  const orderId = String(formData.get("order_id") ?? "");
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  // Verify the order belongs to the user and isn't already paid.
+  const { data: order } = await supabase
+    .from("video_orders")
+    .select("id, paid, title")
+    .eq("id", orderId)
+    .eq("user_id", user.id)
+    .single();
+  if (!order) redirect("/videos");
+  if (order.paid) redirect(`/videos/${orderId}`);
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.somevideopost.com";
+  const [locale, currency] = await Promise.all([getLocale(), getCurrency()]);
+
+  const session = await getStripe().checkout.sessions.create({
+    mode: "payment",
+    customer_email: user.email,
+    line_items: [{
+      price_data: {
+        currency,
+        product_data: { name: `Præsentationsvideo — ${order.title ?? "bolig"}` },
+        unit_amount: priceAmount("video", currency),
+      },
+      quantity: 1,
+    }],
+    success_url: `${appUrl}/videos/${orderId}?paid=1`,
+    cancel_url: `${appUrl}/videos/${orderId}`,
+    metadata: { user_id: user.id, type: "video_payment", order_id: orderId },
+    locale,
+  });
+
+  redirect(session.url!);
 }
 
 export async function createBillingPortalSession(): Promise<void> {

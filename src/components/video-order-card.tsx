@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Loader2, Clock, XCircle, Trash2, ArrowRight, Download, Share2, RefreshCw, AlertTriangle } from "lucide-react";
+import { CheckCircle2, Loader2, Clock, XCircle, Trash2, ArrowRight, Download, Share2, RefreshCw, AlertTriangle, Lock } from "lucide-react";
 import { deleteVideoOrder, restartVideoOrder } from "@/services/video-orders";
 
 const MAX_PROCESSING_SEC = 60 * 60; // 60 minutes before showing timeout warning
@@ -15,6 +15,7 @@ type Order = {
   created_at: string;
   video_url: string | null;
   image_urls: string[] | null;
+  paid?: boolean | null;
 };
 
 function useElapsed(createdAt: string, active: boolean) {
@@ -217,7 +218,7 @@ export function VideoOrderCard({ order }: { order: Order }) {
         onRestart={handleRestart}
       />
 
-      {order.status === "ready" && order.video_url && (
+      {order.status === "ready" && order.video_url && order.paid && (
         <div className="mt-4">
           <video src={order.video_url} controls className="w-full max-w-sm rounded-lg border border-slate-100" />
           <div className="mt-3 flex gap-3">
@@ -235,6 +236,18 @@ export function VideoOrderCard({ order }: { order: Order }) {
               <Share2 size={13} /> Del på sociale medier
             </Link>
           </div>
+        </div>
+      )}
+
+      {order.status === "ready" && order.video_url && !order.paid && (
+        <div className="mt-4">
+          <Link
+            href={`/videos/${order.id}`}
+            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-white transition-opacity hover:opacity-90"
+            style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
+          >
+            <Lock size={13} /> Se & lås op
+          </Link>
         </div>
       )}
 

@@ -1,24 +1,23 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Check, X, Sparkles, Zap, Building2, CreditCard, Video } from "lucide-react";
+import { Check, Sparkles, CreditCard, Video, Wand2, Share2 } from "lucide-react";
 import { getCurrency } from "@/lib/locale-server";
-import { formatPriceKey } from "@/lib/currency";
+import { formatPriceKey, MONTHLY_POST_CREDITS } from "@/lib/currency";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
-import { MetaAdsSection } from "@/components/meta-ads-section";
 
 export const metadata: Metadata = {
   title: "Priser — SOME VIDEO POST | AI-video og sociale medier til udlejere",
   description:
-    "Se priser for somevideopost.com. Tre pakker fra €50/md. med præsentationsvideoer inkluderet, direkte deling til sociale medier og Meta-annoncering på Business. Ingen binding.",
+    "Enkel pris for somevideopost.com: €10/md. for studie-adgang med AI-opslag og direkte deling til sociale medier, og €50 pr. præsentationsvideo — betal kun for de videoer, du bruger. Ingen binding.",
   keywords:
-    "somevideopost priser, AI video pris, sociale medier udlejning abonnement, feriebolig markedsføring pris, meta annoncering pris",
+    "somevideopost priser, AI video pris, sociale medier udlejning, feriebolig markedsføring pris, præsentationsvideo pris",
   alternates: { canonical: "https://www.somevideopost.com/priser" },
   openGraph: {
     title: "Priser — SOME VIDEO POST",
     description:
-      "Tre pakker fra €50/md. med præsentationsvideoer inkluderet og direkte deling til sociale medier. Ingen binding.",
+      "€10/md. for studie-adgang med AI-opslag og direkte deling, og €50 pr. præsentationsvideo. Betal kun for det, du bruger. Ingen binding.",
     type: "website",
     siteName: "somevideopost.com",
     url: "https://www.somevideopost.com/priser",
@@ -26,33 +25,6 @@ export const metadata: Metadata = {
 };
 
 const ORANGE_GRADIENT = "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)";
-
-const FEATURES: { label: string; starter: string | boolean; pro: string | boolean; business: string | boolean }[] = [
-  { label: "Præsentationsvideoer inkluderet pr. måned", starter: "1", pro: "2", business: "6" },
-  { label: "Del opslag direkte på sociale medier", starter: true, pro: true, business: true },
-  { label: "Generér SOME opslag (AI)", starter: true, pro: true, business: true },
-  { label: "Download i alle formater", starter: true, pro: true, business: true },
-  { label: "Forbind Facebook / Instagram-konto", starter: true, pro: true, business: true },
-  { label: "Blog & guides", starter: true, pro: true, business: true },
-  { label: "Planlæg opslag", starter: false, pro: true, business: true },
-  { label: "Analytics", starter: false, pro: true, business: true },
-  { label: "Flere brands / projekter", starter: false, pro: true, business: true },
-  { label: "Ekstra præsentationsvideo (tilkøb)", starter: "€50/stk.", pro: "€50/stk.", business: "€50/stk." },
-  { label: "Meta-integration for annoncering", starter: false, pro: false, business: true },
-  { label: "Flere brugere / teamadgang", starter: false, pro: false, business: true },
-  { label: "Prioriteret support", starter: false, pro: false, business: true },
-];
-
-function Tick({ value }: { value: string | boolean }) {
-  if (typeof value === "string") {
-    return <span className="text-sm font-semibold text-white">{value}</span>;
-  }
-  return value ? (
-    <Check size={16} className="mx-auto text-emerald-400" strokeWidth={2.5} />
-  ) : (
-    <X size={16} className="mx-auto text-slate-600" strokeWidth={2} />
-  );
-}
 
 function CheckItem({ children }: { children: React.ReactNode }) {
   return (
@@ -65,10 +37,9 @@ function CheckItem({ children }: { children: React.ReactNode }) {
 
 export default async function PriserPage() {
   const currency = await getCurrency();
-  const starterPrice = formatPriceKey("starter", currency);
-  const proPrice = formatPriceKey("pro", currency);
-  const businessPrice = formatPriceKey("business", currency);
+  const subscriptionPrice = formatPriceKey("subscription", currency);
   const videoPrice = formatPriceKey("video", currency);
+  const postPrice = formatPriceKey("aiPost", currency, { decimals: true });
 
   return (
     <div className="min-h-screen text-slate-100" style={{ background: "#050d24" }}>
@@ -80,99 +51,41 @@ export default async function PriserPage() {
         <div className="pointer-events-none absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full border border-blue-400/20" style={{ boxShadow: "0 0 80px rgba(59,130,246,0.2)" }} />
         <div className="relative mx-auto max-w-4xl px-6 py-16 text-center">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-400/25 bg-blue-500/10 px-4 py-1.5 text-xs font-semibold text-blue-200">
-            <CreditCard size={13} /> Gennemsigtige priser
+            <CreditCard size={13} /> Enkel, gennemsigtig pris
           </div>
           <h1 className="text-3xl font-bold text-white sm:text-4xl md:text-5xl">
-            Vælg den pakke der passer til dig
+            Betal kun for det, du bruger
           </h1>
           <p className="mt-4 text-base text-slate-300 max-w-xl mx-auto">
-            Alle pakker inkluderer direkte deling til sociale medier og et fast antal præsentationsvideoer hver måned. Ingen skjulte gebyrer, ingen binding.
+            Studie-adgang for {subscriptionPrice}/md. giver dig AI-opslag og direkte deling til sociale medier. Præsentationsvideoer betaler du pr. styk — {videoPrice} — så du kun betaler for de videoer, du faktisk laver. Ingen binding.
           </p>
         </div>
       </div>
 
-      <div className="mx-auto max-w-6xl px-6 py-16 space-y-16">
+      <div className="mx-auto max-w-5xl px-6 py-16 space-y-16">
 
-        {/* How it works */}
-        <div className="rounded-2xl border border-blue-400/20 bg-blue-500/[0.06] p-6 md:p-8 backdrop-blur-sm">
-          <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/15">
-              <Sparkles size={20} className="text-blue-300" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-lg font-bold text-white mb-1">Sådan fungerer det</h2>
-              <p className="text-sm text-slate-300 leading-relaxed max-w-2xl">
-                Vælg en månedlig pakke der passer til, hvor meget du deler. Hver pakke inkluderer et fast antal AI-præsentationsvideoer om måneden og giver dig mulighed for at dele opslag direkte på dine sociale medier. Har du brug for flere videoer, kan du tilkøbe dem for {videoPrice}/stk.
-              </p>
-              <div className="mt-4 flex flex-wrap gap-3">
-                {[
-                  { label: "Starter", credits: "1 video/md." },
-                  { label: "Pro", credits: "2 videoer/md." },
-                  { label: "Business", credits: "6 videoer/md." },
-                  { label: "Ekstra video", credits: `${videoPrice}/stk.` },
-                ].map((item) => (
-                  <div key={item.label} className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-                    <span className="text-xs font-semibold text-white">{item.label}</span>
-                    <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-bold text-blue-200">{item.credits}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Pricing cards */}
+        <div className="grid items-start gap-6 md:grid-cols-2">
 
-        {/* Plan cards */}
-        <div className="grid items-start gap-6 md:grid-cols-3">
-
-          {/* Starter */}
-          <div className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-sm">
-            <div className="mb-2 inline-flex w-fit items-center gap-2 rounded-lg bg-blue-500/15 px-2.5 py-1 text-xs font-semibold text-blue-300">
-              <Zap size={12} /> Starter
-            </div>
-            <div className="mt-4 flex items-baseline gap-1">
-              <span className="text-4xl font-extrabold text-white">{starterPrice}</span>
-              <span className="text-slate-400 text-sm">/md.</span>
-            </div>
-            <p className="mt-1 text-xs text-slate-500">Faktureres månedligt · inkl. moms</p>
-            <p className="mt-3 text-sm text-slate-300">Kom i gang med direkte deling til sociale medier og din første video hver måned.</p>
-            <ul className="my-6 flex flex-col gap-2.5">
-              <CheckItem><strong className="text-white">1 præsentationsvideo</strong> pr. måned inkluderet</CheckItem>
-              <CheckItem>Del opslag direkte på sociale medier</CheckItem>
-              <CheckItem>AI-generering af SOME opslag</CheckItem>
-              <CheckItem>Download i alle formater</CheckItem>
-              <CheckItem>Op til 5 boliger</CheckItem>
-            </ul>
-            <div className="mt-auto">
-              <Link
-                href="/signup"
-                className="block w-full rounded-xl border border-white/20 py-3 text-center text-sm font-bold text-slate-200 transition-colors hover:border-blue-400/50 hover:text-white"
-              >
-                Kom i gang gratis
-              </Link>
-            </div>
-          </div>
-
-          {/* Pro — most popular */}
+          {/* Studio access — subscription */}
           <div className="relative flex flex-col rounded-2xl border border-blue-400/50 bg-white/[0.05] p-8 shadow-[0_0_45px_rgba(59,130,246,0.25)] backdrop-blur-sm">
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-              <span className="rounded-full px-4 py-1 text-xs font-bold text-white whitespace-nowrap" style={{ background: ORANGE_GRADIENT }}>Mest populær</span>
-            </div>
             <div className="mb-2 inline-flex w-fit items-center gap-2 rounded-lg bg-blue-500/15 px-2.5 py-1 text-xs font-semibold text-blue-300">
-              <Sparkles size={12} /> Pro
+              <Sparkles size={12} /> Studie-adgang
             </div>
             <div className="mt-4 flex items-baseline gap-1">
-              <span className="text-4xl font-extrabold text-white">{proPrice}</span>
+              <span className="text-4xl font-extrabold text-white">{subscriptionPrice}</span>
               <span className="text-slate-400 text-sm">/md.</span>
             </div>
-            <p className="mt-1 text-xs text-slate-500">Faktureres månedligt · inkl. moms</p>
-            <p className="mt-3 text-sm text-slate-300">Til den aktive udlejer der deler mere og vil have overblik og indsigt.</p>
+            <p className="mt-1 text-xs text-slate-500">Faktureres månedligt · ingen binding</p>
+            <p className="mt-3 text-sm text-slate-300">
+              Adgang til hele studiet: generér AI-opslag og del dem direkte på dine sociale medier.
+            </p>
             <ul className="my-6 flex flex-col gap-2.5">
-              <CheckItem><strong className="text-white">2 præsentationsvideoer</strong> pr. måned inkluderet</CheckItem>
-              <CheckItem>Alt i Starter</CheckItem>
-              <CheckItem>Del direkte på alle kanaler</CheckItem>
-              <CheckItem>Planlægning af opslag</CheckItem>
-              <CheckItem>Analytics og indsigt</CheckItem>
-              <CheckItem>Flere brands / projekter</CheckItem>
+              <CheckItem><strong className="text-white">{MONTHLY_POST_CREDITS} AI-opslag</strong> inkluderet hver måned ({postPrice}/opslag)</CheckItem>
+              <CheckItem>Del opslag direkte på Facebook & Instagram</CheckItem>
+              <CheckItem>Alle studie-værktøjer og downloads i alle formater</CheckItem>
+              <CheckItem>Opret præsentationsvideoer (betales pr. styk)</CheckItem>
+              <CheckItem>Blog, guides og løbende nye funktioner</CheckItem>
             </ul>
             <div className="mt-auto">
               <Link
@@ -180,28 +93,30 @@ export default async function PriserPage() {
                 className="block w-full rounded-xl py-3 text-center text-sm font-bold text-white shadow-[0_0_20px_rgba(59,130,246,0.35)] transition-opacity hover:opacity-90"
                 style={{ background: "linear-gradient(135deg, #1e4f9a, #4d8dff)" }}
               >
-                Vælg Pro
+                Kom i gang
               </Link>
             </div>
           </div>
 
-          {/* Business */}
+          {/* Presentation video — pay per use */}
           <div className="flex flex-col rounded-2xl border border-orange-500/25 bg-orange-500/[0.06] p-8 backdrop-blur-sm">
             <div className="mb-2 inline-flex w-fit items-center gap-2 rounded-lg bg-orange-500/15 px-2.5 py-1 text-xs font-semibold text-orange-400">
-              <Building2 size={12} /> Business
+              <Video size={12} /> Præsentationsvideo
             </div>
             <div className="mt-4 flex items-baseline gap-1">
-              <span className="text-4xl font-extrabold text-white">{businessPrice}</span>
-              <span className="text-slate-400 text-sm">/md.</span>
+              <span className="text-4xl font-extrabold text-white">{videoPrice}</span>
+              <span className="text-slate-400 text-sm">/ stk.</span>
             </div>
-            <p className="mt-1 text-xs text-slate-500">Alt inkluderet · prioriteret support</p>
-            <p className="mt-3 text-sm text-slate-300">Den komplette løsning med annoncering via Meta og prioriteret support.</p>
+            <p className="mt-1 text-xs text-slate-500">Betaling pr. brug · ingen abonnement på video</p>
+            <p className="mt-3 text-sm text-slate-300">
+              En cinematisk AI-genereret præsentationsvideo af din bolig — betal kun, når du bruger den.
+            </p>
             <ul className="my-6 flex flex-col gap-2.5">
-              <CheckItem><strong className="text-white">6 præsentationsvideoer</strong> pr. måned inkluderet</CheckItem>
-              <CheckItem>Alt inkluderet — alt i Pro</CheckItem>
-              <CheckItem>Meta-integration for annoncering</CheckItem>
-              <CheckItem>Prioriteret support</CheckItem>
-              <CheckItem>Team og flere brugere</CheckItem>
+              <CheckItem><strong className="text-white">{videoPrice} pr. video</strong> — ingen binding, ingen skjulte gebyrer</CheckItem>
+              <CheckItem>Indsæt et annonce-link — AI&apos;en bygger videoen for dig</CheckItem>
+              <CheckItem>Cinematisk 9:16-video klar til Reels & TikTok</CheckItem>
+              <CheckItem>Se en forhåndsvisning, betal først når du er tilfreds</CheckItem>
+              <CheckItem>Download og del direkte, når videoen er låst op</CheckItem>
             </ul>
             <div className="mt-auto">
               <Link
@@ -209,55 +124,30 @@ export default async function PriserPage() {
                 className="block w-full rounded-xl py-3 text-center text-sm font-bold text-white transition-opacity hover:opacity-90"
                 style={{ background: ORANGE_GRADIENT }}
               >
-                Vælg Business
+                Opret din første video
               </Link>
             </div>
           </div>
         </div>
 
-        {/* Extra video add-on */}
-        <div className="-mt-6 flex flex-col items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-5 backdrop-blur-sm sm:flex-row">
-          <div className="flex items-center gap-4">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-500/15 text-orange-400">
-              <Video size={20} />
-            </div>
-            <div>
-              <p className="font-semibold text-white">Ekstra præsentationsvideo</p>
-              <p className="text-sm text-slate-400">Brug for flere videoer end din pakke inkluderer? Tilkøb efter behov.</p>
-            </div>
+        {/* How it works */}
+        <div className="rounded-2xl border border-blue-400/20 bg-blue-500/[0.06] p-6 md:p-8 backdrop-blur-sm">
+          <h2 className="text-lg font-bold text-white mb-6">Sådan fungerer det</h2>
+          <div className="grid gap-6 sm:grid-cols-3">
+            {[
+              { icon: Sparkles, title: "1 · Tegn studie-adgang", desc: `For ${subscriptionPrice}/md. får du adgang til studiet og ${MONTHLY_POST_CREDITS} AI-opslag hver måned.` },
+              { icon: Wand2, title: "2 · Lav opslag og videoer", desc: `Generér opslag inkluderet i din adgang, og lav præsentationsvideoer for ${videoPrice}/stk. efter behov.` },
+              { icon: Share2, title: "3 · Del direkte", desc: "Del opslag og videoer direkte på Facebook og Instagram fra dashboardet." },
+            ].map((step) => (
+              <div key={step.title} className="flex flex-col gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/15">
+                  <step.icon size={20} className="text-blue-300" />
+                </div>
+                <p className="text-sm font-bold text-white">{step.title}</p>
+                <p className="text-sm leading-relaxed text-slate-400">{step.desc}</p>
+              </div>
+            ))}
           </div>
-          <p className="text-2xl font-extrabold text-white whitespace-nowrap">{videoPrice} <span className="text-sm font-normal text-slate-400">/ stk.</span></p>
-        </div>
-
-        {/* Meta advertising (Business) */}
-        <MetaAdsSection />
-
-        {/* Feature comparison table */}
-        <div>
-          <h2 className="text-xl font-bold text-white mb-6">Sammenlign pakker</h2>
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/10">
-                  <th className="py-4 pl-6 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400 w-1/2">Funktion</th>
-                  <th className="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-300">Starter</th>
-                  <th className="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider text-blue-300">Pro</th>
-                  <th className="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider text-orange-400">Business</th>
-                </tr>
-              </thead>
-              <tbody>
-                {FEATURES.map((f, i) => (
-                  <tr key={f.label} className={i % 2 === 0 ? "bg-transparent" : "bg-white/[0.02]"}>
-                    <td className="py-3 pl-6 pr-4 text-slate-300">{f.label}</td>
-                    <td className="px-4 py-3 text-center"><Tick value={f.starter} /></td>
-                    <td className="px-4 py-3 text-center"><Tick value={f.pro} /></td>
-                    <td className="px-4 py-3 text-center"><Tick value={f.business} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="mt-3 text-xs text-slate-500">Meta-integration for annoncering (Business) kræver en godkendt Meta Business-konto og er underlagt Metas API-begrænsninger.</p>
         </div>
 
         {/* FAQ */}
@@ -266,28 +156,28 @@ export default async function PriserPage() {
           <div className="grid gap-6 md:grid-cols-2">
             {[
               {
-                q: "Hvor mange videoer er inkluderet?",
-                a: `Starter inkluderer 1 præsentationsvideo om måneden, Pro inkluderer 2, og Business inkluderer 6. Har du brug for flere, tilkøber du dem for ${videoPrice}/stk.`,
+                q: "Hvad er inkluderet i studie-adgangen?",
+                a: `Studie-adgang for ${subscriptionPrice}/md. giver dig ${MONTHLY_POST_CREDITS} AI-opslag om måneden, direkte deling til sociale medier og alle studiets værktøjer. Præsentationsvideoer betales særskilt pr. styk.`,
+              },
+              {
+                q: "Hvad koster en præsentationsvideo?",
+                a: `En præsentationsvideo koster ${videoPrice} pr. styk. Du betaler kun for de videoer, du laver — der er intet abonnement på video.`,
+              },
+              {
+                q: "Hvornår betaler jeg for en video?",
+                a: "Du kan se en forhåndsvisning, mens videoen bygges, og betaler først, når du vil låse den fulde video op til download og deling. Uploadede videoer koster ingenting.",
               },
               {
                 q: "Kan jeg dele direkte på sociale medier?",
-                a: "Ja. Alle pakker giver dig mulighed for at dele opslag direkte på dine sociale medier fra dashboardet.",
+                a: "Ja. Med studie-adgang deler du opslag og videoer direkte på Facebook og Instagram fra dashboardet.",
               },
               {
-                q: "Hvad koster en ekstra præsentationsvideo?",
-                a: `En ekstra præsentationsvideo koster ${videoPrice} pr. styk, ud over det din pakke inkluderer hver måned.`,
-              },
-              {
-                q: "Kan jeg skifte pakke?",
-                a: "Ja, du kan opgradere eller nedgradere din pakke når som helst. Ændringen træder i kraft ved næste faktureringsperiode.",
-              },
-              {
-                q: "Hvad er Meta-integration for annoncering?",
-                a: "Business-pakken giver adgang til Meta Marketing API, så du kan bruge dine videoer og opslag til rigtige annoncekampagner på Facebook og Instagram — med målgruppestyring, retargeting og annonceindsigt, sammen med prioriteret support.",
+                q: "Hvad sker der, når mine månedlige opslag er brugt?",
+                a: `Din adgang giver ${MONTHLY_POST_CREDITS} AI-opslag om måneden. Saldoen fyldes automatisk op hver måned, så længe dit abonnement er aktivt.`,
               },
               {
                 q: "Er der binding?",
-                a: "Nej. Alle pakker er månedlige uden binding. Du kan opsige når som helst, og adgang fortsætter til slutningen af den betalte periode.",
+                a: "Nej. Studie-adgangen er månedlig uden binding, og du kan opsige når som helst. Videoer betaler du kun for, når du bruger dem.",
               },
             ].map((item) => (
               <div key={item.q}>

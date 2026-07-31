@@ -45,7 +45,7 @@ export function SiteHeader({ active, locale = "da" }: { active?: NavKey; locale?
           <LanguageSwitcher current={locale} />
           <Link href="/login" className="hidden sm:inline text-sm font-medium text-slate-300 hover:text-white transition-colors">Log ind</Link>
           <Link href="/signup" className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ background: ORANGE_GRADIENT }}>
-            Kom i gang gratis
+            Kom i gang
           </Link>
           <MobileNav
             dark

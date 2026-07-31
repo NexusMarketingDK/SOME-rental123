@@ -5,13 +5,12 @@ import {
   TrendingUp, Play, Globe, Link2,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
-import { LANDING, LOCALE_FLAGS, LOCALE_LABELS, LOCALE_PATHS, LOCALES } from "@/lib/i18n";
-import { currencyForLocale, formatPriceKey, priceAmount } from "@/lib/currency";
-import { JsonLd } from "@/components/seo/json-ld";
-import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
+import { LANDING, LOCALE_PATHS } from "@/lib/i18n";
+import { currencyForLocale, formatPriceKey } from "@/lib/currency";
+import { DemoPhoneSwitcher } from "@/components/demo-phone-switcher";
 import { WorkflowDemo } from "@/components/workflow-demo";
 import { MobileNav } from "@/components/layout/mobile-nav";
-import { PresentationVideo } from "@/components/presentation-video";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 
 /* Shared brand tokens for the midnight-blue design */
 const ORANGE_GRADIENT = "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)";
@@ -213,81 +212,12 @@ function Testimonial({ name, role, quote }: { name: string; role: string; quote:
   );
 }
 
-function LanguageSwitcher({ current }: { current: Locale }) {
-  return (
-    <div className="relative group">
-      <button className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300 hover:border-blue-400/40 hover:text-white transition-colors">
-        <Globe size={12} />
-        <span>{LOCALE_FLAGS[current]} {LOCALE_LABELS[current]}</span>
-        <span className="text-slate-500">▾</span>
-      </button>
-      <div className="absolute right-0 top-full mt-1 hidden group-hover:block z-50 min-w-[140px] rounded-xl border border-white/10 bg-[#0a1430] shadow-xl shadow-black/40 py-1">
-        {LOCALES.map((loc) => (
-          <a
-            key={loc}
-            href={LOCALE_PATHS[loc]}
-            className={`flex items-center gap-2 px-3 py-2 text-xs hover:bg-white/5 transition-colors ${loc === current ? "font-semibold text-blue-300" : "text-slate-300"}`}
-          >
-            <span>{LOCALE_FLAGS[loc]}</span>
-            <span>{LOCALE_LABELS[loc]}</span>
-            {loc === current && <span className="ml-auto text-blue-300">✓</span>}
-          </a>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.somevideopost.com";
-
 export function LandingPage({ locale }: { locale: Locale }) {
   const t = LANDING[locale];
   const currency = currencyForLocale(locale);
-  const pageUrl = locale === "da" ? BASE : `${BASE}${LOCALE_PATHS[locale]}`;
-  const priceCurrency = currency.toUpperCase();
-  const starterPrice = (priceAmount("starter", currency) / 100).toFixed(2);
-
-  // Structured data for rich results: who we are, the site, and the product.
-  const structuredData = [
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "@id": `${BASE}/#organization`,
-      name: "somevideopost.com",
-      url: BASE,
-      logo: { "@type": "ImageObject", url: `${BASE}/opengraph-image` },
-      email: "mail@somevideopost.com",
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "@id": `${BASE}/#website`,
-      name: "somevideopost.com",
-      url: BASE,
-      inLanguage: locale,
-      publisher: { "@id": `${BASE}/#organization` },
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      name: "SOME VIDEO POST",
-      applicationCategory: "BusinessApplication",
-      operatingSystem: "Web",
-      url: pageUrl,
-      description: t.heroSub,
-      offers: {
-        "@type": "Offer",
-        price: starterPrice,
-        priceCurrency,
-        availability: "https://schema.org/InStock",
-      },
-      publisher: { "@id": `${BASE}/#organization` },
-    },
-  ];
 
   return (
     <div className="flex min-h-screen flex-col text-slate-100" style={{ background: PAGE_BG }}>
-      <JsonLd data={structuredData} />
 
       {/* ── Nav ── */}
       <header className="sticky top-0 z-50 border-b border-white/10 backdrop-blur" style={{ background: "rgba(5,13,36,0.9)" }}>
@@ -438,9 +368,9 @@ export function LandingPage({ locale }: { locale: Locale }) {
             <div className="flex justify-center">
               <div className="relative">
                 <div className="absolute inset-0 scale-90 rounded-[2.5rem] opacity-40 blur-2xl" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }} />
-                {/* Interactive cinematic walkthrough prototype (canvas Ken Burns tour) */}
+                {/* Toggle between the real sample video and the interactive tour */}
                 <div className="relative mx-auto w-full max-w-[300px] md:max-w-[340px]">
-                  <CinematicWalkthrough locale={locale} />
+                  <DemoPhoneSwitcher locale={locale} label={t.aiTitle1} startAt={6} />
                 </div>
                 <div className="absolute -right-8 top-12 rounded-xl border border-blue-400/30 bg-blue-500/10 px-3 py-2 backdrop-blur-md shadow-[0_0_20px_rgba(59,130,246,0.2)]">
                   <p className="text-[10px] font-semibold text-white">9:16 format</p>
@@ -552,94 +482,43 @@ export function LandingPage({ locale }: { locale: Locale }) {
             <h2 className="text-3xl font-bold text-white md:text-4xl">{t.priceTitle}</h2>
             <p className="mt-3 text-slate-400">{t.priceSub}</p>
           </div>
-          <div className="grid items-start gap-6 md:grid-cols-3">
-            {/* Starter */}
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-sm">
+          <div className="mx-auto grid max-w-3xl items-start gap-6 md:grid-cols-2">
+            {/* Studio access — subscription */}
+            <div className="relative rounded-2xl border border-blue-400/50 bg-white/[0.05] p-8 shadow-[0_0_45px_rgba(59,130,246,0.25)] backdrop-blur-sm">
               <div className="mb-2 inline-flex items-center gap-2 rounded-lg bg-blue-500/15 px-2.5 py-1 text-xs font-semibold text-blue-300">
-                <Zap size={12} /> {t.plan1Name}
+                <Sparkles size={12} /> {t.plan1Name}
               </div>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-white">{formatPriceKey("starter", currency)}</span>
+                <span className="text-4xl font-bold text-white">{formatPriceKey("subscription", currency)}</span>
                 <span className="text-slate-400">{t.perMonth}</span>
               </div>
               <p className="text-xs text-slate-500">incl. VAT</p>
               <ul className="my-7 flex flex-col gap-2.5">
                 {t.plan1Items.map((item) => <Check key={item}>{item}</Check>)}
               </ul>
-              <Link href="/signup" className="block w-full rounded-xl border border-white/20 py-3 text-center text-sm font-bold text-slate-200 transition-colors hover:border-blue-400/50 hover:text-white">
+              <Link href="/signup" className="block w-full rounded-xl py-3 text-center text-sm font-bold text-white shadow-[0_0_20px_rgba(59,130,246,0.35)] transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #1e4f9a, #4d8dff)" }}>
                 {t.startFreeBtn}
               </Link>
             </div>
 
-            {/* Pro — most popular */}
-            <div className="relative rounded-2xl border border-blue-400/50 bg-white/[0.05] p-8 shadow-[0_0_45px_rgba(59,130,246,0.25)] backdrop-blur-sm">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                <span className="rounded-full px-4 py-1 text-xs font-bold text-white whitespace-nowrap" style={{ background: ORANGE_GRADIENT }}>{t.mostPopular}</span>
-              </div>
-              <div className="mb-2 inline-flex items-center gap-2 rounded-lg bg-blue-500/15 px-2.5 py-1 text-xs font-semibold text-blue-300">
-                <Sparkles size={12} /> {t.plan2Name}
+            {/* Presentation video — pay per use */}
+            <div className="rounded-2xl border border-orange-500/25 bg-orange-500/[0.06] p-8 backdrop-blur-sm">
+              <div className="mb-2 inline-flex items-center gap-2 rounded-lg bg-orange-500/15 px-2.5 py-1 text-xs font-semibold text-orange-400">
+                <Video size={12} /> {t.plan2Name}
               </div>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-white">{formatPriceKey("pro", currency)}</span>
-                <span className="text-slate-400">{t.perMonth}</span>
+                <span className="text-4xl font-bold text-white">{formatPriceKey("video", currency)}</span>
+                <span className="text-slate-400">{t.videoAddonPer}</span>
               </div>
-              <p className="text-xs text-slate-500">incl. VAT</p>
+              <p className="text-xs text-slate-500">{t.plan2PayLabel}</p>
               <ul className="my-7 flex flex-col gap-2.5">
                 {t.plan2Items.map((item) => <Check key={item}>{item}</Check>)}
               </ul>
-              <Link href="/signup" className="block w-full rounded-xl py-3 text-center text-sm font-bold text-white shadow-[0_0_20px_rgba(59,130,246,0.35)] transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #1e4f9a, #4d8dff)" }}>
+              <Link href="/signup" className="block w-full rounded-xl py-3 text-center text-sm font-bold text-white transition-opacity hover:opacity-90" style={{ background: ORANGE_GRADIENT }}>
                 {t.planProCta}
               </Link>
             </div>
-
-            {/* Business */}
-            <div className="rounded-2xl border border-orange-500/25 bg-orange-500/[0.06] p-8 backdrop-blur-sm">
-              <div className="mb-2 inline-flex items-center gap-2 rounded-lg bg-orange-500/15 px-2.5 py-1 text-xs font-semibold text-orange-400">
-                <Sparkles size={12} /> {t.plan3Name}
-              </div>
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-white">{formatPriceKey("business", currency)}</span>
-                <span className="text-slate-400">{t.perMonth}</span>
-              </div>
-              <p className="text-xs text-slate-500">incl. VAT</p>
-              <ul className="my-7 flex flex-col gap-2.5">
-                {t.plan3Items.map((item) => <Check key={item}>{item}</Check>)}
-              </ul>
-              <Link href="/priser" className="block w-full rounded-xl py-3 text-center text-sm font-bold text-white transition-opacity hover:opacity-90" style={{ background: ORANGE_GRADIENT }}>
-                {t.plan3OrderBtn}
-              </Link>
-            </div>
           </div>
-
-          {/* Extra video add-on */}
-          <div className="mt-6 flex flex-col items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-4 backdrop-blur-sm sm:flex-row">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/15 text-orange-400">
-                <Video size={18} />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-white">{t.videoAddonLabel}</p>
-                <p className="text-xs text-slate-400">{t.videoAddonSub}</p>
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-white">{formatPriceKey("video", currency)} <span className="text-sm font-normal text-slate-400">{t.videoAddonPer}</span></p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Product presentation video ── */}
-      <section className="relative overflow-hidden py-24" style={{ background: "#071130" }}>
-        <div className="pointer-events-none absolute -left-40 top-10 h-96 w-96 rounded-full bg-blue-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute -right-40 bottom-10 h-96 w-96 rounded-full bg-orange-400/10 blur-3xl" />
-        <div className="relative mx-auto max-w-4xl px-6">
-          <div className="mb-10 text-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-400/25 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-100">
-              <Play size={11} className="text-orange-300" /> {t.presentationBadge}
-            </div>
-            <h2 className="text-3xl font-bold text-white md:text-4xl">{t.presentationTitle}</h2>
-            <p className="mx-auto mt-3 max-w-xl text-slate-400">{t.presentationSub}</p>
-          </div>
-          <PresentationVideo />
         </div>
       </section>
 

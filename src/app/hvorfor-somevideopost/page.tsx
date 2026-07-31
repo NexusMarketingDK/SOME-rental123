@@ -173,7 +173,7 @@ export default function WhySomeVideoPostPage() {
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link href="/signup" className="inline-flex items-center justify-center gap-2 rounded-xl px-7 py-3.5 text-sm font-bold text-white shadow-[0_0_30px_rgba(255,107,74,0.35)] transition-opacity hover:opacity-90" style={{ background: ORANGE_GRADIENT }}>
-                  Start gratis i dag <ArrowRight size={16} />
+                  Kom i gang i dag <ArrowRight size={16} />
                 </Link>
                 <Link href="/priser" className="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-400/40 px-7 py-3.5 text-sm font-medium text-white hover:bg-blue-500/10 transition-colors">
                   Se priser
@@ -352,7 +352,7 @@ export default function WhySomeVideoPostPage() {
                 det, hvor du vil.
               </p>
               <Link href="/signup" className="mt-6 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold text-white shadow-[0_0_20px_rgba(59,130,246,0.35)] transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #1e4f9a, #4d8dff)" }}>
-                Prøv gratis <ArrowRight size={15} />
+                Kom i gang <ArrowRight size={15} />
               </Link>
             </div>
             <div className="grid grid-cols-3 gap-4">
@@ -422,7 +422,7 @@ export default function WhySomeVideoPostPage() {
             Gå fra boliglink til færdig video og opslag på minutter. Pakker fra €50/md. med præsentationsvideoer inkluderet.
           </p>
           <Link href="/signup" className="mt-8 inline-flex items-center gap-2 rounded-xl px-8 py-4 text-base font-bold text-white shadow-[0_0_35px_rgba(255,107,74,0.4)] transition-opacity hover:opacity-90" style={{ background: ORANGE_GRADIENT }}>
-            Start gratis i dag <ArrowRight size={18} />
+            Kom i gang i dag <ArrowRight size={18} />
           </Link>
           <p className="mt-4 text-sm text-slate-400">
             Vil du læse mere? Se vores <Link href="/blog" className="text-blue-300 underline-offset-2 hover:underline">blog & guides</Link> eller <Link href="/priser" className="text-blue-300 underline-offset-2 hover:underline">priser</Link>.

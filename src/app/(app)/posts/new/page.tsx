@@ -59,7 +59,7 @@ const BENEFITS = [
   "AI-genereret tekst tilpasset platformen",
   "Henter billeder direkte fra annoncen",
   "Henter titel, pris, størrelse og beliggenhed",
-  "De første 5 opslag er gratis",
+  "5 kr. pr. opslag fra din månedlige saldo",
 ];
 
 type Account = Awaited<ReturnType<typeof getSocialAccounts>>[number];
@@ -80,7 +80,6 @@ export default function GeneratePostPage() {
   const [generateError, setGenerateError] = useState("");
   const [generatedText, setGeneratedText] = useState("");
   const [noCredits, setNoCredits] = useState(false);
-  const [wasFree, setWasFree] = useState(false);
 
   // Text editing
   const [editingText, setEditingText] = useState(false);
@@ -143,7 +142,6 @@ export default function GeneratePostPage() {
     if (json.error === "no_credits") { setNoCredits(true); return; }
     if (json.error || !json.text) { setGenerateError(json.error ?? "Generering fejlede."); return; }
     setGeneratedText(json.text);
-    setWasFree(json.wasFree ?? false);
     setEditingText(false);
   }
 
@@ -170,7 +168,6 @@ export default function GeneratePostPage() {
     if (json.error === "no_credits") { setNoCredits(true); return; }
     if (json.error || !json.text) { setGenerateError(json.error ?? "Generering fejlede."); return; }
     setGeneratedText(json.text);
-    setWasFree(json.wasFree ?? false);
     setEditingText(false);
   }
 
@@ -195,7 +192,7 @@ export default function GeneratePostPage() {
       {/* Info banner */}
       <div className="border-b border-orange-100 bg-orange-50 px-4 py-2.5 md:px-8 md:py-3">
         <p className="text-sm text-orange-800">
-          <span className="font-semibold">De første 5 opslag er gratis.</span> Derefter 0,5 credit/opslag. Min. køb 100 kr.
+          <span className="font-semibold">5 kr. pr. opslag</span> — trækkes fra din månedlige saldo (abonnement €10/md).
         </p>
       </div>
 
@@ -237,10 +234,9 @@ export default function GeneratePostPage() {
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Priser</p>
                 <div className="space-y-2">
                   {[
-                    { label: "5 første opslag", price: "Gratis" },
-                    { label: "Opslag (tekst + billede)", price: "0,5 credit" },
-                    { label: "Video", price: "1 credit" },
-                    { label: "Min. køb", price: "100 kr." },
+                    { label: "Abonnement", price: "€10 / md" },
+                    { label: "Pr. opslag", price: "5 kr." },
+                    { label: "Præsentationsvideo", price: "€50" },
                   ].map((row) => (
                     <div key={row.label} className="flex items-center justify-between text-sm">
                       <span className="text-slate-600">{row.label}</span>
@@ -248,8 +244,9 @@ export default function GeneratePostPage() {
                     </div>
                   ))}
                 </div>
-                <Link href="/billing" className="mt-4 flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:underline">
-                  <ShoppingCart size={11} /> Køb credits
+                <p className="mt-2 text-[11px] text-slate-400">Abonnementet giver din månedlige opslag-saldo. Opsig når som helst.</p>
+                <Link href="/billing" className="mt-3 flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:underline">
+                  <ShoppingCart size={11} /> Se abonnement & saldo
                 </Link>
               </div>
 
@@ -306,9 +303,10 @@ export default function GeneratePostPage() {
                 )}
                 {noCredits && (
                   <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                    <p className="text-sm font-semibold text-amber-800">Ingen credits tilbage</p>
+                    <p className="text-sm font-semibold text-amber-800">Ingen saldo tilbage</p>
+                    <p className="mt-0.5 text-xs text-amber-700">Tegn abonnementet (€10/md) for at få din månedlige opslag-saldo.</p>
                     <Link href="/billing" className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 underline">
-                      <ShoppingCart size={11} /> Køb credits
+                      <ShoppingCart size={11} /> Tegn abonnement
                     </Link>
                   </div>
                 )}
@@ -355,11 +353,6 @@ export default function GeneratePostPage() {
                   <div className="mb-4 flex items-center justify-between">
                     <div>
                       <h3 className="text-base font-bold text-slate-900">3. Rediger tekst</h3>
-                      {wasFree && (
-                        <span className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-emerald-700">
-                          <CheckCircle2 size={11} /> Dette opslag var gratis
-                        </span>
-                      )}
                     </div>
                     <div className="flex items-center gap-2">
                       <button

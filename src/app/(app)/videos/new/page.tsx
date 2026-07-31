@@ -7,8 +7,9 @@ import { createVideoOrderCheckout } from "@/services/billing";
 import {
   Upload, Link as LinkIcon, X, Loader2, Sparkles, CheckCircle2, Clock,
   Star, ChevronLeft, ChevronRight, Plus, AlertCircle, MapPin, Tag,
-  Maximize2, Download, Share2, Users,
+  Maximize2, Download, Share2, Users, UploadCloud, ArrowRight,
 } from "lucide-react";
+import Link from "next/link";
 import { scrapePropertyUrl, type ScrapedProperty } from "@/services/scrape-property";
 import { ScreenshotImporter } from "@/components/screenshot-importer";
 
@@ -221,6 +222,18 @@ export default function NewVideoPage() {
         </div>
       </div>
 
+      {/* Already have a video? */}
+      <div className="border-b border-slate-100 bg-white px-4 py-2.5 md:px-8">
+        <Link
+          href="/videos/upload"
+          className="inline-flex items-center gap-2 text-xs font-medium text-slate-500 hover:text-[#FF6B4A] transition-colors"
+        >
+          <UploadCloud size={13} className="text-[#FF6B4A]" />
+          Har du allerede lavet en video (fx i Veo3)? Upload den i stedet
+          <ArrowRight size={12} />
+        </Link>
+      </div>
+
       {/* ── LAYOUT (same design on mobile and web) ── */}
       <div className="flex flex-1 px-4 py-6 md:px-8 md:py-8">
         <div className="mx-auto w-full max-w-5xl">
@@ -273,10 +286,9 @@ export default function NewVideoPage() {
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Priser</p>
                 <div className="space-y-2">
                   {[
-                    { label: "5 første opslag", price: "Gratis" },
-                    { label: "Opslag (tekst + billede)", price: "0,5 credit" },
-                    { label: "Video", price: "1 credit" },
-                    { label: "Min. køb", price: "100 kr." },
+                    { label: "Præsentationsvideo", price: "€50" },
+                    { label: "Studie-adgang", price: "€10 / md" },
+                    { label: "Pr. opslag", price: "5 kr." },
                   ].map((row) => (
                     <div key={row.label} className="flex items-center justify-between text-sm">
                       <span className="text-slate-600">{row.label}</span>

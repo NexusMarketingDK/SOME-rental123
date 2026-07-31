@@ -25,7 +25,7 @@ export function SiteFooter() {
               AI-drevet markedsføring til udlejere af ferieboliger. Spar tid og nå flere gæster automatisk.
             </p>
             <div className="mt-5 flex gap-3">
-              <a href="#" aria-label="Facebook" className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-colors hover:border-blue-400/40 hover:text-blue-300">
+              <a href="https://www.facebook.com/profile.php?id=61592058891174" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-colors hover:border-blue-400/40 hover:text-blue-300">
                 <FacebookIcon />
               </a>
               <a href="#" aria-label="Instagram" className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-400 transition-colors hover:border-blue-400/40 hover:text-blue-300">
@@ -63,7 +63,7 @@ export function SiteFooter() {
               <li><Link href="/signup" className="transition-colors hover:text-white">Kom i gang</Link></li>
             </ul>
             <div className="mt-6 rounded-xl border border-orange-500/20 bg-orange-500/10 p-4">
-              <p className="text-xs font-semibold text-orange-400">Prøv gratis i dag</p>
+              <p className="text-xs font-semibold text-orange-400">Kom i gang i dag</p>
               <p className="mt-1 text-xs text-slate-400">Ingen binding.</p>
               <Link href="/signup" className="mt-3 block w-full rounded-lg py-2 text-center text-xs font-bold text-white transition-opacity hover:opacity-90" style={{ background: ORANGE_GRADIENT }}>
                 Start nu
