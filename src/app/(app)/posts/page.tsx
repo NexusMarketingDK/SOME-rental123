@@ -4,6 +4,7 @@ import { Topbar } from "@/components/layout/topbar";
 import { getPosts } from "@/services/posts";
 import { getSocialAccounts } from "@/services/social-accounts";
 import { PostCard } from "@/components/posts/post-card";
+import { PresentationVideo } from "@/components/presentation-video";
 import type { ConnectedAccount } from "@/components/posts/publish-panel";
 
 export default async function PostsPage() {
@@ -32,6 +33,18 @@ export default async function PostsPage() {
       />
 
       <div className="flex-1 px-8 py-6">
+        {/* ── Product presentation video ── */}
+        <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-6">
+          <div className="mb-5 text-center">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#FF6B4A]">Præsentation</span>
+            <h2 className="mt-2 text-2xl font-bold text-slate-900">Se SOME Video Post i aktion</h2>
+            <p className="mt-2 text-sm text-slate-500">Fra boliglink til færdigt opslag — hele flowet på under et minut.</p>
+          </div>
+          <div className="mx-auto max-w-3xl">
+            <PresentationVideo />
+          </div>
+        </section>
+
         {posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-20 text-center">
             <p className="text-sm font-medium text-slate-900">Ingen opslag endnu</p>

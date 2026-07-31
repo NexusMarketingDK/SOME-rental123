@@ -8,6 +8,7 @@ import type { VideoOrder } from "@/types/database";
 import { VideoDemo } from "@/components/video-demo";
 import { VideoListPoller } from "@/components/video-list-poller";
 import { VideoOrderCard } from "@/components/video-order-card";
+import { PresentationVideo } from "@/components/presentation-video";
 
 async function getVideoOrders(): Promise<VideoOrder[]> {
   const supabase = await createClient();
@@ -183,6 +184,18 @@ export default async function VideosPage() {
       />
 
       <div className="flex-1">
+        {/* ── Product presentation video ── */}
+        <section className="border-b border-slate-200 bg-white px-8 py-12">
+          <div className="mx-auto max-w-4xl">
+            <div className="mb-6 text-center">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#FF6B4A]">Præsentation</span>
+              <h2 className="mt-2 text-2xl font-bold text-slate-900">Se SOME Video Post i aktion</h2>
+              <p className="mt-2 text-sm text-slate-500">Fra boliglink til færdig video og opslag — hele flowet på under et minut.</p>
+            </div>
+            <PresentationVideo />
+          </div>
+        </section>
+
         {orders.length === 0 ? (
           <div className="space-y-0">
 
