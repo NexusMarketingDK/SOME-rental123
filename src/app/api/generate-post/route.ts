@@ -26,6 +26,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "ANTHROPIC_API_KEY er ikke konfigureret på serveren." }, { status: 500 });
   }
 
+  // Each generated post costs 1 credit (= 5 kr), drawn from the monthly balance.
+  const { data: credits } = await supabase
+    .from("ai_credits")
+    .select("balance")
+    .eq("user_id", user.id)
+    .single();
+  const balance = credits?.balance ?? 0;
+  if (balance < 1) {
+    return NextResponse.json(
+      { error: "Ingen saldo tilbage. Tegn abonnementet for at generere opslag.", code: "no_credits" },
+      { status: 402 },
+    );
+  }
+
   const body = await req.json() as {
     platform: string;
     title?: string;
@@ -70,7 +84,15 @@ Returner KUN den færdige tekst — ingen forklaringer, ingen overskrifter, inge
     if (content.type !== "text") throw new Error("Unexpected response type");
     const text = content.text.trim();
 
-    return NextResponse.json({ text, wasFree: true });
+    // Charge 1 credit now that generation succeeded, and log the usage.
+    await supabase.from("ai_credits").update({ balance: balance - 1 }).eq("user_id", user.id);
+    await supabase.from("credit_transactions").insert({
+      user_id: user.id,
+      amount: -1,
+      description: `AI-opslag (${platform})`,
+    });
+
+    return NextResponse.json({ text, creditsLeft: balance - 1 });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }

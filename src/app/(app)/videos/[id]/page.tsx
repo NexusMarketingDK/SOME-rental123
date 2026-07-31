@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Topbar } from "@/components/layout/topbar";
 import { VideoStatusClient } from "@/components/video-status-client";
+import { getCurrency } from "@/lib/locale-server";
+import { formatPriceKey } from "@/lib/currency";
 import type { SocialAccount } from "@/types/database";
 
 export default async function VideoDetailPage({
@@ -14,9 +16,10 @@ export default async function VideoDetailPage({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) notFound();
 
-  const [{ data: order }, { data: accounts }] = await Promise.all([
+  const [{ data: order }, { data: accounts }, currency] = await Promise.all([
     supabase.from("video_orders").select("*").eq("id", id).eq("user_id", user.id).single(),
     supabase.from("social_accounts").select("*").eq("user_id", user.id).order("created_at"),
+    getCurrency(),
   ]);
 
   if (!order) notFound();
@@ -48,6 +51,8 @@ export default async function VideoDetailPage({
           bookingUrl={property?.booking_url ?? null}
           imageUrls={order.image_urls ?? []}
           accounts={(accounts ?? []) as SocialAccount[]}
+          initialPaid={(order as { paid?: boolean }).paid ?? false}
+          videoPrice={formatPriceKey("video", currency)}
         />
       </div>
     </>

@@ -44,14 +44,18 @@ export const PRICES = {
   starter:      { dkk: 37500,  eur: 5000 },   // 375 kr. / €50 per month — 1 video/mo
   pro:          { dkk: 73900,  eur: 9900 },   // 739 kr. / €99 per month — 2 videos/mo
   business:     { dkk: 222900, eur: 29900 },  // 2.229 kr. / €299 per month — 6 videos/mo
-  // Extra presentation video beyond what a plan includes
+  // Pay-per-use presentation video (charged when generation reaches 80%)
   video:        { dkk: 37500,  eur: 5000 },   // 375 kr. / €50 per video
-  // The entry subscription drives in-app checkout; kept in sync with Starter.
-  subscription: { dkk: 37500,  eur: 5000 },   // 375 kr. / €50 per month
-  aiPost:       { dkk: 500,    eur: 67 },     // 5 kr. / €0.67 — internal credit unit
+  // Entry subscription that funds the monthly post balance (clearly disclosed).
+  subscription: { dkk: 7500,   eur: 1000 },   // 75 kr. / €10 per month
+  aiPost:       { dkk: 500,    eur: 67 },     // 5 kr. / €0.67 — 1 credit = 1 post
 } as const;
 
 export type PriceKey = keyof typeof PRICES;
+
+// Post-credits granted each month the subscription is paid (1 credit = 1 post).
+// ~€10 worth of posts at 5 kr each.
+export const MONTHLY_POST_CREDITS = 15;
 
 export function priceAmount(key: PriceKey, currency: Currency): number {
   return PRICES[key][currency];

@@ -286,10 +286,9 @@ export default function NewVideoPage() {
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Priser</p>
                 <div className="space-y-2">
                   {[
-                    { label: "5 første opslag", price: "Gratis" },
-                    { label: "Opslag (tekst + billede)", price: "0,5 credit" },
-                    { label: "Video", price: "1 credit" },
-                    { label: "Min. køb", price: "100 kr." },
+                    { label: "Præsentationsvideo", price: "€50" },
+                    { label: "Studie-adgang", price: "€10 / md" },
+                    { label: "Pr. opslag", price: "5 kr." },
                   ].map((row) => (
                     <div key={row.label} className="flex items-center justify-between text-sm">
                       <span className="text-slate-600">{row.label}</span>
