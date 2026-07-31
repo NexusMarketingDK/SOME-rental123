@@ -32,6 +32,16 @@ export const LOCALE_PATHS: Record<Locale, string> = {
   de: "/de",
 };
 
+/**
+ * Href for the language switcher. Danish lives at "/" which has no locale
+ * prefix, so a stale `locale` cookie would otherwise redirect it straight back
+ * to the previously chosen language (see proxy.ts). Passing an explicit
+ * `?lang=` override lets the middleware reset the cookie and land on Danish.
+ */
+export function localeSwitchHref(loc: Locale): string {
+  return loc === "da" ? "/?lang=da" : LOCALE_PATHS[loc];
+}
+
 // ── App UI (sidebar & common) ──────────────────────────────────────────────
 export const APP_LABELS: Record<Locale, {
   home: string; create: string; schedule: string; channels: string;
