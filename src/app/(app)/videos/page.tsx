@@ -1,11 +1,14 @@
 import Link from "next/link";
-import { Plus, Sparkles, Share2, TrendingUp, Star, Zap, Play, Clapperboard, Download, Users, ChevronDown } from "lucide-react";
+import { Plus, Sparkles, Share2, TrendingUp, Star, Zap, Play, Clapperboard, Download, Users, ChevronDown, UploadCloud } from "lucide-react";
 import { Topbar } from "@/components/layout/topbar";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrency } from "@/lib/locale-server";
+import { formatPriceKey } from "@/lib/currency";
 import type { VideoOrder } from "@/types/database";
 import { VideoDemo } from "@/components/video-demo";
 import { VideoListPoller } from "@/components/video-list-poller";
 import { VideoOrderCard } from "@/components/video-order-card";
+import { PresentationVideo } from "@/components/presentation-video";
 
 async function getVideoOrders(): Promise<VideoOrder[]> {
   const supabase = await createClient();
@@ -109,7 +112,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Kan jeg bestille flere videoer til samme bolig?",
-    a: "Ja, du kan bestille så mange videoer du ønsker. Hver video koster 499 kr og produceres uafhængigt — perfekt til at fremhæve forskellige rum eller årstider.",
+    a: "Ja. Din pakke inkluderer et fast antal videoer hver måned (1 på Starter, 2 på Pro, 6 på Business), og ekstra videoer kan altid tilkøbes — perfekt til at fremhæve forskellige rum eller årstider.",
   },
   {
     q: "Hvad hvis jeg ikke er tilfreds med videoen?",
@@ -151,7 +154,8 @@ function StatPill({ value, label }: { value: string; label: string }) {
 }
 
 export default async function VideosPage() {
-  const orders = await getVideoOrders();
+  const [orders, currency] = await Promise.all([getVideoOrders(), getCurrency()]);
+  const videoPrice = formatPriceKey("video", currency);
 
   return (
     <>
@@ -160,18 +164,38 @@ export default async function VideosPage() {
         description="AI-genererede præsentationsvideoer af dine boliger."
         action={
           orders.length > 0 ? (
-            <Link
-              href="/videos/new"
-              className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-              style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
-            >
-              <Plus size={16} /> Bestil ny video
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/videos/upload"
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+              >
+                <UploadCloud size={16} /> Upload færdig video
+              </Link>
+              <Link
+                href="/videos/new"
+                className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+                style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
+              >
+                <Plus size={16} /> Bestil ny video
+              </Link>
+            </div>
           ) : null
         }
       />
 
       <div className="flex-1">
+        {/* ── Product presentation video ── */}
+        <section className="border-b border-slate-200 bg-white px-8 py-12">
+          <div className="mx-auto max-w-4xl">
+            <div className="mb-6 text-center">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#FF6B4A]">Præsentation</span>
+              <h2 className="mt-2 text-2xl font-bold text-slate-900">Se SOME Video Post i aktion</h2>
+              <p className="mt-2 text-sm text-slate-500">Fra boliglink til færdig video og opslag — hele flowet på under et minut.</p>
+            </div>
+            <PresentationVideo />
+          </div>
+        </section>
+
         {orders.length === 0 ? (
           <div className="space-y-0">
 
@@ -216,7 +240,7 @@ export default async function VideosPage() {
               <div className="mx-auto mt-8 grid max-w-5xl grid-cols-3 gap-4">
                 <StatPill value="3×" label="Flere bookingforespørgsler" />
                 <StatPill value="15 min" label="Gennemsnitlig leveringstid" />
-                <StatPill value="499 kr" label="Pr. video — ingen abonnement" />
+                <StatPill value={videoPrice} label="Pr. ekstra video" />
               </div>
             </section>
 
@@ -274,6 +298,12 @@ export default async function VideosPage() {
                   >
                     <Plus size={16} /> Bestil din første video
                   </Link>
+                  <p className="mt-4 text-sm text-slate-500">
+                    Har du allerede lavet en video?{" "}
+                    <Link href="/videos/upload" className="font-semibold text-[#FF6B4A] hover:underline">
+                      Upload den her
+                    </Link>
+                  </p>
                 </div>
               </div>
             </section>
@@ -368,9 +398,9 @@ export default async function VideosPage() {
                   href="/videos/new"
                   className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-sm font-bold text-[#1B3F7A] shadow-xl transition-opacity hover:opacity-90"
                 >
-                  <Sparkles size={16} /> Bestil video — kun 499 kr
+                  <Sparkles size={16} /> Bestil ekstra video — {videoPrice}
                 </Link>
-                <p className="mt-4 text-xs text-blue-300">Ingen abonnement · Leveres på under 15 minutter · Download direkte i appen</p>
+                <p className="mt-4 text-xs text-blue-300">Inkluderet i din pakke · Leveres på under 15 minutter · Download direkte i appen</p>
               </div>
             </section>
 

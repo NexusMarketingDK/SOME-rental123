@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { startVideoGeneration } from "@/lib/google-video";
+import { MONTHLY_POST_CREDITS } from "@/lib/currency";
 import { createClient } from "@/lib/supabase/server";
 import type Stripe from "stripe";
 
@@ -53,6 +54,16 @@ export async function POST(req: NextRequest) {
         });
       }
 
+      if (session.mode === "payment" && session.metadata?.type === "video_payment") {
+        const orderId = session.metadata.order_id;
+        if (orderId) {
+          await supabase.from("video_orders").update({
+            paid: true,
+            stripe_payment_id: session.payment_intent as string,
+          }).eq("id", orderId);
+        }
+      }
+
       if (session.mode === "payment" && session.metadata?.type === "video") {
         const propertyId = session.metadata.property_id || null;
         const imageUrls = session.metadata.image_urls
@@ -81,7 +92,7 @@ export async function POST(req: NextRequest) {
 
             await supabase
               .from("video_orders")
-              .update({ higgsfield_job_id: jobIds[0] ?? null, higgsfield_job_ids: jobIds })
+              .update({ video_job_id: jobIds[0] ?? null, video_job_ids: jobIds })
               .eq("id", order.id);
           } catch (err) {
             console.error("Video generation error:", err);
@@ -92,6 +103,49 @@ export async function POST(req: NextRequest) {
           }
         }
       }
+      break;
+    }
+
+    case "invoice.paid": {
+      // Each paid subscription invoice (first payment + monthly renewals) tops
+      // up the user's post balance. Idempotent per invoice via a transaction log.
+      const invoice = event.data.object as Stripe.Invoice;
+      const customerId = String(invoice.customer);
+
+      // Only subscribers have a subscriptions row for this customer; one-off
+      // credit/video payments use Checkout in payment mode and don't invoice.
+      const { data: sub } = await supabase
+        .from("subscriptions")
+        .select("user_id")
+        .eq("stripe_customer_id", customerId)
+        .single();
+      if (!sub?.user_id) break;
+
+      // Skip if we've already granted for this invoice.
+      const { data: already } = await supabase
+        .from("credit_transactions")
+        .select("id")
+        .eq("stripe_payment_id", invoice.id)
+        .maybeSingle();
+      if (already) break;
+
+      const { data: existing } = await supabase
+        .from("ai_credits")
+        .select("balance")
+        .eq("user_id", sub.user_id)
+        .single();
+
+      await supabase.from("ai_credits").upsert({
+        user_id: sub.user_id,
+        balance: (existing?.balance ?? 0) + MONTHLY_POST_CREDITS,
+      }, { onConflict: "user_id" });
+
+      await supabase.from("credit_transactions").insert({
+        user_id: sub.user_id,
+        amount: MONTHLY_POST_CREDITS,
+        description: "Månedlig opslag-saldo (abonnement)",
+        stripe_payment_id: invoice.id,
+      });
       break;
     }
 

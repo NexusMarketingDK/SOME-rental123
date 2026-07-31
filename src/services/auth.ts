@@ -28,6 +28,8 @@ export async function signUpAction(
 
   // Onboarding profile fields (optional — improve personalisation & admin stats).
   const name = String(formData.get("name") ?? "").trim().slice(0, 120);
+  // Language for AI-generated posts; defaults to the app language.
+  const postLanguage = String(formData.get("post_language") ?? locale).trim().slice(0, 8);
   const postsPerWeek = String(formData.get("posts_per_week") ?? "").trim().slice(0, 20);
   const videosPerWeek = String(formData.get("videos_per_week") ?? "").trim().slice(0, 20);
   const country = String(formData.get("country") ?? "").trim().slice(0, 60);
@@ -49,6 +51,7 @@ export async function signUpAction(
       data: {
         locale,
         currency,
+        ...(postLanguage ? { post_language: postLanguage } : {}),
         ...(name ? { name } : {}),
         ...(postsPerWeek ? { posts_per_week: postsPerWeek } : {}),
         ...(videosPerWeek ? { videos_per_week: videosPerWeek } : {}),

@@ -1,9 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Sparkles, Loader2, CheckCircle2, ArrowRight, Link as LinkIcon } from "lucide-react";
+import { Sparkles, Loader2, CheckCircle2, ArrowRight, Link as LinkIcon, Volume2, VolumeX } from "lucide-react";
 
 type Stage = "idle" | "generating" | "done";
+
+// Sample presentation video shown in the demo phone once "generation" finishes.
+// A real AI-generated clip — illustrates the finished result.
+const DEMO_VIDEO_URL =
+  "https://r2.veo3ai.io/videos/ed952c81-3bcf-4d52-bdfc-f2c4a312f155-1080p-1785068502029.mp4";
 
 const STEPS = [
   "Henter billeder fra din annonce...",
@@ -20,6 +25,12 @@ export function VideoDemo() {
   const [stepIdx, setStepIdx] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const stepRef = useRef<NodeJS.Timeout | null>(null);
+  const [muted, setMuted] = useState(true);
+  const [videoError, setVideoError] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  let domain = "";
+  try { domain = new URL(url).hostname.replace(/^www\./, ""); } catch { /* partial url */ }
 
   function start() {
     if (!url.trim()) return;
@@ -58,6 +69,8 @@ export function VideoDemo() {
     setProgress(0);
     setStepIdx(0);
     setUrl("");
+    setMuted(true);
+    setVideoError(false);
   }
 
   useEffect(() => () => {
@@ -159,31 +172,51 @@ export function VideoDemo() {
             </div>
             <div>
               <p className="text-sm font-bold text-white">Din video er klar!</p>
-              <p className="text-xs text-white/50">Opret din ordre og modtag videoen inden for 15 minutter</p>
+              <p className="text-xs text-white/50">
+                {domain ? <>Genereret fra <span className="text-white/80">{domain}</span></> : "Sådan ser din præsentationsvideo ud"}
+              </p>
             </div>
           </div>
 
-          {/* Preview mockup */}
-          <div className="mb-4 overflow-hidden rounded-xl border border-white/10" style={{ background: "linear-gradient(135deg, #1B3F7A, #FF6B4A)" }}>
-            <div className="flex items-center justify-center py-8">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 shadow-lg">
-                <div
-                  className="ml-1"
-                  style={{
-                    width: 0,
-                    height: 0,
-                    borderTop: "10px solid transparent",
-                    borderBottom: "10px solid transparent",
-                    borderLeft: "16px solid #1B3F7A",
-                  }}
+          {/* Real video preview in a phone mockup */}
+          {!videoError ? (
+            <div className="mb-4 flex justify-center">
+              <div className="relative w-[190px] overflow-hidden rounded-[2rem] border-4 border-white/10 bg-black shadow-2xl">
+                <div className="pointer-events-none absolute left-1/2 top-2 z-10 h-4 w-16 -translate-x-1/2 rounded-full bg-black" />
+                <video
+                  ref={videoRef}
+                  src={DEMO_VIDEO_URL}
+                  autoPlay
+                  loop
+                  muted={muted}
+                  playsInline
+                  onError={() => setVideoError(true)}
+                  className="aspect-[9/16] w-full object-cover"
                 />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const v = videoRef.current;
+                    if (!v) return;
+                    v.muted = !v.muted;
+                    setMuted(v.muted);
+                    if (!v.muted) v.play().catch(() => {});
+                  }}
+                  aria-label={muted ? "Slå lyd til" : "Slå lyd fra"}
+                  className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70"
+                >
+                  {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                </button>
               </div>
             </div>
-            <div className="bg-black/40 px-4 py-2">
-              <div className="h-2 w-3/4 rounded bg-white/40 mb-1" />
-              <div className="h-1.5 w-1/2 rounded bg-white/25" />
+          ) : (
+            <div className="mb-4 overflow-hidden rounded-xl border border-white/10" style={{ background: "linear-gradient(135deg, #1B3F7A, #FF6B4A)" }}>
+              <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
+                <Sparkles size={22} className="text-white/80" />
+                <p className="text-xs text-white/70">Din cinematiske præsentationsvideo</p>
+              </div>
             </div>
-          </div>
+          )}
 
           <a
             href={payUrl}

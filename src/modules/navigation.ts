@@ -7,11 +7,13 @@ import {
   Settings,
   CreditCard,
   Video,
+  Clapperboard,
 } from "lucide-react";
 import type { NavItem } from "@/types/navigation";
 
 export const primaryNav: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Studio", href: "/studio", icon: Clapperboard },
   { label: "Boliger", href: "/properties", icon: Home },
   { label: "Opslag", href: "/posts", icon: SendHorizontal },
   { label: "Sociale konti", href: "/accounts", icon: Share2 },

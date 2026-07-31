@@ -3,6 +3,7 @@ import { Plus, CalendarClock, Send, Video, Sparkles, ArrowRight, Flame, Target, 
 import { createClient } from "@/lib/supabase/server";
 import type { Post, SocialAccount } from "@/types/database";
 import { VideoProgressBadge } from "@/components/video-progress-badge";
+import { MetaAdsSection } from "@/components/meta-ads-section";
 
 async function getDashboardData() {
   const supabase = await createClient();
@@ -202,6 +203,9 @@ export default async function DashboardPage() {
           </div>
         </div>
       )}
+
+      {/* ── Meta advertising (Business) ── */}
+      <MetaAdsSection />
 
       {/* ── Streak / Goals / Score ── */}
       <div className="grid grid-cols-3 gap-4">

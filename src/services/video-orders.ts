@@ -43,10 +43,10 @@ export async function pollVideoOrder(orderId: string): Promise<{
   }
 
   // Use multi-job IDs if available, else fall back to single job
-  const jobIds: string[] = order.higgsfield_job_ids?.length
-    ? order.higgsfield_job_ids
-    : order.higgsfield_job_id
-    ? [order.higgsfield_job_id]
+  const jobIds: string[] = order.video_job_ids?.length
+    ? order.video_job_ids
+    : order.video_job_id
+    ? [order.video_job_id]
     : [];
 
   if (!jobIds.length) return { status: order.status };
@@ -89,8 +89,8 @@ export async function restartVideoOrder(orderId: string): Promise<{ error?: stri
 
   await supabase.from("video_orders").update({
     status: "processing",
-    higgsfield_job_id: null,
-    higgsfield_job_ids: [],
+    video_job_id: null,
+    video_job_ids: [],
     video_url: null,
     video_urls: [],
   }).eq("id", orderId);
@@ -99,11 +99,11 @@ export async function restartVideoOrder(orderId: string): Promise<{ error?: stri
     const jobIds = await startVideoGeneration(imageUrls, order.title ?? "Bolig fremvisning");
     if (!jobIds.length) {
       await supabase.from("video_orders").update({ status: "failed" }).eq("id", orderId);
-      return { error: "Ingen videoer blev startet — tjek at GEMINI_API_KEY er korrekt og har adgang til Veo 2" };
+      return { error: "Ingen videoer blev startet — tjek at GEMINI_API_KEY er korrekt og har adgang til Veo 3" };
     }
     await supabase.from("video_orders").update({
-      higgsfield_job_id: jobIds[0] ?? null,
-      higgsfield_job_ids: jobIds,
+      video_job_id: jobIds[0] ?? null,
+      video_job_ids: jobIds,
     }).eq("id", orderId);
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);

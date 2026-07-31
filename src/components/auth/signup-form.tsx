@@ -40,11 +40,28 @@ const CHANNELS = [
   { value: "youtube", label: "YouTube", color: "#FF0000" },
 ];
 
+// Language used for the AI-generated posts (can differ from the app language,
+// e.g. a Danish host writing English posts for international guests).
+const POST_LANGUAGES: { value: string; label: string }[] = [
+  { value: "da", label: "🇩🇰 Dansk" },
+  { value: "en", label: "🇬🇧 English" },
+  { value: "de", label: "🇩🇪 Deutsch" },
+  { value: "es", label: "🇪🇸 Español" },
+  { value: "fr", label: "🇫🇷 Français" },
+  { value: "it", label: "🇮🇹 Italiano" },
+  { value: "nl", label: "🇳🇱 Nederlands" },
+  { value: "sv", label: "🇸🇪 Svenska" },
+  { value: "no", label: "🇳🇴 Norsk" },
+  { value: "pt", label: "🇵🇹 Português" },
+];
+
 export function SignupForm() {
   const [state, formAction, isPending] = useActionState(signUpAction, initialState);
 
   const [locale, setLocale] = useState<Locale>("da");
   const [currency, setCurrency] = useState<Currency>("dkk");
+  const [postLanguage, setPostLanguage] = useState<string>("da");
+  const [postLanguageTouched, setPostLanguageTouched] = useState(false);
   const [postsPerWeek, setPostsPerWeek] = useState("3-5");
   const [videosPerWeek, setVideosPerWeek] = useState("1-2");
   const [channels, setChannels] = useState<Set<string>>(new Set(["facebook", "instagram"]));
@@ -52,6 +69,9 @@ export function SignupForm() {
   function onLocaleChange(next: Locale) {
     setLocale(next);
     setCurrency(currencyForLocale(next));
+    // Keep the post language in sync with the site language until the user
+    // explicitly picks a different one.
+    if (!postLanguageTouched) setPostLanguage(next);
   }
 
   function toggleChannel(value: string) {
@@ -65,27 +85,82 @@ export function SignupForm() {
 
   return (
     <div>
-      {/* Free-to-start banner */}
+      {/* Get-started banner */}
       <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
         <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white">
           <Gift size={15} />
         </div>
         <div>
-          <p className="text-sm font-bold text-emerald-800">Gratis at komme i gang</p>
+          <p className="text-sm font-bold text-emerald-800">Kom i gang på få minutter</p>
           <p className="text-xs leading-relaxed text-emerald-700">
-            Opret din konto uden kreditkort og test alle funktioner gratis — generér opslag og videoer med det samme.
+            Opret din konto og få adgang til studiet — generér opslag og lav præsentationsvideoer af din bolig.
           </p>
         </div>
       </div>
 
       <h1 className="text-2xl text-[#1B1B1F]" style={{ fontFamily: "var(--font-fraunces)" }}>
-        Opret din gratis konto
+        Opret din konto
       </h1>
       <p className="mt-1 text-sm text-[#6B6B76]">
         Fortæl os lidt om dig, så tilpasser vi din oplevelse.
       </p>
 
       <form action={formAction} className="mt-6 flex flex-col gap-4">
+        {/* Language settings — first choice on the page */}
+        <div className="flex flex-col gap-3 rounded-xl border border-[#E7E2D9] bg-[#FBF9F5] p-4">
+          <p className="text-sm font-semibold text-[#1B1B1F]">Sprogindstillinger</p>
+
+          {/* Site language + currency */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="locale" className="text-sm font-medium text-[#1B1B1F]">Sprog til siden</label>
+            <div className="flex gap-3">
+              <select
+                id="locale"
+                name="locale"
+                value={locale}
+                onChange={(e) => onLocaleChange(e.target.value as Locale)}
+                className={`${fieldClass} flex-1`}
+              >
+                {LOCALES.map((loc) => (
+                  <option key={loc} value={loc}>
+                    {LOCALE_FLAGS[loc]} {LOCALE_LABELS[loc]}
+                  </option>
+                ))}
+              </select>
+              <select
+                id="currency"
+                name="currency"
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value as Currency)}
+                aria-label="Valuta"
+                className={`${fieldClass} w-32`}
+              >
+                {CURRENCIES.map((cur) => (
+                  <option key={cur} value={cur}>{CURRENCY_LABELS[cur]}</option>
+                ))}
+              </select>
+            </div>
+            <p className="text-xs text-[#6B6B76]">Hele appen vises på det valgte sprog, når du er logget ind.</p>
+          </div>
+
+          {/* Post language */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="post_language" className="text-sm font-medium text-[#1B1B1F]">Sprog til opslag</label>
+            <select
+              id="post_language"
+              name="post_language"
+              value={postLanguage}
+              onChange={(e) => { setPostLanguage(e.target.value); setPostLanguageTouched(true); }}
+              className={fieldClass}
+            >
+              {POST_LANGUAGES.map((lang) => (
+                <option key={lang.value} value={lang.value}>{lang.label}</option>
+              ))}
+            </select>
+            <p className="text-xs text-[#6B6B76]">Sproget dine AI-genererede opslag skrives på — kan afvige fra sidens sprog.</p>
+          </div>
+        </div>
+
         {/* Name */}
         <div className="flex flex-col gap-1.5">
           <label htmlFor="name" className="text-sm font-medium text-[#1B1B1F]">Navn</label>
@@ -222,40 +297,6 @@ export function SignupForm() {
           ))}
         </div>
 
-        {/* Language + currency */}
-        <div className="flex gap-3">
-          <div className="flex flex-1 flex-col gap-1.5">
-            <label htmlFor="locale" className="text-sm font-medium text-[#1B1B1F]">Sprog</label>
-            <select
-              id="locale"
-              name="locale"
-              value={locale}
-              onChange={(e) => onLocaleChange(e.target.value as Locale)}
-              className={fieldClass}
-            >
-              {LOCALES.map((loc) => (
-                <option key={loc} value={loc}>
-                  {LOCALE_FLAGS[loc]} {LOCALE_LABELS[loc]}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex flex-1 flex-col gap-1.5">
-            <label htmlFor="currency" className="text-sm font-medium text-[#1B1B1F]">Valuta</label>
-            <select
-              id="currency"
-              name="currency"
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value as Currency)}
-              className={fieldClass}
-            >
-              {CURRENCIES.map((cur) => (
-                <option key={cur} value={cur}>{CURRENCY_LABELS[cur]}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
         {state?.error && (
           <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{state.error}</p>
         )}
@@ -267,13 +308,13 @@ export function SignupForm() {
           style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
         >
           <Sparkles size={15} />
-          {isPending ? "Opretter konto…" : "Opret gratis konto"}
+          {isPending ? "Opretter konto…" : "Opret konto"}
         </button>
 
         {/* Reassurance row */}
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-[#6B6B76]">
-          <span className="inline-flex items-center gap-1"><Check size={12} className="text-emerald-500" /> Intet kreditkort</span>
-          <span className="inline-flex items-center gap-1"><Check size={12} className="text-emerald-500" /> Test gratis</span>
+          <span className="inline-flex items-center gap-1"><Check size={12} className="text-emerald-500" /> Klar på få minutter</span>
+          <span className="inline-flex items-center gap-1"><Check size={12} className="text-emerald-500" /> Opsig når som helst</span>
           <span className="inline-flex items-center gap-1"><Check size={12} className="text-emerald-500" /> Ingen binding</span>
         </div>
       </form>

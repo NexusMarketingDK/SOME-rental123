@@ -12,11 +12,17 @@ export const metadata: Metadata = {
     description: "Ahorra horas cada semana. Publica en todas las redes sociales a la vez, sincroniza tu calendario de reservas y deja que la IA genere tus publicaciones y vídeos de presentación automáticamente.",
     type: "website",
     siteName: "somevideopost.com",
+    locale: "es_ES",
     url: "https://www.somevideopost.com/es",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SOME VIDEO POST — Marketing automatizado en redes sociales y vídeo IA para alquiler vacacional",
+    description: "Ahorra horas cada semana. Publica en todas las redes sociales a la vez, sincroniza tu calendario de reservas y deja que la IA genere tus publicaciones y vídeos de presentación automáticamente.",
   },
   alternates: {
     canonical: "https://www.somevideopost.com/es",
-    languages: { da: "https://www.somevideopost.com", en: "https://www.somevideopost.com/en", es: "https://www.somevideopost.com/es", de: "https://www.somevideopost.com/de" },
+    languages: { da: "https://www.somevideopost.com", en: "https://www.somevideopost.com/en", es: "https://www.somevideopost.com/es", de: "https://www.somevideopost.com/de", "x-default": "https://www.somevideopost.com" },
   },
 };
 
