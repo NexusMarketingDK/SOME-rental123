@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useTransition, useRef } from "react";
 import { CheckCircle2, Loader2, XCircle, Download, Share2, Send } from "lucide-react";
 import { pollVideoOrder } from "@/services/video-orders";
 import { shareVideoToSocial } from "@/services/share-video";
+import { VideoSalesText } from "@/components/video-sales-text";
 import type { SocialAccount } from "@/types/database";
 
 const PLATFORM_COLORS: Record<string, string> = {
@@ -19,6 +20,9 @@ type Props = {
   initialVideoUrl?: string;
   initialVideoUrls?: string[];
   title: string;
+  description?: string | null;
+  location?: string | null;
+  bookingUrl?: string | null;
   imageUrls: string[];
   accounts: SocialAccount[];
 };
@@ -31,9 +35,8 @@ const STEPS = [
   "Afsluttende touches...",
 ];
 
-function SharePanel({ videoUrl, accounts }: { videoUrl: string; accounts: SocialAccount[] }) {
+function SharePanel({ videoUrl, accounts, caption, setCaption }: { videoUrl: string; accounts: SocialAccount[]; caption: string; setCaption: (v: string) => void }) {
   const [open, setOpen] = useState(false);
-  const [caption, setCaption] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   const [scheduledAt, setScheduledAt] = useState("");
   const [done, setDone] = useState(false);
@@ -161,10 +164,11 @@ function SharePanel({ videoUrl, accounts }: { videoUrl: string; accounts: Social
   );
 }
 
-export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, initialVideoUrls, title, imageUrls, accounts }: Props) {
+export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, initialVideoUrls, title, description, location, bookingUrl, imageUrls, accounts }: Props) {
   const [status, setStatus] = useState<Status>(initialStatus);
   const [videoUrl, setVideoUrl] = useState<string | undefined>(initialVideoUrl);
   const [videoUrls, setVideoUrls] = useState<string[]>(initialVideoUrls ?? (initialVideoUrl ? [initialVideoUrl] : []));
+  const [caption, setCaption] = useState("");
   const [stepIdx, setStepIdx] = useState(0);
   const [elapsedSec, setElapsedSec] = useState(0);
   const startRef = useRef<number>(Date.now());
@@ -221,7 +225,16 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, ini
           </div>
         ))}
 
-        <SharePanel videoUrl={videoUrl} accounts={accounts} />
+        <VideoSalesText
+          title={title}
+          description={description}
+          location={location}
+          bookingUrl={bookingUrl}
+          caption={caption}
+          setCaption={setCaption}
+        />
+
+        <SharePanel videoUrl={videoUrl} accounts={accounts} caption={caption} setCaption={setCaption} />
       </div>
     );
   }

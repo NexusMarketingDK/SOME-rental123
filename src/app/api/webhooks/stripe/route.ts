@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
 
             await supabase
               .from("video_orders")
-              .update({ higgsfield_job_id: jobIds[0] ?? null, higgsfield_job_ids: jobIds })
+              .update({ video_job_id: jobIds[0] ?? null, video_job_ids: jobIds })
               .eq("id", order.id);
           } catch (err) {
             console.error("Video generation error:", err);

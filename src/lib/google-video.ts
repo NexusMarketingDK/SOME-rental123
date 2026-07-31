@@ -3,6 +3,23 @@ import axios from "axios";
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY ?? "";
 const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta";
 
+// ── Veo 3 configuration ────────────────────────────────────────────────────
+// Model + render settings are env-driven so we can switch quality/cost tier
+// (e.g. veo-3.0-fast-generate-001) or bump to a newer Veo without a redeploy.
+const VEO_MODEL = process.env.VEO_MODEL || "veo-3.1-generate-preview";
+// 16:9 (landscape) or 9:16 (portrait — better for Reels/TikTok/Stories).
+const VEO_ASPECT_RATIO = process.env.VEO_ASPECT_RATIO || "16:9";
+// Veo 3 supports "720p" and "1080p" (1080p is 16:9 only).
+const VEO_RESOLUTION = process.env.VEO_RESOLUTION || "720p";
+// Keeps Veo 3's native audio clean for a property walkthrough: no talking
+// heads, captions, watermarks or warped rooms.
+const VEO_NEGATIVE_PROMPT =
+  process.env.VEO_NEGATIVE_PROMPT ||
+  "spoken words, voiceover, people talking, on-screen text, subtitles, captions, watermark, logo, distorted architecture, warped walls, blurry, low quality";
+// Max clips per order — one Veo 3 generation per image. Veo 3 is slower and
+// pricier than Veo 2, so we cap this to stay within function limits/budget.
+const MAX_CLIPS = Number(process.env.VEO_MAX_CLIPS || "3");
+
 // ── Cinematic prompt definitions (same logic as before) ───────────────────
 
 type RoomPromptDef = {
@@ -39,7 +56,9 @@ function buildCinematicPrompt(roomLabel: string, title: string, index: number): 
     `Interior design style: ${def.style}. ` +
     `Transition: ${def.transition}. Duration: ${def.duration}. ` +
     `Property: ${title}. Scene ${index + 1} of a seamless luxury walkthrough filmed by a professional drone and Steadicam operator. ` +
-    `Ultra-high quality, photorealistic, 4K cinematic real estate film.`
+    `Ultra-high quality, photorealistic, 4K cinematic real estate film. ` +
+    // Veo 3 generates native audio — steer it toward subtle ambient sound only.
+    `Audio: soft cinematic ambient score with gentle room tone, no narration, no voices.`
   );
 }
 
@@ -60,7 +79,11 @@ async function imageToBase64(url: string): Promise<{ data: string; mimeType: str
 // ── Upload completed video to Supabase Storage ─────────────────────────────
 
 async function uploadVideoToStorage(googleFileUri: string, orderId: string, clipIndex: number): Promise<string> {
-  const downloadUrl = `${googleFileUri}?key=${GEMINI_API_KEY}&alt=media`;
+  // The Veo file URI may already include a query string (e.g. "?alt=media"),
+  // so append the key with the correct separator — a second "?" would make the
+  // key part of an unparsed value and the download would be unauthenticated.
+  const sep = googleFileUri.includes("?") ? "&" : "?";
+  const downloadUrl = `${googleFileUri}${sep}key=${GEMINI_API_KEY}&alt=media`;
   const res = await axios.get<ArrayBuffer>(downloadUrl, { responseType: "arraybuffer" });
   const buffer = Buffer.from(res.data);
 
@@ -81,16 +104,23 @@ async function uploadVideoToStorage(googleFileUri: string, orderId: string, clip
 // ── Public API ────────────────────────────────────────────────────────────
 
 /**
- * Start video generation for each image URL via Google Veo 2.
- * Returns operation names (stored where job IDs used to be).
+ * Start image-to-video generation for each image URL via Google Veo 3.
+ *
+ * Uses the Gemini API long-running `:predictLongRunning` endpoint (the correct
+ * shape for Veo — `instances` + `parameters`, not chat `contents`). Returns the
+ * operation names, which are polled later by {@link getVideoJobsStatus}.
  */
 export async function startVideoGeneration(
   imageUrls: string[],
   title: string,
   roomLabels?: string[]
 ): Promise<string[]> {
-  // Limit to 3 images max to stay within Vercel function timeout/memory
-  const limitedUrls = imageUrls.slice(0, 3);
+  if (!GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY is not configured on the server");
+  }
+
+  // One Veo 3 clip per image, capped to stay within function limits/budget.
+  const limitedUrls = imageUrls.slice(0, MAX_CLIPS);
 
   const operations = await Promise.all(
     limitedUrls.map(async (url, i) => {
@@ -98,38 +128,37 @@ export async function startVideoGeneration(
       const prompt = buildCinematicPrompt(room, title, i);
       const image = await imageToBase64(url);
 
-      let res: { data: { name?: string } };
       try {
-        res = await axios.post<{ name?: string }>(
-          `${GEMINI_BASE}/models/veo-2.0-flash-generate-001:generateVideo?key=${GEMINI_API_KEY}`,
+        const res = await axios.post<{ name?: string }>(
+          `${GEMINI_BASE}/models/${VEO_MODEL}:predictLongRunning?key=${GEMINI_API_KEY}`,
           {
-            contents: [
+            instances: [
               {
-                role: "user",
-                parts: [
-                  { text: prompt },
-                  { inlineData: { mimeType: image.mimeType, data: image.data } },
-                ],
+                prompt,
+                image: {
+                  bytesBase64Encoded: image.data,
+                  mimeType: image.mimeType,
+                },
               },
             ],
-            generationConfig: {
-              responseModalities: ["video"],
-              videoConfig: { durationSeconds: 8, aspectRatio: "16:9" },
+            parameters: {
+              aspectRatio: VEO_ASPECT_RATIO,
+              resolution: VEO_RESOLUTION,
+              negativePrompt: VEO_NEGATIVE_PROMPT,
+              sampleCount: 1,
             },
           }
         );
+        return res.data.name ?? "";
       } catch (err: unknown) {
-        // Try fallback: veo-2.0-generate-001 (allowlisted accounts)
         const status = (err as { response?: { status?: number } })?.response?.status;
-        if (status === 404 || status === 403) {
-          // Model not available — throw with detail for debugging
-          const detail = (err as { response?: { data?: unknown } })?.response?.data;
-          throw new Error(`Google Veo API error ${status}: ${JSON.stringify(detail)}`);
-        }
-        throw err;
+        const detail = (err as { response?: { data?: unknown } })?.response?.data;
+        // Surface the real reason (bad key, model not allow-listed, quota) so
+        // it can be shown to the user instead of a silent failure.
+        throw new Error(
+          `Google Veo API error ${status ?? "?"} for model ${VEO_MODEL}: ${JSON.stringify(detail ?? String(err)).slice(0, 300)}`
+        );
       }
-
-      return res.data.name ?? "";
     })
   );
 
@@ -163,6 +192,8 @@ export async function getVideoJobsStatus(
           done?: boolean;
           error?: { message: string };
           response?: {
+            // Veo 3 (predictLongRunning) wraps samples under generateVideoResponse
+            generateVideoResponse?: { generatedSamples?: Array<{ video?: { uri?: string } }> };
             generatedSamples?: Array<{ video?: { uri?: string } }>;
             candidates?: Array<{ content?: { parts?: Array<{ fileData?: { fileUri?: string; mimeType?: string } }> } }>;
           };
@@ -173,8 +204,10 @@ export async function getVideoJobsStatus(
         if (!data.done) return { status: "in_progress" };
         if (data.error) return { status: "failed" };
 
-        // Try both response shapes Google may use
+        // Try the response shapes Google may use (Veo 3 nests under
+        // generateVideoResponse; older shapes expose it directly).
         const googleUri =
+          data.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri ??
           data.response?.generatedSamples?.[0]?.video?.uri ??
           data.response?.candidates?.[0]?.content?.parts?.find(
             (p) => p.fileData?.mimeType?.startsWith("video")

@@ -7,8 +7,9 @@ import { createVideoOrderCheckout } from "@/services/billing";
 import {
   Upload, Link as LinkIcon, X, Loader2, Sparkles, CheckCircle2, Clock,
   Star, ChevronLeft, ChevronRight, Plus, AlertCircle, MapPin, Tag,
-  Maximize2, Download, Share2, Users,
+  Maximize2, Download, Share2, Users, UploadCloud, ArrowRight,
 } from "lucide-react";
+import Link from "next/link";
 import { scrapePropertyUrl, type ScrapedProperty } from "@/services/scrape-property";
 import { ScreenshotImporter } from "@/components/screenshot-importer";
 
@@ -219,6 +220,18 @@ export default function NewVideoPage() {
           <span className="flex items-center gap-1.5 text-xs text-slate-600"><Users size={12} className="text-emerald-600" /> Facebook-grupper</span>
           <span className="flex items-center gap-1.5 text-xs text-slate-600"><Sparkles size={12} className="text-purple-500" /> Instagram, TikTok, YouTube</span>
         </div>
+      </div>
+
+      {/* Already have a video? */}
+      <div className="border-b border-slate-100 bg-white px-4 py-2.5 md:px-8">
+        <Link
+          href="/videos/upload"
+          className="inline-flex items-center gap-2 text-xs font-medium text-slate-500 hover:text-[#FF6B4A] transition-colors"
+        >
+          <UploadCloud size={13} className="text-[#FF6B4A]" />
+          Har du allerede lavet en video (fx i Veo3)? Upload den i stedet
+          <ArrowRight size={12} />
+        </Link>
       </div>
 
       {/* ── LAYOUT (same design on mobile and web) ── */}
