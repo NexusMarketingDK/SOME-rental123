@@ -3,7 +3,7 @@ import Link from "next/link";
 import { BookOpen } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
-import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
+import { DemoVideoPhone } from "@/components/demo-video-phone";
 import { JsonLd } from "@/components/seo/json-ld";
 import { CATEGORIES, POSTS, formatDate } from "@/lib/blog";
 
@@ -170,7 +170,7 @@ export default function BlogPage() {
               <div className="relative w-full max-w-[280px]">
                 <div className="absolute inset-0 scale-90 rounded-[2.5rem] opacity-40 blur-2xl" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }} />
                 <div className="relative">
-                  <CinematicWalkthrough locale="da" />
+                  <DemoVideoPhone />
                 </div>
               </div>
             </div>

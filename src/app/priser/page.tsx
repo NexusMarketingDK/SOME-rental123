@@ -5,7 +5,7 @@ import { getCurrency } from "@/lib/locale-server";
 import { formatPriceKey, MONTHLY_POST_CREDITS } from "@/lib/currency";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
-import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
+import { DemoVideoPhone } from "@/components/demo-video-phone";
 
 export const metadata: Metadata = {
   title: "Priser — SOME VIDEO POST | AI-video og sociale medier til udlejere",
@@ -210,7 +210,7 @@ export default async function PriserPage() {
               <div className="relative w-full max-w-[300px]">
                 <div className="absolute inset-0 scale-90 rounded-[2.5rem] opacity-40 blur-2xl" style={{ background: ORANGE_GRADIENT }} />
                 <div className="relative">
-                  <CinematicWalkthrough locale="da" />
+                  <DemoVideoPhone />
                 </div>
               </div>
             </div>
