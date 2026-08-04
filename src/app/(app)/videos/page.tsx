@@ -8,7 +8,7 @@ import type { VideoOrder } from "@/types/database";
 import { VideoDemo } from "@/components/video-demo";
 import { VideoListPoller } from "@/components/video-list-poller";
 import { VideoOrderCard } from "@/components/video-order-card";
-import { PresentationVideo } from "@/components/presentation-video";
+import { DemoVideoPhone } from "@/components/demo-video-phone";
 
 async function getVideoOrders(): Promise<VideoOrder[]> {
   const supabase = await createClient();
@@ -192,7 +192,14 @@ export default async function VideosPage() {
               <h2 className="mt-2 text-2xl font-bold text-slate-900">Se SOME Video Post i aktion</h2>
               <p className="mt-2 text-sm text-slate-500">Fra boliglink til færdig video og opslag — hele flowet på under et minut.</p>
             </div>
-            <PresentationVideo />
+            <div className="flex justify-center">
+              <div className="relative w-full max-w-[300px]">
+                <div className="absolute inset-0 scale-90 rounded-[2.5rem] opacity-30 blur-2xl" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }} />
+                <div className="relative">
+                  <DemoVideoPhone label="Præsentationsvideo" />
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
