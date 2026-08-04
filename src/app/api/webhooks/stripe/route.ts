@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { startVideoGeneration } from "@/lib/google-video";
-import { MONTHLY_POST_CREDITS } from "@/lib/currency";
+import { PLAN_POST_CREDITS, isPlanId, type PlanId } from "@/lib/currency";
 import { createClient } from "@/lib/supabase/server";
 import type Stripe from "stripe";
 
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
       // credit/video payments use Checkout in payment mode and don't invoice.
       const { data: sub } = await supabase
         .from("subscriptions")
-        .select("user_id")
+        .select("user_id, stripe_subscription_id")
         .eq("stripe_customer_id", customerId)
         .single();
       if (!sub?.user_id) break;
@@ -129,6 +129,23 @@ export async function POST(req: NextRequest) {
         .maybeSingle();
       if (already) break;
 
+      // Which plan is this? The plan is stored on the Stripe subscription's
+      // metadata at checkout, so renewals grant the right monthly balance
+      // (Basic = 10 posts, Pro = 20). Default to Basic if it's missing.
+      let plan: PlanId = "basic";
+      const subId =
+        String((invoice as unknown as { subscription?: string }).subscription ?? "") ||
+        String(sub.stripe_subscription_id ?? "");
+      if (subId) {
+        try {
+          const stripeSub = await getStripe().subscriptions.retrieve(subId);
+          if (isPlanId(stripeSub.metadata?.plan)) plan = stripeSub.metadata.plan as PlanId;
+        } catch {
+          // Fall back to Basic credits if the subscription can't be read.
+        }
+      }
+      const monthlyCredits = PLAN_POST_CREDITS[plan];
+
       const { data: existing } = await supabase
         .from("ai_credits")
         .select("balance")
@@ -137,13 +154,13 @@ export async function POST(req: NextRequest) {
 
       await supabase.from("ai_credits").upsert({
         user_id: sub.user_id,
-        balance: (existing?.balance ?? 0) + MONTHLY_POST_CREDITS,
+        balance: (existing?.balance ?? 0) + monthlyCredits,
       }, { onConflict: "user_id" });
 
       await supabase.from("credit_transactions").insert({
         user_id: sub.user_id,
-        amount: MONTHLY_POST_CREDITS,
-        description: "Månedlig opslag-saldo (abonnement)",
+        amount: monthlyCredits,
+        description: `Månedlig opslag-saldo (${plan === "pro" ? "Pro" : "Basic"})`,
         stripe_payment_id: invoice.id,
       });
       break;

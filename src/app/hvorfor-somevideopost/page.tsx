@@ -55,7 +55,7 @@ const FAQ = [
   },
   {
     q: "Hvad koster det?",
-    a: "Vi har tre månedlige pakker: Starter til €50/md. med 1 præsentationsvideo inkluderet, Pro til €99/md. med 2 videoer, og Business til €299/md. med 6 videoer, Meta-integration for annoncering og prioriteret support. Alle pakker inkluderer direkte deling til sociale medier, og ekstra videoer koster €50/stk. Se detaljerne på prissiden.",
+    a: "Det er gratis at oprette konto. Basic koster €20/md. og giver 10 AI-opslag om måneden med direkte deling og automation. Pro koster €99/md. og inkluderer 2 præsentationsvideoer og 20 opslag om måneden samt prioriteret support. Ekstra præsentationsvideoer koster €20/stk. Se detaljerne på prissiden.",
   },
 ];
 

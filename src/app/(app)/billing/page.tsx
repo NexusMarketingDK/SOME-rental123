@@ -1,15 +1,16 @@
-import { CheckCircle2, Sparkles, Video, CreditCard, Zap } from "lucide-react";
+import { CheckCircle2, Sparkles, Video, Crown } from "lucide-react";
 import { Topbar } from "@/components/layout/topbar";
 import { getSubscription, getCredits } from "@/services/billing";
 import { SubscribeButton, BuyCreditsButton, BuyVideoButton, ManageBillingButton } from "@/components/billing/billing-buttons";
 import { getCurrency } from "@/lib/locale-server";
-import { formatPrice, formatPriceKey, priceAmount } from "@/lib/currency";
+import { formatPrice, formatPriceKey, priceAmount, PLAN_POST_CREDITS, PLAN_INCLUDED_VIDEOS } from "@/lib/currency";
 
 export default async function BillingPage() {
   const [subscription, credits, currency] = await Promise.all([getSubscription(), getCredits(), getCurrency()]);
   const isActive = subscription?.status === "active" || subscription?.status === "trialing";
 
-  const subscriptionPrice = formatPriceKey("subscription", currency);
+  const basicPrice = formatPriceKey("basic", currency);
+  const proPrice = formatPriceKey("pro", currency);
   const aiPostPrice = formatPriceKey("aiPost", currency, { decimals: currency === "eur" });
   const videoPrice = formatPriceKey("video", currency);
   const creditPacks = [10, 25, 50].map((c) => ({
@@ -30,39 +31,67 @@ export default async function BillingPage() {
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Nuværende plan</p>
                 <h2 className="mt-1 text-xl font-semibold text-slate-900">
-                  {isActive ? "Social Medie Plan" : "Ingen aktiv plan"}
+                  {isActive ? "Aktivt abonnement" : "Gratis plan"}
                 </h2>
-                {isActive && (
+                {isActive ? (
                   <p className="mt-1 text-sm text-slate-500">
-                    {subscriptionPrice}/md · {subscription?.cancel_at_period_end ? "Udløber" : "Fornyes"} {subscription?.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString("da-DK") : ""}
+                    {subscription?.cancel_at_period_end ? "Udløber" : "Fornyes"} {subscription?.current_period_end ? new Date(subscription.current_period_end).toLocaleDateString("da-DK") : ""}
+                  </p>
+                ) : (
+                  <p className="mt-1 text-sm text-slate-500">
+                    Gratis at oprette konto. Opgradér for månedlige AI-opslag, direkte deling og automation.
                   </p>
                 )}
               </div>
               <span className={`rounded-full px-3 py-1 text-xs font-semibold ${isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
-                {isActive ? "Aktiv" : "Inaktiv"}
+                {isActive ? "Aktiv" : "Gratis"}
               </span>
             </div>
 
             {!isActive && (
-              <div className="mt-6 rounded-xl border-2 border-[#1B3F7A] bg-blue-50/50 p-5">
-                <p className="font-semibold text-[#1B3F7A]">Social Medie Plan — {subscriptionPrice}/md</p>
-                <ul className="mt-3 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-                  {[
-                    "4 sociale medie platforme",
-                    "Ubegrænsede opslag",
-                    "Kalendersynkronisering",
-                    "Post på sider og i grupper",
-                    "Automatisk posting med interval",
-                    "Op til 5 boliger",
-                  ].map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-slate-700">
-                      <CheckCircle2 size={14} className="text-[#1B3F7A] shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-4">
-                  <SubscribeButton price={subscriptionPrice} />
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                {/* Basic */}
+                <div className="flex flex-col rounded-xl border-2 border-[#1B3F7A] bg-blue-50/50 p-5">
+                  <p className="font-semibold text-[#1B3F7A]">Basic — {basicPrice}/md</p>
+                  <ul className="mt-3 flex flex-1 flex-col gap-1.5">
+                    {[
+                      `${PLAN_POST_CREDITS.basic} SoMe-opslag (tekst + billede) hver måned`,
+                      "Direkte deling til sociale medier",
+                      "Automation & planlægning",
+                      `Præsentationsvideoer for ${videoPrice}/stk.`,
+                    ].map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-sm text-slate-700">
+                        <CheckCircle2 size={14} className="mt-0.5 text-[#1B3F7A] shrink-0" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-4">
+                    <SubscribeButton plan="basic" price={basicPrice} label="Vælg Basic" />
+                  </div>
+                </div>
+
+                {/* Pro */}
+                <div className="flex flex-col rounded-xl border-2 border-[#FF6B4A] bg-orange-50/50 p-5">
+                  <p className="flex items-center gap-1.5 font-semibold text-[#FF6B4A]">
+                    <Crown size={15} /> Pro — {proPrice}/md
+                  </p>
+                  <ul className="mt-3 flex flex-1 flex-col gap-1.5">
+                    {[
+                      `${PLAN_INCLUDED_VIDEOS.pro} præsentationsvideoer inkluderet hver måned`,
+                      `${PLAN_POST_CREDITS.pro} SoMe-opslag (tekst + billede) hver måned`,
+                      "Direkte deling til sociale medier",
+                      "Automation, planlægning & prioriteret support",
+                    ].map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-sm text-slate-700">
+                        <CheckCircle2 size={14} className="mt-0.5 text-[#FF6B4A] shrink-0" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-4">
+                    <SubscribeButton plan="pro" price={proPrice} label="Vælg Pro" variant="pro" />
+                  </div>
                 </div>
               </div>
             )}

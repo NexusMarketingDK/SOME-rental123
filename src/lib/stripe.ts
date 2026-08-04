@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { PRICES, type Currency } from "./currency";
+import { priceAmount, PLAN_PRICE_KEY, type Currency, type PlanId } from "./currency";
 
 // Lazy-initialize so missing env vars don't crash the build
 let _stripe: Stripe | null = null;
@@ -16,30 +16,32 @@ export function getStripe(): Stripe {
   return _stripe;
 }
 
-export const SUBSCRIPTION_PRODUCT_NAME = "Social Medie Plan";
+export const PLAN_PRODUCT_NAME: Record<PlanId, string> = {
+  basic: "Basic — Social Medie Plan",
+  pro: "Pro — Video & Social Medie Plan",
+};
 
 /**
- * Build the subscription checkout line item for a given currency.
+ * Build the subscription checkout line item for a plan + currency.
  *
- * If a currency-specific Stripe Price is configured via env we use it;
- * otherwise we fall back to an inline `price_data` price so a new currency
- * works without pre-creating a Price in the Stripe dashboard.
+ * If a plan/currency-specific Stripe Price is configured via env we use it;
+ * otherwise we fall back to an inline `price_data` price so the plan works
+ * without pre-creating a Price in the Stripe dashboard.
  */
-export function subscriptionLineItem(
+export function planLineItem(
+  plan: PlanId,
   currency: Currency,
 ): Stripe.Checkout.SessionCreateParams.LineItem {
-  const priceId =
-    currency === "dkk"
-      ? process.env.STRIPE_PRICE_SOCIAL_MONTHLY
-      : process.env.STRIPE_PRICE_SOCIAL_MONTHLY_EUR;
+  const envKey = `STRIPE_PRICE_${plan.toUpperCase()}_${currency.toUpperCase()}`;
+  const priceId = process.env[envKey];
 
   if (priceId) return { price: priceId, quantity: 1 };
 
   return {
     price_data: {
       currency,
-      product_data: { name: SUBSCRIPTION_PRODUCT_NAME },
-      unit_amount: PRICES.subscription[currency],
+      product_data: { name: PLAN_PRODUCT_NAME[plan] },
+      unit_amount: priceAmount(PLAN_PRICE_KEY[plan], currency),
       recurring: { interval: "month" },
     },
     quantity: 1,

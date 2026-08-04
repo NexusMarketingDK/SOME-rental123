@@ -40,22 +40,42 @@ export function currencyForLocale(locale: Locale): Currency {
  * Amounts are in the currency's minor unit (øre for DKK, cents for EUR).
  */
 export const PRICES = {
-  // Subscription tiers (shown on /priser and the landing page)
-  starter:      { dkk: 37500,  eur: 5000 },   // 375 kr. / €50 per month — 1 video/mo
-  pro:          { dkk: 73900,  eur: 9900 },   // 739 kr. / €99 per month — 2 videos/mo
-  business:     { dkk: 222900, eur: 29900 },  // 2.229 kr. / €299 per month — 6 videos/mo
+  // Subscription plans (shown on /priser, the landing page and /billing)
+  basic: { dkk: 14900, eur: 2000 },   // 149 kr. / €20 per month — 10 SoMe posts/mo
+  pro:   { dkk: 73900, eur: 9900 },   // 739 kr. / €99 per month — 2 videos + 20 posts/mo
   // Pay-per-use presentation video (charged when generation reaches 80%)
-  video:        { dkk: 37500,  eur: 5000 },   // 375 kr. / €50 per video
-  // Entry subscription that funds the monthly post balance (clearly disclosed).
-  subscription: { dkk: 7500,   eur: 1000 },   // 75 kr. / €10 per month
-  aiPost:       { dkk: 500,    eur: 67 },     // 5 kr. / €0.67 — 1 credit = 1 post
+  video: { dkk: 14900, eur: 2000 },   // 149 kr. / €20 per video
+  aiPost: { dkk: 500,  eur: 67 },     // 5 kr. / €0.67 — 1 credit = 1 post
 } as const;
 
 export type PriceKey = keyof typeof PRICES;
 
-// Post-credits granted each month the subscription is paid (1 credit = 1 post).
-// ~€10 worth of posts at 5 kr each.
-export const MONTHLY_POST_CREDITS = 15;
+// ── Subscription plans ────────────────────────────────────────────────────
+export type PlanId = "basic" | "pro";
+
+export const PLAN_IDS: PlanId[] = ["basic", "pro"];
+
+export function isPlanId(value: unknown): value is PlanId {
+  return value === "basic" || value === "pro";
+}
+
+/** Post-credits granted each month the plan is paid (1 credit = 1 post). */
+export const PLAN_POST_CREDITS: Record<PlanId, number> = {
+  basic: 10,
+  pro: 20,
+};
+
+/** Presentation videos included per month (display only for now). */
+export const PLAN_INCLUDED_VIDEOS: Record<PlanId, number> = {
+  basic: 0,
+  pro: 2,
+};
+
+/** Which price key each plan is billed at. */
+export const PLAN_PRICE_KEY: Record<PlanId, PriceKey> = {
+  basic: "basic",
+  pro: "pro",
+};
 
 export function priceAmount(key: PriceKey, currency: Currency): number {
   return PRICES[key][currency];

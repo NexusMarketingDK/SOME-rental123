@@ -2,9 +2,9 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getStripe, subscriptionLineItem } from "@/lib/stripe";
+import { getStripe, planLineItem } from "@/lib/stripe";
 import { getLocale, getCurrency } from "@/lib/locale-server";
-import { priceAmount } from "@/lib/currency";
+import { priceAmount, isPlanId, type PlanId } from "@/lib/currency";
 
 export async function getSubscription() {
   const supabase = await createClient();
@@ -37,7 +37,8 @@ export async function hasActiveSubscription(): Promise<boolean> {
   return sub?.status === "active" || sub?.status === "trialing";
 }
 
-export async function createSubscriptionCheckout(): Promise<void> {
+export async function createSubscriptionCheckout(formData?: FormData): Promise<void> {
+  const plan: PlanId = isPlanId(formData?.get("plan")) ? (formData!.get("plan") as PlanId) : "basic";
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -63,10 +64,13 @@ export async function createSubscriptionCheckout(): Promise<void> {
   const session = await getStripe().checkout.sessions.create({
     customer: customerId,
     mode: "subscription",
-    line_items: [subscriptionLineItem(currency)],
+    line_items: [planLineItem(plan, currency)],
+    // Carry the plan on the subscription so webhook renewals grant the right
+    // number of monthly post credits (Basic = 10, Pro = 20).
+    subscription_data: { metadata: { plan, user_id: user.id } },
     success_url: `${appUrl}/dashboard?payment=success`,
     cancel_url: `${appUrl}/billing`,
-    metadata: { user_id: user.id },
+    metadata: { user_id: user.id, plan },
     locale,
   });
 

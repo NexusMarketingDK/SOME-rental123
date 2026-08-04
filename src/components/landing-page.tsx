@@ -2,7 +2,7 @@ import Link from "next/link";
 import {
   CalendarDays, Share2, Sparkles, Video, Clock, CheckCircle2,
   ArrowRight, Home, Zap, Star, Users,
-  TrendingUp, Play, Globe, Link2,
+  TrendingUp, Play, Globe, Link2, Crown,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 import { LANDING, LOCALE_PATHS } from "@/lib/i18n";
@@ -482,28 +482,50 @@ export function LandingPage({ locale }: { locale: Locale }) {
             <h2 className="text-3xl font-bold text-white md:text-4xl">{t.priceTitle}</h2>
             <p className="mt-3 text-slate-400">{t.priceSub}</p>
           </div>
-          <div className="mx-auto grid max-w-3xl items-start gap-6 md:grid-cols-2">
-            {/* Studio access — subscription */}
-            <div className="relative rounded-2xl border border-blue-400/50 bg-white/[0.05] p-8 shadow-[0_0_45px_rgba(59,130,246,0.25)] backdrop-blur-sm">
-              <div className="mb-2 inline-flex items-center gap-2 rounded-lg bg-blue-500/15 px-2.5 py-1 text-xs font-semibold text-blue-300">
+          <p className="mx-auto mb-8 max-w-md text-center text-sm text-slate-400">
+            {t.freeAccountNote}
+          </p>
+          <div className="mx-auto grid max-w-5xl items-stretch gap-6 md:grid-cols-3">
+            {/* Basic — most popular */}
+            <div className="relative flex flex-col rounded-2xl border border-blue-400/50 bg-white/[0.05] p-8 shadow-[0_0_45px_rgba(59,130,246,0.25)] backdrop-blur-sm">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-blue-500 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">{t.mostPopular}</span>
+              <div className="mb-2 inline-flex w-fit items-center gap-2 rounded-lg bg-blue-500/15 px-2.5 py-1 text-xs font-semibold text-blue-300">
                 <Sparkles size={12} /> {t.plan1Name}
               </div>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-white">{formatPriceKey("subscription", currency)}</span>
+                <span className="text-4xl font-bold text-white">{formatPriceKey("basic", currency)}</span>
                 <span className="text-slate-400">{t.perMonth}</span>
               </div>
               <p className="text-xs text-slate-500">incl. VAT</p>
-              <ul className="my-7 flex flex-col gap-2.5">
+              <ul className="my-7 flex flex-1 flex-col gap-2.5">
                 {t.plan1Items.map((item) => <Check key={item}>{item}</Check>)}
               </ul>
-              <Link href="/signup" className="block w-full rounded-xl py-3 text-center text-sm font-bold text-white shadow-[0_0_20px_rgba(59,130,246,0.35)] transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #1e4f9a, #4d8dff)" }}>
+              <Link href="/signup" className="mt-auto block w-full rounded-xl py-3 text-center text-sm font-bold text-white shadow-[0_0_20px_rgba(59,130,246,0.35)] transition-opacity hover:opacity-90" style={{ background: "linear-gradient(135deg, #1e4f9a, #4d8dff)" }}>
                 {t.startFreeBtn}
               </Link>
             </div>
 
+            {/* Pro */}
+            <div className="flex flex-col rounded-2xl border border-orange-500/40 bg-orange-500/[0.06] p-8 backdrop-blur-sm">
+              <div className="mb-2 inline-flex w-fit items-center gap-2 rounded-lg bg-orange-500/15 px-2.5 py-1 text-xs font-semibold text-orange-400">
+                <Crown size={12} /> {t.plan3Name}
+              </div>
+              <div className="mt-4 flex items-baseline gap-1">
+                <span className="text-4xl font-bold text-white">{formatPriceKey("pro", currency)}</span>
+                <span className="text-slate-400">{t.perMonth}</span>
+              </div>
+              <p className="text-xs text-slate-500">incl. VAT</p>
+              <ul className="my-7 flex flex-1 flex-col gap-2.5">
+                {t.plan3Items.map((item) => <Check key={item}>{item}</Check>)}
+              </ul>
+              <Link href="/signup" className="mt-auto block w-full rounded-xl py-3 text-center text-sm font-bold text-white transition-opacity hover:opacity-90" style={{ background: ORANGE_GRADIENT }}>
+                {t.plan3OrderBtn}
+              </Link>
+            </div>
+
             {/* Presentation video — pay per use */}
-            <div className="rounded-2xl border border-orange-500/25 bg-orange-500/[0.06] p-8 backdrop-blur-sm">
-              <div className="mb-2 inline-flex items-center gap-2 rounded-lg bg-orange-500/15 px-2.5 py-1 text-xs font-semibold text-orange-400">
+            <div className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-sm">
+              <div className="mb-2 inline-flex w-fit items-center gap-2 rounded-lg bg-white/10 px-2.5 py-1 text-xs font-semibold text-slate-300">
                 <Video size={12} /> {t.plan2Name}
               </div>
               <div className="mt-4 flex items-baseline gap-1">
@@ -511,10 +533,10 @@ export function LandingPage({ locale }: { locale: Locale }) {
                 <span className="text-slate-400">{t.videoAddonPer}</span>
               </div>
               <p className="text-xs text-slate-500">{t.plan2PayLabel}</p>
-              <ul className="my-7 flex flex-col gap-2.5">
+              <ul className="my-7 flex flex-1 flex-col gap-2.5">
                 {t.plan2Items.map((item) => <Check key={item}>{item}</Check>)}
               </ul>
-              <Link href="/signup" className="block w-full rounded-xl py-3 text-center text-sm font-bold text-white transition-opacity hover:opacity-90" style={{ background: ORANGE_GRADIENT }}>
+              <Link href="/signup" className="mt-auto block w-full rounded-xl border border-white/20 py-3 text-center text-sm font-bold text-white transition hover:bg-white/10">
                 {t.planProCta}
               </Link>
             </div>

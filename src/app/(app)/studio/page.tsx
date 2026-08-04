@@ -136,9 +136,9 @@ export default function StudioPage() {
                 <Crown size={22} className="text-orange-300" />
               </div>
               <div>
-                <h2 className="text-xl font-bold">Studie-adgang — €10/md</h2>
+                <h2 className="text-xl font-bold">Basic €20/md · Pro €99/md</h2>
                 <p className="mt-1 max-w-lg text-sm leading-relaxed text-slate-300">
-                  Adgang til studiet og din månedlige opslag-saldo. Præsentationsvideoer betales pr. stk. (€50). Opsig når som helst.
+                  Basic giver 10 opslag om måneden med direkte deling og automation. Pro inkluderer 2 videoer og 20 opslag. Ekstra præsentationsvideoer betales pr. stk. (€20). Opsig når som helst.
                 </p>
               </div>
             </div>

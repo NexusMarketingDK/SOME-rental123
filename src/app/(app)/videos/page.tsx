@@ -112,7 +112,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Kan jeg bestille flere videoer til samme bolig?",
-    a: "Ja. Din pakke inkluderer et fast antal videoer hver måned (1 på Starter, 2 på Pro, 6 på Business), og ekstra videoer kan altid tilkøbes — perfekt til at fremhæve forskellige rum eller årstider.",
+    a: "Ja. Pro-planen inkluderer 2 præsentationsvideoer hver måned, og ekstra videoer kan altid tilkøbes for €20/stk. På Free og Basic betaler du 20 € pr. video — perfekt til at fremhæve forskellige rum eller årstider.",
   },
   {
     q: "Hvad hvis jeg ikke er tilfreds med videoen?",
