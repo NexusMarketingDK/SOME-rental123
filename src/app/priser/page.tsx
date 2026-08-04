@@ -201,8 +201,8 @@ export default async function PriserPage() {
                 Sådan ser en AI-genereret præsentationsvideo ud. Indsæt et link til din annonce — AI&apos;en henter billederne, bygger fotoruten og leverer en cinematisk video i 9:16 til Reels & TikTok.
               </p>
               <ul className="flex flex-col gap-2 text-sm text-slate-300">
-                <CheckItem><span className="text-slate-300">Prøv selv: scroll i videoen for at gå rundt i boligen</span></CheckItem>
-                <CheckItem><span className="text-slate-300">Skift farvestemning med filtre</span></CheckItem>
+                <CheckItem><span className="text-slate-300">Cinematiske kamerabevægelser gennem hvert rum</span></CheckItem>
+                <CheckItem><span className="text-slate-300">Musik, overgange og undertekster tilføjes automatisk</span></CheckItem>
                 <CheckItem><span className="text-slate-300">Klar på under 15 minutter</span></CheckItem>
               </ul>
             </div>
