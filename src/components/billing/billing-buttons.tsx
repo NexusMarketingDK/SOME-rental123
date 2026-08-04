@@ -2,14 +2,29 @@
 
 import { createSubscriptionCheckout, createAiCreditCheckout, createVideoOrderCheckout, createBillingPortalSession } from "@/services/billing";
 
-export function SubscribeButton({ price }: { price: string }) {
+export function SubscribeButton({
+  plan,
+  price,
+  label,
+  variant = "primary",
+}: {
+  plan: "basic" | "pro";
+  price: string;
+  label?: string;
+  variant?: "primary" | "pro";
+}) {
+  const cls =
+    variant === "pro"
+      ? "bg-[#FF6B4A] hover:bg-[#e85c3d]"
+      : "bg-[#1B3F7A] hover:bg-[#152f5c]";
   return (
     <form action={createSubscriptionCheckout}>
+      <input type="hidden" name="plan" value={plan} />
       <button
         type="submit"
-        className="rounded-lg bg-[#1B3F7A] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#152f5c] transition-colors"
+        className={`w-full rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition-colors ${cls}`}
       >
-        Start abonnement — {price}/md
+        {label ?? "Vælg plan"} — {price}/md
       </button>
     </form>
   );

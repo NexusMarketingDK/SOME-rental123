@@ -6,7 +6,7 @@ import { Sparkles, Volume2, VolumeX } from "lucide-react";
 // A real AI-generated sample presentation video, shown in a 9:16 phone frame
 // to illustrate the actual product output on the landing page.
 const DEMO_VIDEO_URL =
-  "https://r2.veo3ai.io/videos/ed952c81-3bcf-4d52-bdfc-f2c4a312f155-1080p-1785068502029.mp4";
+  "https://acwfpiyswezwecemnndw.supabase.co/storage/v1/object/public/videos/38fe7fda-f755-4942-aba2-17642e3774e1/upload-1785073692222.mp4";
 
 export function DemoVideoPhone({
   label,

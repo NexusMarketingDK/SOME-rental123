@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Video, ArrowRight } from "lucide-react";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
-import { CinematicWalkthrough } from "@/components/walkthrough/cinematic-walkthrough";
+import { DemoVideoPhone } from "@/components/demo-video-phone";
 import { JsonLd } from "@/components/seo/json-ld";
 import { CATEGORIES, POSTS, formatDate } from "@/lib/blog";
 
@@ -76,6 +76,30 @@ export default function BlogPage() {
       </div>
 
       <div className="mx-auto max-w-6xl px-6 py-10 space-y-16">
+        {/* Featured guide — presentation video */}
+        <Link
+          href="/blog/praesentationsvideo"
+          className="group flex flex-col items-start gap-5 overflow-hidden rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 to-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:flex-row sm:items-center sm:p-8"
+        >
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl" style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}>
+            <Video size={26} className="text-white" />
+          </div>
+          <div className="flex-1">
+            <span className="mb-1.5 inline-block rounded-full bg-orange-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#FF6B4A]">
+              Fremhævet guide
+            </span>
+            <h2 className="text-lg font-bold text-slate-900 group-hover:text-[#FF6B4A] transition-colors">
+              Præsentationsvideo til din bolig — fra link til færdig video på minutter
+            </h2>
+            <p className="mt-1 text-sm leading-relaxed text-slate-500">
+              Se hele brugerflowet med interaktiv simulering, fordelene ved video og hvordan det løfter din SEO.
+            </p>
+          </div>
+          <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold text-[#FF6B4A]">
+            Læs guiden <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+          </span>
+        </Link>
+
         {CATEGORIES.map((cat) => {
           const catPosts = POSTS.filter((p) => p.category === cat.id);
           const Icon = cat.icon;
@@ -149,7 +173,7 @@ export default function BlogPage() {
               <span className="mb-3 inline-block rounded-full border border-orange-400/30 bg-orange-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-orange-300">Live demo</span>
               <h2 className="text-xl font-bold mb-2">Klar til at gøre din bolig uimodståelig?</h2>
               <p className="text-blue-200 text-sm mb-6 max-w-md mx-auto md:mx-0">
-                AI genererer sælgende SOME-opslag og professionelle præsentationsvideoer direkte fra din annonce — klar på minutter. Prøv demoen her: scroll i videoen for at gå rundt i boligen.
+                AI genererer sælgende SOME-opslag og professionelle præsentationsvideoer direkte fra din annonce — klar på minutter. Se en rigtig AI-genereret præsentationsvideo her ved siden af.
               </p>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                 <Link
@@ -170,7 +194,7 @@ export default function BlogPage() {
               <div className="relative w-full max-w-[280px]">
                 <div className="absolute inset-0 scale-90 rounded-[2.5rem] opacity-40 blur-2xl" style={{ background: "linear-gradient(135deg, #FFB36B, #FF6B4A)" }} />
                 <div className="relative">
-                  <CinematicWalkthrough locale="da" />
+                  <DemoVideoPhone />
                 </div>
               </div>
             </div>

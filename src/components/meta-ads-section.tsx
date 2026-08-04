@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Megaphone, Target, Repeat, BarChart3, Rocket, ArrowRight, Lock, CheckCircle2 } from "lucide-react";
+import { Megaphone, Target, Repeat, BarChart3, Rocket, ArrowRight, Lock, CheckCircle2, Crown } from "lucide-react";
+import { createMetaAddonCheckout } from "@/services/billing";
 
 /** What the Meta Marketing API integration unlocks — shared across dashboard & pricing. */
 export const META_ADS_CAPABILITIES: { icon: React.ElementType; title: string; desc: string }[] = [
@@ -27,12 +28,13 @@ export const META_ADS_CAPABILITIES: { icon: React.ElementType; title: string; de
 
 /**
  * Meta advertising promo/feature block. Rendered on the dashboard (for logged-in
- * users) and reused on the pricing page to describe the Business-only capability.
+ * users) to describe the Meta Marketing API capability.
  *
- * `hasBusiness` toggles between the "connect your Meta account" state and the
- * "available with Business" upsell.
+ * `hasMetaAds` toggles between the "connect your Meta account" state and the
+ * upsell — the connection is included in Pro, or available as a monthly add-on
+ * priced at `addonPrice`.
  */
-export function MetaAdsSection({ hasBusiness = false }: { hasBusiness?: boolean }) {
+export function MetaAdsSection({ hasMetaAds = false, addonPrice }: { hasMetaAds?: boolean; addonPrice?: string }) {
   return (
     <div
       className="relative overflow-hidden rounded-2xl border border-white/10 p-6 md:p-8 text-white"
@@ -50,26 +52,26 @@ export function MetaAdsSection({ hasBusiness = false }: { hasBusiness?: boolean 
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-bold">Meta annoncering</h2>
-                <span className="rounded-full bg-orange-500/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange-300">Business</span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-orange-500/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange-300"><Crown size={10} /> Pro</span>
               </div>
               <p className="text-xs text-blue-200">Drevet af Meta Marketing API</p>
             </div>
           </div>
-          {hasBusiness ? (
+          {hasMetaAds ? (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300">
               <CheckCircle2 size={13} /> Aktiv på din pakke
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-blue-100">
-              <Lock size={12} /> Inkluderet i Business
+              <Lock size={12} /> Inkluderet i Pro{addonPrice ? ` · tilkøb ${addonPrice}/md.` : ""}
             </span>
           )}
         </div>
 
         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-blue-100">
-          Med Business-pakken forbinder du din Meta Business-konto og bruger dine AI-videoer og opslag til
-          rigtige annoncekampagner på Facebook og Instagram — direkte fra somevideopost.com via Metas
-          Marketing API.
+          Forbind din Meta Business-konto og brug dine AI-videoer og opslag til rigtige annoncekampagner på
+          Facebook og Instagram — direkte fra somevideopost.com via Metas Marketing API. Inkluderet i Pro,
+          eller tilkøb{addonPrice ? ` for ${addonPrice}/md.` : " som månedligt add-on"}.
         </p>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -87,7 +89,7 @@ export function MetaAdsSection({ hasBusiness = false }: { hasBusiness?: boolean 
         </div>
 
         <div className="mt-6 flex flex-wrap items-center gap-3">
-          {hasBusiness ? (
+          {hasMetaAds ? (
             <Link
               href="/accounts/connect"
               className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-[#14306b] transition-opacity hover:opacity-90"
@@ -95,13 +97,23 @@ export function MetaAdsSection({ hasBusiness = false }: { hasBusiness?: boolean 
               <Megaphone size={15} /> Forbind Meta-konto
             </Link>
           ) : (
-            <Link
-              href="/priser"
-              className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_25px_rgba(255,107,74,0.35)] transition-opacity hover:opacity-90"
-              style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
-            >
-              <Rocket size={15} /> Få Meta annoncering med Business <ArrowRight size={15} />
-            </Link>
+            <>
+              <Link
+                href="/priser"
+                className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white shadow-[0_0_25px_rgba(255,107,74,0.35)] transition-opacity hover:opacity-90"
+                style={{ background: "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)" }}
+              >
+                <Crown size={15} /> Opgradér til Pro <ArrowRight size={15} />
+              </Link>
+              <form action={createMetaAddonCheckout}>
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/20"
+                >
+                  <Rocket size={15} /> Tilkøb{addonPrice ? ` — ${addonPrice}/md.` : " Meta annoncering"}
+                </button>
+              </form>
+            </>
           )}
           <Link href="/priser" className="text-sm font-medium text-blue-200 transition-colors hover:text-white">
             Se priser

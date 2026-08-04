@@ -2,9 +2,9 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getStripe, subscriptionLineItem } from "@/lib/stripe";
+import { getStripe, planLineItem } from "@/lib/stripe";
 import { getLocale, getCurrency } from "@/lib/locale-server";
-import { priceAmount } from "@/lib/currency";
+import { priceAmount, isPlanId, type PlanId } from "@/lib/currency";
 
 export async function getSubscription() {
   const supabase = await createClient();
@@ -37,7 +37,8 @@ export async function hasActiveSubscription(): Promise<boolean> {
   return sub?.status === "active" || sub?.status === "trialing";
 }
 
-export async function createSubscriptionCheckout(): Promise<void> {
+export async function createSubscriptionCheckout(formData?: FormData): Promise<void> {
+  const plan: PlanId = isPlanId(formData?.get("plan")) ? (formData!.get("plan") as PlanId) : "basic";
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -63,10 +64,57 @@ export async function createSubscriptionCheckout(): Promise<void> {
   const session = await getStripe().checkout.sessions.create({
     customer: customerId,
     mode: "subscription",
-    line_items: [subscriptionLineItem(currency)],
+    line_items: [planLineItem(plan, currency)],
+    // Carry the plan on the subscription so webhook renewals grant the right
+    // number of monthly post credits (Basic = 10, Pro = 20).
+    subscription_data: { metadata: { plan, user_id: user.id } },
     success_url: `${appUrl}/dashboard?payment=success`,
     cancel_url: `${appUrl}/billing`,
-    metadata: { user_id: user.id },
+    metadata: { user_id: user.id, plan },
+    locale,
+  });
+
+  redirect(session.url!);
+}
+
+/**
+ * Buy the Meta advertising connection as a standalone monthly add-on (for users
+ * who aren't on Pro, where it's already included). This is a separate Stripe
+ * subscription tagged `type: meta_ads` so the webhook doesn't treat it as a
+ * plan (it grants no post credits and doesn't overwrite the plan row).
+ */
+export async function createMetaAddonCheckout(): Promise<void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.somevideopost.com";
+  const [locale, currency] = await Promise.all([getLocale(), getCurrency()]);
+
+  // Reuse the existing Stripe customer if the user already has one.
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select("stripe_customer_id")
+    .eq("user_id", user.id)
+    .single();
+  const customerId = sub?.stripe_customer_id ?? undefined;
+
+  const session = await getStripe().checkout.sessions.create({
+    ...(customerId ? { customer: customerId } : { customer_email: user.email }),
+    mode: "subscription",
+    line_items: [{
+      price_data: {
+        currency,
+        product_data: { name: "Meta annoncering (tilkøb)" },
+        unit_amount: priceAmount("metaAds", currency),
+        recurring: { interval: "month" },
+      },
+      quantity: 1,
+    }],
+    subscription_data: { metadata: { type: "meta_ads", user_id: user.id } },
+    success_url: `${appUrl}/dashboard?addon=meta_ads`,
+    cancel_url: `${appUrl}/billing`,
+    metadata: { user_id: user.id, type: "meta_ads" },
     locale,
   });
 

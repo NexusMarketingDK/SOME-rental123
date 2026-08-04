@@ -11,6 +11,13 @@ const VEO_MODEL = process.env.VEO_MODEL || "veo-3.1-generate-preview";
 const VEO_ASPECT_RATIO = process.env.VEO_ASPECT_RATIO || "16:9";
 // Veo 3 supports "720p" and "1080p" (1080p is 16:9 only).
 const VEO_RESOLUTION = process.env.VEO_RESOLUTION || "720p";
+// Clip length in seconds. Veo 3.1 accepts an integer from 5–8; 8 is the max
+// and the length we ship every clip at. Override per-env if a shorter/cheaper
+// tier is ever needed, but the value is clamped to Veo's supported 5–8 range.
+const VEO_DURATION_SECONDS = Math.min(
+  8,
+  Math.max(5, Number(process.env.VEO_DURATION_SECONDS || "8"))
+);
 // Keeps Veo 3's native audio clean for a property walkthrough: no talking
 // heads, captions, watermarks or warped rooms.
 const VEO_NEGATIVE_PROMPT =
@@ -54,7 +61,7 @@ function buildCinematicPrompt(roomLabel: string, title: string, index: number): 
     `Mood: ${def.mood}. ` +
     `Architectural focus: ${def.focus}. ` +
     `Interior design style: ${def.style}. ` +
-    `Transition: ${def.transition}. Duration: ${def.duration}. ` +
+    `Transition: ${def.transition}. Duration: ${VEO_DURATION_SECONDS} seconds. ` +
     `Property: ${title}. Scene ${index + 1} of a seamless luxury walkthrough filmed by a professional drone and Steadicam operator. ` +
     `Ultra-high quality, photorealistic, 4K cinematic real estate film. ` +
     // Veo 3 generates native audio — steer it toward subtle ambient sound only.
@@ -144,6 +151,7 @@ export async function startVideoGeneration(
             parameters: {
               aspectRatio: VEO_ASPECT_RATIO,
               resolution: VEO_RESOLUTION,
+              durationSeconds: VEO_DURATION_SECONDS,
               negativePrompt: VEO_NEGATIVE_PROMPT,
               sampleCount: 1,
             },
