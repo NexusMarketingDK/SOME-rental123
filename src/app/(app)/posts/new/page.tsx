@@ -192,7 +192,7 @@ export default function GeneratePostPage() {
       {/* Info banner */}
       <div className="border-b border-orange-100 bg-orange-50 px-4 py-2.5 md:px-8 md:py-3">
         <p className="text-sm text-orange-800">
-          <span className="font-semibold">5 kr. pr. opslag</span> — trækkes fra din månedlige saldo (abonnement €10/md).
+          <span className="font-semibold">5 kr. pr. opslag</span> — trækkes fra din månedlige saldo (Basic €20/md, Pro €99/md).
         </p>
       </div>
 
@@ -234,9 +234,10 @@ export default function GeneratePostPage() {
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Priser</p>
                 <div className="space-y-2">
                   {[
-                    { label: "Abonnement", price: "€10 / md" },
+                    { label: "Basic-plan", price: "€20 / md" },
+                    { label: "Pro-plan", price: "€99 / md" },
                     { label: "Pr. opslag", price: "5 kr." },
-                    { label: "Præsentationsvideo", price: "€50" },
+                    { label: "Præsentationsvideo", price: "€20" },
                   ].map((row) => (
                     <div key={row.label} className="flex items-center justify-between text-sm">
                       <span className="text-slate-600">{row.label}</span>
@@ -304,7 +305,7 @@ export default function GeneratePostPage() {
                 {noCredits && (
                   <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
                     <p className="text-sm font-semibold text-amber-800">Ingen saldo tilbage</p>
-                    <p className="mt-0.5 text-xs text-amber-700">Tegn abonnementet (€10/md) for at få din månedlige opslag-saldo.</p>
+                    <p className="mt-0.5 text-xs text-amber-700">Vælg Basic (€20/md) eller Pro (€99/md) for at få din månedlige opslag-saldo.</p>
                     <Link href="/billing" className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 underline">
                       <ShoppingCart size={11} /> Tegn abonnement
                     </Link>

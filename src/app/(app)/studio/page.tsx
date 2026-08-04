@@ -20,7 +20,7 @@ const TOOLS = [
     icon: Clapperboard,
     title: "Præsentationsvideo",
     text: "Forvandl boligens billeder til en cinematisk video med kamerabevægelser og musik.",
-    tag: "€50 / video",
+    tag: "€20 / video",
     gradient: "linear-gradient(135deg,#FFB36B,#FF6B4A)",
   },
   {
