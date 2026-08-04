@@ -77,6 +77,50 @@ export async function createSubscriptionCheckout(formData?: FormData): Promise<v
   redirect(session.url!);
 }
 
+/**
+ * Buy the Meta advertising connection as a standalone monthly add-on (for users
+ * who aren't on Pro, where it's already included). This is a separate Stripe
+ * subscription tagged `type: meta_ads` so the webhook doesn't treat it as a
+ * plan (it grants no post credits and doesn't overwrite the plan row).
+ */
+export async function createMetaAddonCheckout(): Promise<void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.somevideopost.com";
+  const [locale, currency] = await Promise.all([getLocale(), getCurrency()]);
+
+  // Reuse the existing Stripe customer if the user already has one.
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select("stripe_customer_id")
+    .eq("user_id", user.id)
+    .single();
+  const customerId = sub?.stripe_customer_id ?? undefined;
+
+  const session = await getStripe().checkout.sessions.create({
+    ...(customerId ? { customer: customerId } : { customer_email: user.email }),
+    mode: "subscription",
+    line_items: [{
+      price_data: {
+        currency,
+        product_data: { name: "Meta annoncering (tilkøb)" },
+        unit_amount: priceAmount("metaAds", currency),
+        recurring: { interval: "month" },
+      },
+      quantity: 1,
+    }],
+    subscription_data: { metadata: { type: "meta_ads", user_id: user.id } },
+    success_url: `${appUrl}/dashboard?addon=meta_ads`,
+    cancel_url: `${appUrl}/billing`,
+    metadata: { user_id: user.id, type: "meta_ads" },
+    locale,
+  });
+
+  redirect(session.url!);
+}
+
 export async function createAiCreditCheckout(formData: FormData): Promise<void> {
   const credits = parseInt(String(formData.get("credits") ?? "10"));
   const supabase = await createClient();

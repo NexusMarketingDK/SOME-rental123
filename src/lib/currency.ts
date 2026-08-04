@@ -46,6 +46,8 @@ export const PRICES = {
   // Pay-per-use presentation video (charged when generation reaches 80%)
   video: { dkk: 14900, eur: 2000 },   // 149 kr. / €20 per video
   aiPost: { dkk: 500,  eur: 67 },     // 5 kr. / €0.67 — 1 credit = 1 post
+  // Meta advertising connection — included in Pro, else a monthly add-on.
+  metaAds: { dkk: 7500, eur: 1000 },  // 75 kr. / €10 per month
 } as const;
 
 export type PriceKey = keyof typeof PRICES;
@@ -69,6 +71,12 @@ export const PLAN_POST_CREDITS: Record<PlanId, number> = {
 export const PLAN_INCLUDED_VIDEOS: Record<PlanId, number> = {
   basic: 0,
   pro: 2,
+};
+
+/** Whether the Meta advertising connection is included in the plan. */
+export const PLAN_INCLUDES_META_ADS: Record<PlanId, boolean> = {
+  basic: false,
+  pro: true,
 };
 
 /** Which price key each plan is billed at. */

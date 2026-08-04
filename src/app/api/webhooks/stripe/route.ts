@@ -24,7 +24,9 @@ export async function POST(req: NextRequest) {
       const userId = session.metadata?.user_id;
       if (!userId) break;
 
-      if (session.mode === "subscription") {
+      // Only real plans (Basic/Pro) own the subscriptions row. The Meta-ads
+      // add-on is a separate subscription and must not overwrite the plan row.
+      if (session.mode === "subscription" && session.metadata?.type !== "meta_ads") {
         await supabase.from("subscriptions").upsert({
           user_id: userId,
           stripe_customer_id: String(session.customer),
@@ -133,17 +135,21 @@ export async function POST(req: NextRequest) {
       // metadata at checkout, so renewals grant the right monthly balance
       // (Basic = 10 posts, Pro = 20). Default to Basic if it's missing.
       let plan: PlanId = "basic";
+      let isAddon = false;
       const subId =
         String((invoice as unknown as { subscription?: string }).subscription ?? "") ||
         String(sub.stripe_subscription_id ?? "");
       if (subId) {
         try {
           const stripeSub = await getStripe().subscriptions.retrieve(subId);
+          if (stripeSub.metadata?.type === "meta_ads") isAddon = true;
           if (isPlanId(stripeSub.metadata?.plan)) plan = stripeSub.metadata.plan as PlanId;
         } catch {
           // Fall back to Basic credits if the subscription can't be read.
         }
       }
+      // The Meta-ads add-on grants no monthly post credits.
+      if (isAddon) break;
       const monthlyCredits = PLAN_POST_CREDITS[plan];
 
       const { data: existing } = await supabase

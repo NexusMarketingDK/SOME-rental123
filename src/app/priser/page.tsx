@@ -41,6 +41,7 @@ export default async function PriserPage() {
   const proPrice = formatPriceKey("pro", currency);
   const videoPrice = formatPriceKey("video", currency);
   const postPrice = formatPriceKey("aiPost", currency, { decimals: true });
+  const metaAdsPrice = formatPriceKey("metaAds", currency);
 
   return (
     <div className="min-h-screen text-slate-100" style={{ background: "#050d24" }}>
@@ -115,6 +116,7 @@ export default async function PriserPage() {
               <CheckItem>Del direkte på Facebook & Instagram</CheckItem>
               <CheckItem>Automation & planlægning af opslag</CheckItem>
               <CheckItem>Præsentationsvideoer for {videoPrice}/stk.</CheckItem>
+              <CheckItem>Meta-annoncering som tilkøb ({metaAdsPrice}/md.)</CheckItem>
               <CheckItem>Alle studie-værktøjer og downloads</CheckItem>
             </ul>
             <div className="mt-auto">
@@ -144,6 +146,7 @@ export default async function PriserPage() {
             <ul className="my-6 flex flex-1 flex-col gap-2.5">
               <CheckItem><strong className="text-white">{PLAN_INCLUDED_VIDEOS.pro} præsentationsvideoer</strong> inkluderet hver måned</CheckItem>
               <CheckItem><strong className="text-white">{PLAN_POST_CREDITS.pro} SoMe-opslag</strong> (tekst + billede) hver måned</CheckItem>
+              <CheckItem><strong className="text-white">Meta-annoncering inkluderet</strong> (Marketing API)</CheckItem>
               <CheckItem>Del direkte på alle sociale medier</CheckItem>
               <CheckItem>Automation, planlægning & prioriteret support</CheckItem>
               <CheckItem>Ekstra videoer for {videoPrice}/stk.</CheckItem>

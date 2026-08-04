@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Plus, CalendarClock, Send, Video, Sparkles, ArrowRight, Flame, Target, Users, BarChart2, TrendingUp, TrendingDown, CheckCircle2, Clock, Play } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrency } from "@/lib/locale-server";
+import { formatPriceKey } from "@/lib/currency";
 import type { Post, SocialAccount } from "@/types/database";
 import { VideoProgressBadge } from "@/components/video-progress-badge";
 import { MetaAdsSection } from "@/components/meta-ads-section";
@@ -59,7 +61,8 @@ function TrendBadge({ current, previous }: { current: number; previous: number }
 
 
 export default async function DashboardPage() {
-  const data = await getDashboardData();
+  const [data, currency] = await Promise.all([getDashboardData(), getCurrency()]);
+  const metaAddonPrice = formatPriceKey("metaAds", currency);
   const firstName = data.userEmail.split("@")[0];
   const now = new Date();
   const weekStart = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000);
@@ -204,8 +207,8 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* ── Meta advertising (Business) ── */}
-      <MetaAdsSection />
+      {/* ── Meta advertising (Pro / add-on) ── */}
+      <MetaAdsSection addonPrice={metaAddonPrice} />
 
       {/* ── Streak / Goals / Score ── */}
       <div className="grid grid-cols-3 gap-4">

@@ -13,6 +13,7 @@ export default async function BillingPage() {
   const proPrice = formatPriceKey("pro", currency);
   const aiPostPrice = formatPriceKey("aiPost", currency, { decimals: currency === "eur" });
   const videoPrice = formatPriceKey("video", currency);
+  const metaAdsPrice = formatPriceKey("metaAds", currency);
   const creditPacks = [10, 25, 50].map((c) => ({
     credits: c,
     price: formatPrice(priceAmount("aiPost", currency) * c, currency),
@@ -59,6 +60,7 @@ export default async function BillingPage() {
                       "Direkte deling til sociale medier",
                       "Automation & planlægning",
                       `Præsentationsvideoer for ${videoPrice}/stk.`,
+                      `Meta-annoncering som tilkøb (${metaAdsPrice}/md.)`,
                     ].map((f) => (
                       <li key={f} className="flex items-start gap-2 text-sm text-slate-700">
                         <CheckCircle2 size={14} className="mt-0.5 text-[#1B3F7A] shrink-0" />
@@ -80,6 +82,7 @@ export default async function BillingPage() {
                     {[
                       `${PLAN_INCLUDED_VIDEOS.pro} præsentationsvideoer inkluderet hver måned`,
                       `${PLAN_POST_CREDITS.pro} SoMe-opslag (tekst + billede) hver måned`,
+                      "Meta-annoncering inkluderet (Marketing API)",
                       "Direkte deling til sociale medier",
                       "Automation, planlægning & prioriteret support",
                     ].map((f) => (
