@@ -39,7 +39,7 @@ const FAQ = [
   },
   {
     q: "Hvor hurtigt er en AI-video klar?",
-    a: "De fleste præsentationsvideoer er færdige på under 15 minutter. Du indsætter blot et boliglink eller uploader dine fotos, vælger stil, og AI genererer video med kamerabevægelser, overgange og musik, mens du følger fremdriften live i dashboardet.",
+    a: "De fleste præsentationsvideoer er færdige på under 5 minutter. Du indsætter blot et boliglink eller uploader dine fotos, vælger stil, og AI genererer video med kamerabevægelser, overgange og musik, mens du følger fremdriften live i dashboardet.",
   },
   {
     q: "Kan jeg dele direkte på Facebook, Instagram, TikTok og LinkedIn?",
@@ -181,7 +181,7 @@ export default function WhySomeVideoPostPage() {
               </div>
               <div className="mt-8 flex flex-wrap gap-6 border-t border-white/10 pt-6">
                 {[
-                  { icon: Clock, val: "< 15 min", label: "Video leveret" },
+                  { icon: Clock, val: "< 5 min", label: "Video leveret" },
                   { icon: TrendingUp, val: "op til 80 %", label: "Flere bookinger med video" },
                   { icon: Share2, val: "5 kanaler", label: "Del med ét klik" },
                 ].map((s) => (
@@ -419,7 +419,7 @@ export default function WhySomeVideoPostPage() {
         <div className="relative mx-auto max-w-3xl px-6 text-center">
           <h2 className="text-3xl font-bold md:text-4xl">Klar til at markedsføre din bolig på autopilot?</h2>
           <p className="mx-auto mt-4 max-w-lg text-slate-300">
-            Gå fra boliglink til færdig video og opslag på minutter. Pakker fra €50/md. med præsentationsvideoer inkluderet.
+            Gå fra boliglink til færdig video og opslag på minutter. Gratis at starte — Basic fra €20/md., eller Pro €99/md. med præsentationsvideoer inkluderet.
           </p>
           <Link href="/signup" className="mt-8 inline-flex items-center gap-2 rounded-xl px-8 py-4 text-base font-bold text-white shadow-[0_0_35px_rgba(255,107,74,0.4)] transition-opacity hover:opacity-90" style={{ background: ORANGE_GRADIENT }}>
             Kom i gang i dag <ArrowRight size={18} />

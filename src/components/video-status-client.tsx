@@ -341,7 +341,7 @@ export function VideoStatusClient({ orderId, initialStatus, initialVideoUrl, ini
           <Loader2 size={20} className="text-blue-600 animate-spin shrink-0" />
           <div>
             <p className="font-semibold text-blue-900">AI genererer din video...</p>
-            <p className="text-sm text-blue-700">Leveres inden for 5-15 minutter</p>
+            <p className="text-sm text-blue-700">Leveres inden for 5 minutter</p>
           </div>
         </div>
 

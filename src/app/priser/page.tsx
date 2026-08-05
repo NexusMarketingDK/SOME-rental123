@@ -256,7 +256,7 @@ export default async function PriserPage() {
               <ul className="flex flex-col gap-2 text-sm text-slate-300">
                 <CheckItem><span className="text-slate-300">Cinematiske kamerabevægelser gennem hvert rum</span></CheckItem>
                 <CheckItem><span className="text-slate-300">Musik, overgange og undertekster tilføjes automatisk</span></CheckItem>
-                <CheckItem><span className="text-slate-300">Klar på under 15 minutter</span></CheckItem>
+                <CheckItem><span className="text-slate-300">Klar på under 5 minutter</span></CheckItem>
               </ul>
             </div>
             <div className="flex justify-center">

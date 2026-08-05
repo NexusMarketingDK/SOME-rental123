@@ -403,7 +403,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
               <div className="grid grid-cols-3 gap-4">
                 {[
                   { value: "3×", label: t.aiStat1 },
-                  { value: "15 min", label: t.aiStat2 },
+                  { value: "5 min", label: t.aiStat2 },
                   { value: "9:16", label: t.aiStat3 },
                 ].map((s) => (
                   <div key={s.label} className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">

@@ -213,7 +213,7 @@ export default function GeneratePostPage() {
                 <h2 className="mb-1 text-xl font-bold leading-snug">
                   Generer SOME<br />opslag med AI
                 </h2>
-                <p className="mb-5 text-sm text-blue-200">Fra boliglink til færdigt opslag på få sekunder</p>
+                <p className="mb-5 text-sm text-blue-200">Fra boliglink til færdigt opslag på ca. 30 sekunder</p>
                 <div className="mb-5 flex items-center gap-1">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} size={13} className="fill-yellow-400 text-yellow-400" />

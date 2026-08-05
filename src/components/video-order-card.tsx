@@ -141,7 +141,7 @@ function ProgressSection({
           {checking ? <Loader2 size={9} className="animate-spin" /> : <RefreshCw size={9} />}
           {checking ? "Tjekker..." : "Tjek nu"}
         </button>
-        <span className="text-[10px] text-blue-400">{pct}% — typisk klar inden 15 min</span>
+        <span className="text-[10px] text-blue-400">{pct}% — typisk klar inden 5 min</span>
       </div>
     </div>
   );

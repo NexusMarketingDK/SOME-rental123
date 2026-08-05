@@ -4,25 +4,43 @@ import { BrandWordmark } from "@/components/layout/brand-wordmark";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import type { Locale } from "@/lib/i18n";
 
-type NavKey = "home" | "features" | "video" | "why" | "blog" | "pricing";
+type NavKey = "home" | "features" | "integrations" | "video" | "why" | "blog" | "pricing";
 
 const ORANGE_GRADIENT = "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)";
 
-const NAV_LINKS: { key: NavKey; href: string; label: string; external?: boolean }[] = [
-  { key: "home", href: "/", label: "Forside" },
-  { key: "features", href: "/#features", label: "Funktioner", external: true },
-  { key: "video", href: "/#ai", label: "Video", external: true },
-  { key: "why", href: "/hvorfor-somevideopost", label: "Hvorfor os" },
-  { key: "blog", href: "/blog", label: "Blog" },
-  { key: "pricing", href: "/priser", label: "Priser" },
+const NAV_LINKS: { key: NavKey; href: string; external?: boolean }[] = [
+  { key: "home", href: "/" },
+  { key: "features", href: "/#features", external: true },
+  { key: "integrations", href: "/integrationer" },
+  { key: "video", href: "/#ai", external: true },
+  { key: "why", href: "/hvorfor-somevideopost" },
+  { key: "blog", href: "/blog" },
+  { key: "pricing", href: "/priser" },
 ];
+
+const NAV_LABELS: Record<Locale, Record<NavKey, string>> = {
+  da: { home: "Forside", features: "Funktioner", integrations: "Integrationer", video: "Video", why: "Hvorfor os", blog: "Blog", pricing: "Priser" },
+  en: { home: "Home", features: "Features", integrations: "Integrations", video: "Video", why: "Why us", blog: "Blog", pricing: "Pricing" },
+  es: { home: "Inicio", features: "Funciones", integrations: "Integraciones", video: "Vídeo", why: "Por qué", blog: "Blog", pricing: "Precios" },
+  de: { home: "Start", features: "Funktionen", integrations: "Integrationen", video: "Video", why: "Warum wir", blog: "Blog", pricing: "Preise" },
+};
+
+const AUX: Record<Locale, { login: string; cta: string }> = {
+  da: { login: "Log ind", cta: "Kom i gang" },
+  en: { login: "Log in", cta: "Get started" },
+  es: { login: "Iniciar sesión", cta: "Empezar" },
+  de: { login: "Anmelden", cta: "Loslegen" },
+};
 
 /**
  * Shared sticky marketing header (dark, front-page style) used across the public
- * sub-pages (blog, articles, pricing, why…). Mirrors the landing-page nav so the
- * menu is identical everywhere.
+ * sub-pages (blog, articles, pricing, why…). Nav labels follow the visitor's
+ * language so the menu is localized everywhere.
  */
 export function SiteHeader({ active, locale = "da" }: { active?: NavKey; locale?: Locale }) {
+  const labels = NAV_LABELS[locale] ?? NAV_LABELS.da;
+  const aux = AUX[locale] ?? AUX.da;
+
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 backdrop-blur" style={{ background: "rgba(5,13,36,0.9)" }}>
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
@@ -37,21 +55,21 @@ export function SiteHeader({ active, locale = "da" }: { active?: NavKey; locale?
               href={l.href}
               className={l.key === active ? "text-white font-semibold" : "hover:text-white transition-colors"}
             >
-              {l.label}
+              {labels[l.key]}
             </Link>
           ))}
         </nav>
         <div className="flex items-center gap-3">
           <LanguageSwitcher current={locale} />
-          <Link href="/login" className="hidden sm:inline text-sm font-medium text-slate-300 hover:text-white transition-colors">Log ind</Link>
+          <Link href="/login" className="hidden sm:inline text-sm font-medium text-slate-300 hover:text-white transition-colors">{aux.login}</Link>
           <Link href="/signup" className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ background: ORANGE_GRADIENT }}>
-            Kom i gang
+            {aux.cta}
           </Link>
           <MobileNav
             dark
             links={[
-              ...NAV_LINKS.map(({ href, label, external }) => ({ href, label, external })),
-              { href: "/login", label: "Log ind" },
+              ...NAV_LINKS.map(({ href, key, external }) => ({ href, label: labels[key], external })),
+              { href: "/login", label: aux.login },
             ]}
           />
         </div>

@@ -58,7 +58,7 @@ const STEPS = [
     color: "#059669",
     bg: "#ECFDF5",
     title: "3 · Videoen er klar",
-    text: "På 5–15 minutter har du en færdig præsentationsvideo i 9:16 — klar til Reels, TikTok og Facebook Stories.",
+    text: "På under 5 minutter har du en færdig præsentationsvideo i 9:16 — klar til Reels, TikTok og Facebook Stories.",
   },
   {
     icon: Share2,
@@ -81,8 +81,8 @@ const BENEFITS = [
     icon: Clock,
     color: "#FF6B4A",
     bg: "#FFF4F1",
-    title: "Klar på 15 minutter",
-    text: "Din færdige video leveres på 5–15 minutter. Du får besked i appen, så snart den er klar til download og deling.",
+    title: "Klar på 5 minutter",
+    text: "Din færdige video leveres på under 5 minutter. Du får besked i appen, så snart den er klar til download og deling.",
   },
   {
     icon: TrendingUp,
@@ -287,7 +287,7 @@ export default function PresentationVideoBlogPage() {
               <p className="mt-3 text-4xl font-black text-slate-900">1 link</p>
               <p className="mt-1 text-sm text-slate-500">er alt, hvad der skal til</p>
               <div className="mt-5 h-px w-full bg-slate-200" />
-              <p className="mt-5 text-4xl font-black text-slate-900">~15 min</p>
+              <p className="mt-5 text-4xl font-black text-slate-900">~5 min</p>
               <p className="mt-1 text-sm text-slate-500">til færdig, delbar video</p>
             </div>
           </div>

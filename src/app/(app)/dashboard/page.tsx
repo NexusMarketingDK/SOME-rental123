@@ -179,7 +179,7 @@ export default async function DashboardPage() {
                 Præsentér din bolig<br />med en professionel video
               </h2>
               <p className="mt-2 text-sm text-blue-200 leading-relaxed max-w-sm">
-                Indsæt dit Airbnb- eller Booking.com-link — AI'en genererer en flot præsentationsvideo på under 15 minutter, klar til at dele på sociale medier.
+                Indsæt dit Airbnb- eller Booking.com-link — AI'en genererer en flot præsentationsvideo på under 5 minutter, klar til at dele på sociale medier.
               </p>
               <div className="mt-5 flex items-center gap-3">
                 <Link
@@ -196,7 +196,7 @@ export default async function DashboardPage() {
 
             {/* Visual */}
             <div className="hidden md:flex shrink-0 flex-col gap-2">
-              {["3× mere engagement", "Klar på 15 min", "Del direkte på sociale medier"].map((t) => (
+              {["3× mere engagement", "Klar på 5 min", "Del direkte på sociale medier"].map((t) => (
                 <div key={t} className="flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 backdrop-blur-sm">
                   <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
                   <span className="text-sm text-white font-medium">{t}</span>
