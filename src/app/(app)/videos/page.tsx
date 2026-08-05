@@ -108,7 +108,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Hvor lang tid tager det at generere en video?",
-    a: "De fleste videoer er klar inden for 5-15 minutter. Du modtager en notifikation i appen, så snart din video er klar til download og deling.",
+    a: "De fleste videoer er klar inden for 5 minutter. Du modtager en notifikation i appen, så snart din video er klar til download og deling.",
   },
   {
     q: "Kan jeg bestille flere videoer til samme bolig?",
@@ -224,7 +224,7 @@ export default async function VideosPage() {
                     </span>
                   </h1>
                   <p className="mt-4 text-lg text-blue-200 leading-relaxed max-w-md">
-                    Lad AI'en skabe en professionel præsentationsvideo af din bolig — klar på under 15 minutter, klar til at dele på sociale medier.
+                    Lad AI'en skabe en professionel præsentationsvideo af din bolig — klar på under 5 minutter, klar til at dele på sociale medier.
                   </p>
                   <div className="mt-6 flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
@@ -246,7 +246,7 @@ export default async function VideosPage() {
               {/* Stats bar */}
               <div className="mx-auto mt-8 grid max-w-5xl grid-cols-3 gap-4">
                 <StatPill value="3×" label="Flere bookingforespørgsler" />
-                <StatPill value="15 min" label="Gennemsnitlig leveringstid" />
+                <StatPill value="5 min" label="Gennemsnitlig leveringstid" />
                 <StatPill value={videoPrice} label="Pr. ekstra video" />
               </div>
             </section>
@@ -274,7 +274,7 @@ export default async function VideosPage() {
                       color: "#FF6B4A",
                       bg: "#FFF4F1",
                       title: "AI producerer videoen",
-                      text: "Vores AI skaber en flydende præsentationsvideo med professionelle kamerabevægelser, overgange og stemningsfuldt udtryk på bare 5-15 minutter.",
+                      text: "Vores AI skaber en flydende præsentationsvideo med professionelle kamerabevægelser, overgange og stemningsfuldt udtryk på bare 5 minutter.",
                     },
                     {
                       step: "03",
@@ -335,8 +335,8 @@ export default async function VideosPage() {
                       icon: Zap,
                       color: "#FF6B4A",
                       bg: "#FFF4F1",
-                      title: "Klar på 15 minutter",
-                      text: "SOME VIDEO POST leverer din færdige præsentationsvideo på bare 5-15 minutter. Du modtager besked direkte i appen, så snart den er klar til download.",
+                      title: "Klar på 5 minutter",
+                      text: "SOME VIDEO POST leverer din færdige præsentationsvideo på bare 5 minutter. Du modtager besked direkte i appen, så snart den er klar til download.",
                     },
                     {
                       icon: TrendingUp,
@@ -407,7 +407,7 @@ export default async function VideosPage() {
                 >
                   <Sparkles size={16} /> Bestil ekstra video — {videoPrice}
                 </Link>
-                <p className="mt-4 text-xs text-blue-300">Inkluderet i din pakke · Leveres på under 15 minutter · Download direkte i appen</p>
+                <p className="mt-4 text-xs text-blue-300">Inkluderet i din pakke · Leveres på under 5 minutter · Download direkte i appen</p>
               </div>
             </section>
 

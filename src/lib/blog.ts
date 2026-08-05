@@ -231,7 +231,7 @@ export const POSTS: BlogPost[] = [
   {
     id: 18,
     category: "video-marketing",
-    title: "Cinematisk video af din bolig: fra billeder til færdig film på 15 min",
+    title: "Cinematisk video af din bolig: fra billeder til færdig film på 5 min",
     excerpt: "Upload dine boligfotos — AI tilføjer professionelle kamerabevægelser, flydende overgange og musik. Videoen leveres direkte i appen klar til deling.",
     readTime: "4 min",
     date: "2025-09-01",
@@ -297,7 +297,7 @@ export function articleBody(post: BlogPost): { heading: string; paragraphs: stri
       heading: "Sådan gør du i praksis",
       paragraphs: [
         "Start med at samle dit materiale ét sted: gode billeder, nøgleinformation om boligen og din prissætning. Jo mere komplet dit udgangspunkt er, desto bedre bliver resultatet — både i din annoncetekst og i dine præsentationsvideoer.",
-        "Med SOME VIDEO POST kan du indsætte et link til din eksisterende annonce fra Airbnb, Booking.com eller Novasol. AI henter automatisk billeder og information og skaber både et sælgende opslag og en cinematisk præsentationsvideo på under 15 minutter — klar til at dele på Facebook, Instagram og TikTok.",
+        "Med SOME VIDEO POST kan du indsætte et link til din eksisterende annonce fra Airbnb, Booking.com eller Novasol. AI henter automatisk billeder og information og skaber både et sælgende opslag og en cinematisk præsentationsvideo på under 5 minutter — klar til at dele på Facebook, Instagram og TikTok.",
       ],
     },
     {

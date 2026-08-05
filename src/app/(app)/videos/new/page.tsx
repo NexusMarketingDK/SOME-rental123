@@ -23,7 +23,7 @@ const ROOM_LABELS = [
 const BENEFITS = [
   "Cinematisk præsentationsvideo med AI",
   "Professionelle kamerabevægelser og overgange",
-  "Klar på 5-15 minutter — leveres direkte i appen",
+  "Klar på 5 minutter — leveres direkte i appen",
   "Del direkte på sociale medier",
 ];
 
@@ -277,7 +277,7 @@ export default function NewVideoPage() {
               <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <Clock size={20} className="shrink-0 text-[#FF6B4A]" />
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Leveres inden for 15 minutter</p>
+                  <p className="text-sm font-semibold text-slate-900">Leveres inden for 5 minutter</p>
                   <p className="text-xs text-slate-500">Du modtager besked i appen, så snart din video er klar.</p>
                 </div>
               </div>
@@ -420,7 +420,7 @@ export default function NewVideoPage() {
                   >
                     {canSubmit ? "Opret præsentationsvideo" : "Udfyld titel for at fortsætte"}
                   </button>
-                  <p className="text-center text-xs text-slate-400">Video leveres inden for 15 minutter · 1 credit</p>
+                  <p className="text-center text-xs text-slate-400">Video leveres inden for 5 minutter · 1 credit</p>
                 </div>
 
               </form>
