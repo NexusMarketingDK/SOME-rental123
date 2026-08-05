@@ -50,10 +50,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${BASE}/integrationer`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: `${BASE}/blog`,
       lastModified: now,
       changeFrequency: "weekly",
       priority: 0.8,
+    },
+    {
+      url: `${BASE}/blog/praesentationsvideo`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
     },
     ...POSTS.map((post) => ({
       url: `${BASE}/blog/${post.id}`,
