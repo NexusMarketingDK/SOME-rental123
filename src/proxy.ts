@@ -42,8 +42,16 @@ export async function proxy(request: NextRequest) {
   if (langParam && langParam in LOCALE_PATHS) {
     const locale = langParam as Locale;
     const url = request.nextUrl.clone();
-    url.pathname = LOCALE_PATHS[locale];
     url.searchParams.delete("lang");
+    // On the landing page (which has locale-prefixed variants /en, /es, /de),
+    // switch to that locale's landing path. On every other page — priser, blog,
+    // etc. — stay on the current page; the locale cookie makes it render in the
+    // chosen language. This keeps the visitor on the page they were viewing
+    // instead of bouncing them to the front page.
+    const landingPaths = Object.values(LOCALE_PATHS);
+    if (landingPaths.includes(pathname)) {
+      url.pathname = LOCALE_PATHS[locale];
+    }
     const redirect = NextResponse.redirect(url);
     setLocaleCookie(redirect, locale);
     return redirect;
