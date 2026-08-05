@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Globe } from "lucide-react";
-import { LOCALE_FLAGS, LOCALE_LABELS, LOCALES, localeSwitchHref, type Locale } from "@/lib/i18n";
+import { LOCALE_FLAGS, LOCALE_LABELS, LOCALES, type Locale } from "@/lib/i18n";
 
 /**
  * Dark-themed language switcher used across the marketing header.
@@ -13,6 +14,13 @@ import { LOCALE_FLAGS, LOCALE_LABELS, LOCALES, localeSwitchHref, type Locale } f
  */
 export function LanguageSwitcher({ current }: { current: Locale }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Switching language stays on the current page: `?lang=xx` sets the locale
+  // cookie (handled in middleware) and, on sub-pages, keeps the same path so
+  // the page re-renders in the chosen language instead of jumping to the front
+  // page. On the landing route the middleware swaps to /en, /es, /de.
+  const switchHref = (loc: Locale) => `${pathname || "/"}?lang=${loc}`;
 
   return (
     <div
@@ -44,7 +52,7 @@ export function LanguageSwitcher({ current }: { current: Locale }) {
             {LOCALES.map((loc) => (
               <a
                 key={loc}
-                href={localeSwitchHref(loc)}
+                href={switchHref(loc)}
                 role="menuitem"
                 onClick={() => setOpen(false)}
                 className={`flex items-center gap-2 px-3 py-2 text-xs hover:bg-white/5 transition-colors ${loc === current ? "font-semibold text-blue-300" : "text-slate-300"}`}
