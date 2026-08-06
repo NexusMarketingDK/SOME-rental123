@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Check, Sparkles, CreditCard, Video, Wand2, Share2, Crown, Gift } from "lucide-react";
-import { getCurrency, getLocale } from "@/lib/locale-server";
-import { formatPrice, formatPriceKey, PLAN_POST_CREDITS, PLAN_INCLUDED_VIDEOS } from "@/lib/currency";
+import { getLocale } from "@/lib/locale-server";
+import { currencyForLocale, formatPrice, formatPriceKey, PLAN_POST_CREDITS, PLAN_INCLUDED_VIDEOS } from "@/lib/currency";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { DemoVideoPhone } from "@/components/demo-video-phone";
@@ -159,7 +159,9 @@ function CheckItem({ children }: { children: React.ReactNode }) {
 }
 
 export default async function PriserPage() {
-  const [currency, locale] = await Promise.all([getCurrency(), getLocale()]);
+  const locale = await getLocale();
+  // Currency follows the displayed language: Danish → DKK, everyone else → EUR.
+  const currency = currencyForLocale(locale);
   const t = STRINGS[locale] ?? STRINGS.da;
   const p: P = {
     basic: formatPriceKey("basic", currency),
