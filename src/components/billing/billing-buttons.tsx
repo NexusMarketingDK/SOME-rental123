@@ -6,11 +6,13 @@ export function SubscribeButton({
   plan,
   price,
   label,
+  perMonth = "/md",
   variant = "primary",
 }: {
   plan: "basic" | "pro";
   price: string;
   label?: string;
+  perMonth?: string;
   variant?: "primary" | "pro";
 }) {
   const cls =
@@ -24,13 +26,13 @@ export function SubscribeButton({
         type="submit"
         className={`w-full rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition-colors ${cls}`}
       >
-        {label ?? "Vælg plan"} — {price}/md
+        {label ?? "Vælg plan"} — {price}{perMonth}
       </button>
     </form>
   );
 }
 
-export function BuyCreditsButton({ credits }: { credits: number }) {
+export function BuyCreditsButton({ credits, label = "Køb" }: { credits: number; label?: string }) {
   return (
     <form action={createAiCreditCheckout}>
       <input type="hidden" name="credits" value={credits} />
@@ -38,33 +40,33 @@ export function BuyCreditsButton({ credits }: { credits: number }) {
         type="submit"
         className="w-full rounded-lg border border-purple-200 px-3 py-1.5 text-xs font-medium text-purple-700 hover:bg-purple-50 transition-colors"
       >
-        Køb
+        {label}
       </button>
     </form>
   );
 }
 
-export function BuyVideoButton({ price }: { price: string }) {
+export function BuyVideoButton({ price, label = "Bestil video" }: { price: string; label?: string }) {
   return (
     <form action={createVideoOrderCheckout}>
       <button
         type="submit"
         className="rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-600 transition-colors"
       >
-        Bestil video — {price}
+        {label} — {price}
       </button>
     </form>
   );
 }
 
-export function ManageBillingButton() {
+export function ManageBillingButton({ label = "Administrer abonnement" }: { label?: string }) {
   return (
     <form action={createBillingPortalSession}>
       <button
         type="submit"
         className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
       >
-        Administrer abonnement
+        {label}
       </button>
     </form>
   );
