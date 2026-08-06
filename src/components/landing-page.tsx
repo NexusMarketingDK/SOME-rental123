@@ -2,7 +2,7 @@ import Link from "next/link";
 import {
   CalendarDays, Share2, Sparkles, Video, Clock, CheckCircle2,
   ArrowRight, Home, Zap, Star, Users,
-  TrendingUp, Play, Globe, Link2, Crown,
+  TrendingUp, Play, Globe, Link2, Crown, Gift,
 } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 import { LANDING, LOCALE_PATHS } from "@/lib/i18n";
@@ -483,9 +483,19 @@ export function LandingPage({ locale }: { locale: Locale }) {
             <h2 className="text-3xl font-bold text-white md:text-4xl">{t.priceTitle}</h2>
             <p className="mt-3 text-slate-400">{t.priceSub}</p>
           </div>
-          <p className="mx-auto mb-8 max-w-md text-center text-sm text-slate-400">
-            {t.freeAccountNote}
-          </p>
+          {/* Free test-account call-out — 2 free SoMe posts, no card */}
+          <div className="mx-auto mb-8 flex max-w-2xl flex-col items-center gap-3 rounded-2xl border border-emerald-400/25 bg-emerald-500/[0.07] px-6 py-5 text-center backdrop-blur-sm sm:flex-row sm:text-left">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15">
+              <Gift size={20} className="text-emerald-300" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-bold text-emerald-200">{t.freeTestBadge}</p>
+              <p className="mt-0.5 text-sm text-slate-300">{t.freeTestBody}</p>
+            </div>
+            <Link href="/signup" className="shrink-0 rounded-xl border border-emerald-400/40 bg-emerald-500/10 px-5 py-2.5 text-sm font-bold text-emerald-100 transition hover:bg-emerald-500/20">
+              {t.freeTestBtn}
+            </Link>
+          </div>
           <div className="mx-auto grid max-w-5xl items-stretch gap-6 md:grid-cols-3">
             {/* Basic — most popular */}
             <div className="relative flex flex-col rounded-2xl border border-blue-400/50 bg-white/[0.05] p-8 shadow-[0_0_45px_rgba(59,130,246,0.25)] backdrop-blur-sm">

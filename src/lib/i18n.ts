@@ -126,6 +126,8 @@ export type LandingT = {
   priceTitle: string; priceSub: string;
   mostPopular: string; perMonth: string;
   freeAccountNote: string;
+  // free test-account call-out (2 free posts)
+  freeTestBadge: string; freeTestBody: string; freeTestBtn: string;
   plan1Name: string; plan1Items: string[];
   plan2Name: string; plan2Items: string[]; plan2PayLabel: string; plan2StartBtn: string;
   plan3Name: string; plan3Items: string[]; plan3OnetimeLabel: string; plan3OrderBtn: string;
@@ -195,6 +197,7 @@ export const LANDING: Record<Locale, LandingT> = {
     priceTitle: "Enkel, transparent prissætning", priceSub: "Ingen skjulte gebyrer · Ingen binding",
     mostPopular: "Mest populær", perMonth: "/md.",
     freeAccountNote: "Gratis at oprette konto — intet kort påkrævet. Opgradér når du er klar.",
+    freeTestBadge: "Gratis testkonto", freeTestBody: "Opret en gratis testkonto og få 2 gratis SoMe-opslag med det samme — intet kort påkrævet.", freeTestBtn: "Opret gratis testkonto",
     plan1Name: "Basic",
     plan1Items: ["10 SoMe-opslag (tekst + billede) hver måned","Del direkte på Facebook & Instagram","Automation & planlægning af opslag","Ekstra præsentationsvideoer (betales pr. styk)","Alle studie-værktøjer og downloads"],
     plan2Name: "Præsentationsvideo", plan2PayLabel: "Betal per brug",
@@ -264,6 +267,7 @@ export const LANDING: Record<Locale, LandingT> = {
     priceTitle: "Simple, transparent pricing", priceSub: "No hidden fees · No commitment",
     mostPopular: "Most popular", perMonth: "/mo",
     freeAccountNote: "Free to create an account — no card required. Upgrade when you're ready.",
+    freeTestBadge: "Free test account", freeTestBody: "Create a free test account and get 2 free social posts right away — no card required.", freeTestBtn: "Create free test account",
     plan1Name: "Basic",
     plan1Items: ["10 social posts (text + image) every month","Share directly to Facebook & Instagram","Automation & scheduling","Extra presentation videos (paid per video)","All studio tools and downloads"],
     plan2Name: "Presentation video", plan2PayLabel: "Pay-as-you-go",
@@ -333,6 +337,7 @@ export const LANDING: Record<Locale, LandingT> = {
     priceTitle: "Precios simples y transparentes", priceSub: "Sin tarifas ocultas · Sin compromiso",
     mostPopular: "Más popular", perMonth: "/mes",
     freeAccountNote: "Crear una cuenta es gratis — sin tarjeta. Mejora tu plan cuando quieras.",
+    freeTestBadge: "Cuenta de prueba gratis", freeTestBody: "Crea una cuenta de prueba gratis y recibe 2 publicaciones sociales gratis al instante — sin tarjeta.", freeTestBtn: "Crear cuenta de prueba gratis",
     plan1Name: "Basic",
     plan1Items: ["10 publicaciones sociales (texto + imagen) al mes","Comparte directamente en Facebook e Instagram","Automatización y programación","Vídeos de presentación adicionales (se pagan por vídeo)","Todas las herramientas del estudio y descargas"],
     plan2Name: "Vídeo de presentación", plan2PayLabel: "Pago por uso",
@@ -402,6 +407,7 @@ export const LANDING: Record<Locale, LandingT> = {
     priceTitle: "Einfache, transparente Preise", priceSub: "Keine versteckten Gebühren · Keine Bindung",
     mostPopular: "Am beliebtesten", perMonth: "/Mon.",
     freeAccountNote: "Kostenlos ein Konto erstellen — keine Karte nötig. Upgrade jederzeit.",
+    freeTestBadge: "Kostenloses Testkonto", freeTestBody: "Erstelle ein kostenloses Testkonto und erhalte sofort 2 kostenlose Social-Beiträge — keine Karte nötig.", freeTestBtn: "Kostenloses Testkonto erstellen",
     plan1Name: "Basic",
     plan1Items: ["10 Social-Media-Beiträge (Text + Bild) pro Monat","Direkt auf Facebook & Instagram teilen","Automatisierung & Planung","Zusätzliche Präsentationsvideos (pro Video bezahlt)","Alle Studio-Tools und Downloads"],
     plan2Name: "Präsentationsvideo", plan2PayLabel: "Pay-as-you-go",
