@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Check, Sparkles, CreditCard, Video, Wand2, Share2, Crown, Gift } from "lucide-react";
 import { getLocale } from "@/lib/locale-server";
-import { currencyForLocale, formatPrice, formatPriceKey, PLAN_POST_CREDITS, PLAN_INCLUDED_VIDEOS } from "@/lib/currency";
+import { currencyForLocale, formatPrice, formatPriceKey, PLAN_POST_CREDITS, PLAN_INCLUDED_VIDEOS, FREE_POST_CREDITS } from "@/lib/currency";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { DemoVideoPhone } from "@/components/demo-video-phone";
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 const ORANGE_GRADIENT = "linear-gradient(135deg, #FFB36B 0%, #FF6B4A 100%)";
 
 // Prices passed into the localized copy (currency-aware).
-type P = { basic: string; pro: string; video: string; post: string; metaAds: string; basicN: number; proN: number; proVid: number };
+type P = { basic: string; pro: string; video: string; post: string; metaAds: string; basicN: number; proN: number; proVid: number; freeN: number };
 
 type Faq = { q: string; a: string };
 type Strings = {
@@ -51,8 +51,8 @@ const STRINGS: Record<Locale, Strings> = {
     heroBadge: "Enkel, gennemsigtig pris", heroTitle: "Gratis at starte — betal, når du vokser",
     heroSub: (p) => <>Opret konto gratis. Vælg {bold("Basic")} for {p.basic}/md. med {p.basicN} AI-opslag, direkte deling og automation — eller {bold("Pro")} for {p.pro}/md. med {p.proVid} videoer og {p.proN} opslag. Ekstra præsentationsvideoer koster {p.video}/stk. Ingen binding.</>,
     perMonth: "/md.", billedNote: "Faktureres månedligt · ingen binding", mostPopular: "Mest populær",
-    freeBadge: "Gratis", freeNote: "Gratis at oprette konto", freeDesc: "Kom i gang uden kort. Udforsk studiet og se, hvordan AI laver opslag og videoer.",
-    freeItems: (p) => ["Opret konto og udforsk dashboardet", "Se demoer af opslag og præsentationsvideo", `Køb enkelte AI-opslag (${p.post}/opslag) eller videoer (${p.video}/stk.)`, "Opgradér til Basic eller Pro når som helst"], freeBtn: "Opret gratis konto",
+    freeBadge: "Gratis testkonto", freeNote: "Gratis at oprette — intet kort", freeDesc: "Opret en gratis testkonto og prøv studiet. Du får 2 gratis SoMe-opslag med det samme.",
+    freeItems: (p) => [`${p.freeN} gratis SoMe-opslag inkluderet`, "Opret konto og udforsk dashboardet", `Køb ekstra AI-opslag (${p.post}/opslag) eller videoer (${p.video}/stk.)`, "Opgradér til Basic eller Pro når som helst"], freeBtn: "Opret gratis testkonto",
     basicDesc: "Til dig, der laver opslag jævnligt og vil dele og automatisere direkte.",
     basicItems: (p) => [<>{bold(`${p.basicN} SoMe-opslag`)} (tekst + billede) hver måned</>, "Del direkte på Facebook & Instagram", "Automation & planlægning af opslag", `Præsentationsvideoer for ${p.video}/stk.`, `Meta-annoncering som tilkøb (${p.metaAds}/md.)`, "Alle studie-værktøjer og downloads"], basicBtn: "Vælg Basic",
     proDesc: "Til dig, der vil have videoer inkluderet og maksimal rækkevidde hver måned.",
@@ -62,7 +62,7 @@ const STRINGS: Record<Locale, Strings> = {
     how: (p) => [{ title: "1 · Opret konto & vælg plan", desc: `Opret gratis. Vælg Basic (${p.basic}/md., ${p.basicN} opslag) eller Pro (${p.pro}/md., ${p.proVid} videoer + ${p.proN} opslag).` }, { title: "2 · Lav opslag og videoer", desc: `Generér opslag inkluderet i din plan, og lav ekstra præsentationsvideoer for ${p.video}/stk. efter behov.` }, { title: "3 · Del direkte", desc: "Del opslag og videoer direkte på Facebook og Instagram fra dashboardet." }],
     faqTitle: "Ofte stillede spørgsmål",
     faq: (p) => [
-      { q: "Hvad er forskellen på Free, Basic og Pro?", a: `Det er gratis at oprette konto (Free). Basic koster ${p.basic}/md. og giver ${p.basicN} AI-opslag om måneden med direkte deling og automation. Pro koster ${p.pro}/md. og inkluderer ${p.proVid} præsentationsvideoer og ${p.proN} opslag om måneden.` },
+      { q: "Hvad er forskellen på Free, Basic og Pro?", a: `Det er gratis at oprette konto (Free) — og du får ${p.freeN} gratis SoMe-opslag til at prøve det. Basic koster ${p.basic}/md. og giver ${p.basicN} AI-opslag om måneden med direkte deling og automation. Pro koster ${p.pro}/md. og inkluderer ${p.proVid} præsentationsvideoer og ${p.proN} opslag om måneden.` },
       { q: "Hvad koster en præsentationsvideo?", a: `En præsentationsvideo koster ${p.video} pr. styk på Free og Basic. På Pro er ${p.proVid} videoer inkluderet hver måned, og ekstra videoer koster ${p.video}/stk.` },
       { q: "Hvornår betaler jeg for en video?", a: "Du kan se en forhåndsvisning, mens videoen bygges, og betaler først, når du vil låse den fulde video op til download og deling. Uploadede videoer koster ingenting." },
       { q: "Kan jeg dele direkte på sociale medier?", a: "Ja. Med Basic og Pro deler du opslag og videoer direkte på Facebook og Instagram fra dashboardet — og automatiserer opslag på det bedste tidspunkt." },
@@ -76,8 +76,8 @@ const STRINGS: Record<Locale, Strings> = {
     heroBadge: "Simple, transparent pricing", heroTitle: "Free to start — pay as you grow",
     heroSub: (p) => <>Create an account for free. Choose {bold("Basic")} for {p.basic}/mo with {p.basicN} AI posts, direct sharing and automation — or {bold("Pro")} for {p.pro}/mo with {p.proVid} videos and {p.proN} posts. Extra presentation videos cost {p.video} each. No commitment.</>,
     perMonth: "/mo", billedNote: "Billed monthly · no commitment", mostPopular: "Most popular",
-    freeBadge: "Free", freeNote: "Free to create an account", freeDesc: "Get started without a card. Explore the studio and see how AI makes posts and videos.",
-    freeItems: (p) => ["Create an account and explore the dashboard", "See demos of posts and a presentation video", `Buy individual AI posts (${p.post}/post) or videos (${p.video} each)`, "Upgrade to Basic or Pro anytime"], freeBtn: "Create free account",
+    freeBadge: "Free test account", freeNote: "Free to create — no card", freeDesc: "Create a free test account and try the studio. You get 2 free social posts right away.",
+    freeItems: (p) => [`${p.freeN} free social posts included`, "Create an account and explore the dashboard", `Buy extra AI posts (${p.post}/post) or videos (${p.video} each)`, "Upgrade to Basic or Pro anytime"], freeBtn: "Create free test account",
     basicDesc: "For you who post regularly and want to share and automate directly.",
     basicItems: (p) => [<>{bold(`${p.basicN} social posts`)} (text + image) every month</>, "Share directly to Facebook & Instagram", "Automation & scheduling of posts", `Presentation videos for ${p.video} each`, `Meta advertising as an add-on (${p.metaAds}/mo)`, "All studio tools and downloads"], basicBtn: "Choose Basic",
     proDesc: "For you who want videos included and maximum reach every month.",
@@ -87,7 +87,7 @@ const STRINGS: Record<Locale, Strings> = {
     how: (p) => [{ title: "1 · Create account & choose plan", desc: `Sign up free. Choose Basic (${p.basic}/mo, ${p.basicN} posts) or Pro (${p.pro}/mo, ${p.proVid} videos + ${p.proN} posts).` }, { title: "2 · Make posts and videos", desc: `Generate posts included in your plan, and make extra presentation videos for ${p.video} each as needed.` }, { title: "3 · Share directly", desc: "Share posts and videos directly to Facebook and Instagram from the dashboard." }],
     faqTitle: "Frequently asked questions",
     faq: (p) => [
-      { q: "What's the difference between Free, Basic and Pro?", a: `Creating an account is free (Free). Basic costs ${p.basic}/mo and gives ${p.basicN} AI posts a month with direct sharing and automation. Pro costs ${p.pro}/mo and includes ${p.proVid} presentation videos and ${p.proN} posts a month.` },
+      { q: "What's the difference between Free, Basic and Pro?", a: `Creating an account is free (Free) — and you get ${p.freeN} free social posts to try it. Basic costs ${p.basic}/mo and gives ${p.basicN} AI posts a month with direct sharing and automation. Pro costs ${p.pro}/mo and includes ${p.proVid} presentation videos and ${p.proN} posts a month.` },
       { q: "What does a presentation video cost?", a: `A presentation video costs ${p.video} each on Free and Basic. On Pro, ${p.proVid} videos are included every month, and extra videos cost ${p.video} each.` },
       { q: "When do I pay for a video?", a: "You can preview the video while it's being built and only pay when you want to unlock the full video for download and sharing. Uploaded videos are free." },
       { q: "Can I share directly to social media?", a: "Yes. With Basic and Pro you share posts and videos directly to Facebook and Instagram from the dashboard — and automate posting at the best time." },
@@ -101,8 +101,8 @@ const STRINGS: Record<Locale, Strings> = {
     heroBadge: "Precios simples y transparentes", heroTitle: "Gratis para empezar — paga a medida que creces",
     heroSub: (p) => <>Crea una cuenta gratis. Elige {bold("Basic")} por {p.basic}/mes con {p.basicN} publicaciones IA, compartir directo y automatización — o {bold("Pro")} por {p.pro}/mes con {p.proVid} vídeos y {p.proN} publicaciones. Los vídeos de presentación extra cuestan {p.video} cada uno. Sin compromiso.</>,
     perMonth: "/mes", billedNote: "Facturación mensual · sin compromiso", mostPopular: "Más popular",
-    freeBadge: "Gratis", freeNote: "Crear una cuenta es gratis", freeDesc: "Empieza sin tarjeta. Explora el estudio y ve cómo la IA crea publicaciones y vídeos.",
-    freeItems: (p) => ["Crea una cuenta y explora el panel", "Ve demos de publicaciones y un vídeo de presentación", `Compra publicaciones IA sueltas (${p.post}/publicación) o vídeos (${p.video} c/u)`, "Mejora a Basic o Pro cuando quieras"], freeBtn: "Crear cuenta gratis",
+    freeBadge: "Cuenta de prueba gratis", freeNote: "Crear es gratis — sin tarjeta", freeDesc: "Crea una cuenta de prueba gratis y explora el estudio. Recibes 2 publicaciones sociales gratis al instante.",
+    freeItems: (p) => [`${p.freeN} publicaciones sociales gratis incluidas`, "Crea una cuenta y explora el panel", `Compra publicaciones IA extra (${p.post}/publicación) o vídeos (${p.video} c/u)`, "Mejora a Basic o Pro cuando quieras"], freeBtn: "Crear cuenta de prueba gratis",
     basicDesc: "Para ti, que publicas con regularidad y quieres compartir y automatizar directamente.",
     basicItems: (p) => [<>{bold(`${p.basicN} publicaciones`)} (texto + imagen) al mes</>, "Comparte directo en Facebook e Instagram", "Automatización y programación de publicaciones", `Vídeos de presentación por ${p.video} c/u`, `Publicidad en Meta como extra (${p.metaAds}/mes)`, "Todas las herramientas y descargas"], basicBtn: "Elegir Basic",
     proDesc: "Para ti, que quieres vídeos incluidos y máximo alcance cada mes.",
@@ -112,7 +112,7 @@ const STRINGS: Record<Locale, Strings> = {
     how: (p) => [{ title: "1 · Crea cuenta y elige plan", desc: `Regístrate gratis. Elige Basic (${p.basic}/mes, ${p.basicN} publicaciones) o Pro (${p.pro}/mes, ${p.proVid} vídeos + ${p.proN} publicaciones).` }, { title: "2 · Crea publicaciones y vídeos", desc: `Genera las publicaciones incluidas en tu plan y crea vídeos de presentación extra por ${p.video} c/u según necesites.` }, { title: "3 · Comparte directo", desc: "Comparte publicaciones y vídeos directamente en Facebook e Instagram desde el panel." }],
     faqTitle: "Preguntas frecuentes",
     faq: (p) => [
-      { q: "¿Cuál es la diferencia entre Free, Basic y Pro?", a: `Crear una cuenta es gratis (Free). Basic cuesta ${p.basic}/mes y da ${p.basicN} publicaciones IA al mes con compartir directo y automatización. Pro cuesta ${p.pro}/mes e incluye ${p.proVid} vídeos de presentación y ${p.proN} publicaciones al mes.` },
+      { q: "¿Cuál es la diferencia entre Free, Basic y Pro?", a: `Crear una cuenta es gratis (Free) — y recibes ${p.freeN} publicaciones sociales gratis para probarlo. Basic cuesta ${p.basic}/mes y da ${p.basicN} publicaciones IA al mes con compartir directo y automatización. Pro cuesta ${p.pro}/mes e incluye ${p.proVid} vídeos de presentación y ${p.proN} publicaciones al mes.` },
       { q: "¿Cuánto cuesta un vídeo de presentación?", a: `Un vídeo de presentación cuesta ${p.video} c/u en Free y Basic. En Pro se incluyen ${p.proVid} vídeos al mes, y los extra cuestan ${p.video} c/u.` },
       { q: "¿Cuándo pago por un vídeo?", a: "Puedes ver una vista previa mientras se crea y solo pagas cuando quieres desbloquear el vídeo completo para descargar y compartir. Los vídeos subidos son gratis." },
       { q: "¿Puedo compartir directamente en redes sociales?", a: "Sí. Con Basic y Pro compartes publicaciones y vídeos directamente en Facebook e Instagram desde el panel — y automatizas la publicación en el mejor momento." },
@@ -126,8 +126,8 @@ const STRINGS: Record<Locale, Strings> = {
     heroBadge: "Einfache, transparente Preise", heroTitle: "Kostenlos starten — bezahle, wenn du wächst",
     heroSub: (p) => <>Erstelle kostenlos ein Konto. Wähle {bold("Basic")} für {p.basic}/Mon. mit {p.basicN} KI-Beiträgen, direktem Teilen und Automatisierung — oder {bold("Pro")} für {p.pro}/Mon. mit {p.proVid} Videos und {p.proN} Beiträgen. Zusätzliche Präsentationsvideos kosten je {p.video}. Keine Bindung.</>,
     perMonth: "/Mon.", billedNote: "Monatliche Abrechnung · keine Bindung", mostPopular: "Am beliebtesten",
-    freeBadge: "Kostenlos", freeNote: "Kostenlos ein Konto erstellen", freeDesc: "Ohne Karte loslegen. Erkunde das Studio und sieh, wie die KI Beiträge und Videos erstellt.",
-    freeItems: (p) => ["Konto erstellen und Dashboard erkunden", "Demos von Beiträgen und einem Präsentationsvideo ansehen", `Einzelne KI-Beiträge (${p.post}/Beitrag) oder Videos (je ${p.video}) kaufen`, "Jederzeit auf Basic oder Pro upgraden"], freeBtn: "Kostenloses Konto erstellen",
+    freeBadge: "Kostenloses Testkonto", freeNote: "Kostenlos erstellen — keine Karte", freeDesc: "Erstelle ein kostenloses Testkonto und probiere das Studio. Du erhältst sofort 2 kostenlose Social-Beiträge.",
+    freeItems: (p) => [`${p.freeN} kostenlose Social-Beiträge inklusive`, "Konto erstellen und Dashboard erkunden", `Zusätzliche KI-Beiträge (${p.post}/Beitrag) oder Videos (je ${p.video}) kaufen`, "Jederzeit auf Basic oder Pro upgraden"], freeBtn: "Kostenloses Testkonto erstellen",
     basicDesc: "Für dich, der regelmäßig postet und direkt teilen und automatisieren will.",
     basicItems: (p) => [<>{bold(`${p.basicN} Social-Beiträge`)} (Text + Bild) pro Monat</>, "Direkt auf Facebook & Instagram teilen", "Automatisierung & Planung von Beiträgen", `Präsentationsvideos für je ${p.video}`, `Meta-Werbung als Zusatz (${p.metaAds}/Mon.)`, "Alle Studio-Tools und Downloads"], basicBtn: "Basic wählen",
     proDesc: "Für dich, der Videos inklusive und maximale Reichweite jeden Monat will.",
@@ -137,7 +137,7 @@ const STRINGS: Record<Locale, Strings> = {
     how: (p) => [{ title: "1 · Konto erstellen & Plan wählen", desc: `Kostenlos registrieren. Wähle Basic (${p.basic}/Mon., ${p.basicN} Beiträge) oder Pro (${p.pro}/Mon., ${p.proVid} Videos + ${p.proN} Beiträge).` }, { title: "2 · Beiträge und Videos erstellen", desc: `Erstelle die in deinem Plan enthaltenen Beiträge und zusätzliche Präsentationsvideos für je ${p.video} nach Bedarf.` }, { title: "3 · Direkt teilen", desc: "Teile Beiträge und Videos direkt auf Facebook und Instagram über das Dashboard." }],
     faqTitle: "Häufige Fragen",
     faq: (p) => [
-      { q: "Was ist der Unterschied zwischen Free, Basic und Pro?", a: `Ein Konto zu erstellen ist kostenlos (Free). Basic kostet ${p.basic}/Mon. und bietet ${p.basicN} KI-Beiträge pro Monat mit direktem Teilen und Automatisierung. Pro kostet ${p.pro}/Mon. und enthält ${p.proVid} Präsentationsvideos und ${p.proN} Beiträge pro Monat.` },
+      { q: "Was ist der Unterschied zwischen Free, Basic und Pro?", a: `Ein Konto zu erstellen ist kostenlos (Free) — und du erhältst ${p.freeN} kostenlose Social-Beiträge zum Ausprobieren. Basic kostet ${p.basic}/Mon. und bietet ${p.basicN} KI-Beiträge pro Monat mit direktem Teilen und Automatisierung. Pro kostet ${p.pro}/Mon. und enthält ${p.proVid} Präsentationsvideos und ${p.proN} Beiträge pro Monat.` },
       { q: "Was kostet ein Präsentationsvideo?", a: `Ein Präsentationsvideo kostet bei Free und Basic je ${p.video}. Bei Pro sind ${p.proVid} Videos pro Monat inklusive, zusätzliche kosten je ${p.video}.` },
       { q: "Wann zahle ich für ein Video?", a: "Du kannst das Video während der Erstellung als Vorschau ansehen und zahlst erst, wenn du das vollständige Video zum Herunterladen und Teilen freischalten möchtest. Hochgeladene Videos sind kostenlos." },
       { q: "Kann ich direkt in sozialen Medien teilen?", a: "Ja. Mit Basic und Pro teilst du Beiträge und Videos direkt auf Facebook und Instagram über das Dashboard — und automatisierst das Posten zur besten Zeit." },
@@ -172,6 +172,7 @@ export default async function PriserPage() {
     basicN: PLAN_POST_CREDITS.basic,
     proN: PLAN_POST_CREDITS.pro,
     proVid: PLAN_INCLUDED_VIDEOS.pro,
+    freeN: FREE_POST_CREDITS,
   };
 
   return (

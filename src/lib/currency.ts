@@ -67,6 +67,13 @@ export const PLAN_POST_CREDITS: Record<PlanId, number> = {
   pro: 20,
 };
 
+/**
+ * Free posts every new (free "test") account starts with — 1 credit = 1 post.
+ * Granted on signup by the `grant_free_credits` trigger; keep this in sync with
+ * that migration and with the pricing copy that advertises the free posts.
+ */
+export const FREE_POST_CREDITS = 2;
+
 /** Presentation videos included per month (display only for now). */
 export const PLAN_INCLUDED_VIDEOS: Record<PlanId, number> = {
   basic: 0,

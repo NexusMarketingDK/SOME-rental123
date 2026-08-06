@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { Check, Sparkles, Gift } from "lucide-react";
 import type { AuthFormState } from "@/types/auth";
@@ -121,36 +121,25 @@ const POST_LANGUAGES: { value: string; label: string }[] = [
   { value: "pt", label: "🇵🇹 Português" },
 ];
 
-export function SignupForm() {
+export function SignupForm({ initialLocale = "da" }: { initialLocale?: Locale }) {
   const [state, formAction, isPending] = useActionState(signUpAction, initialState);
 
-  const [locale, setLocale] = useState<Locale>("da");
-  const [currency, setCurrency] = useState<Currency>("dkk");
-  const [postLanguage, setPostLanguage] = useState<string>("da");
+  // Start from the language the visitor already chose on the site (passed in
+  // from the server via the `locale` cookie). This cookie is set by the
+  // language switcher and the middleware — which already falls back to the
+  // browser's Accept-Language — so it's the authoritative site-language choice.
+  const [locale, setLocale] = useState<Locale>(initialLocale);
+  const [currency, setCurrency] = useState<Currency>(currencyForLocale(initialLocale));
+  const [postLanguage, setPostLanguage] = useState<string>(initialLocale);
   const [postLanguageTouched, setPostLanguageTouched] = useState(false);
-  const [localeTouched, setLocaleTouched] = useState(false);
   const [postsPerWeek, setPostsPerWeek] = useState("3-5");
   const [videosPerWeek, setVideosPerWeek] = useState("1-2");
   const [channels, setChannels] = useState<Set<string>>(new Set(["facebook", "instagram"]));
 
   const t = STRINGS[locale] ?? STRINGS.da;
 
-  // Auto-detect the browser language on first load (until the user picks one).
-  useEffect(() => {
-    if (localeTouched) return;
-    const nav = (navigator.language || "").slice(0, 2).toLowerCase();
-    if (LOCALES.includes(nav as Locale)) {
-      const next = nav as Locale;
-      setLocale(next);
-      setCurrency(currencyForLocale(next));
-      if (!postLanguageTouched) setPostLanguage(next);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   function onLocaleChange(next: Locale) {
     setLocale(next);
-    setLocaleTouched(true);
     setCurrency(currencyForLocale(next));
     // Keep the post language in sync with the site language until the user
     // explicitly picks a different one.

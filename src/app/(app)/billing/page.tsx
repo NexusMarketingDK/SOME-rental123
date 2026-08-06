@@ -3,7 +3,7 @@ import { Topbar } from "@/components/layout/topbar";
 import { getSubscription, getCredits } from "@/services/billing";
 import { SubscribeButton, BuyCreditsButton, BuyVideoButton, ManageBillingButton } from "@/components/billing/billing-buttons";
 import { getCurrency } from "@/lib/locale-server";
-import { formatPrice, formatPriceKey, priceAmount, PLAN_POST_CREDITS, PLAN_INCLUDED_VIDEOS } from "@/lib/currency";
+import { formatPrice, formatPriceKey, priceAmount, PLAN_POST_CREDITS, PLAN_INCLUDED_VIDEOS, FREE_POST_CREDITS } from "@/lib/currency";
 
 export default async function BillingPage() {
   const [subscription, credits, currency] = await Promise.all([getSubscription(), getCredits(), getCurrency()]);
@@ -40,7 +40,7 @@ export default async function BillingPage() {
                   </p>
                 ) : (
                   <p className="mt-1 text-sm text-slate-500">
-                    Gratis at oprette konto. Opgradér for månedlige AI-opslag, direkte deling og automation.
+                    Din gratis testkonto inkluderer {FREE_POST_CREDITS} gratis SoMe-opslag. Opgradér for månedlige AI-opslag, direkte deling og automation.
                   </p>
                 )}
               </div>
