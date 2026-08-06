@@ -83,7 +83,9 @@ export const APP_LABELS: Record<Locale, {
 export type LandingT = {
   // nav
   navHome: string; navFeatures: string; navVideo: string; navPricing: string;
-  navLogin: string; navStart: string;
+  navLogin: string; navStart: string; navWhy: string; footerWhy: string;
+  // hero badges
+  badgeAi: string; badgeSocial: string; badgePresentation: string;
   // hero
   heroLine1: string; heroLine2: string; heroLine3: string; heroAccent: string;
   heroSub: string; heroCta: string; heroCta2: string; heroNoCard: string;
@@ -155,7 +157,8 @@ export type LandingT = {
 export const LANDING: Record<Locale, LandingT> = {
   da: {
     navHome: "Hjem", navFeatures: "Funktioner", navVideo: "Video", navPricing: "Priser",
-    navLogin: "Log ind", navStart: "Kom i gang",
+    navLogin: "Log ind", navStart: "Kom i gang", navWhy: "Hvorfor os", footerWhy: "Hvorfor somevideopost.com",
+    badgeAi: "AI-drevet", badgeSocial: "Sociale medier", badgePresentation: "Præsentationsvideoer",
     heroLine1: "Udlej dit", heroLine2: "privatbolig", heroLine3: "", heroAccent: "smartere",
     heroSub: "SOME Video Post hjælper private udlejere med at markedsføre deres feriebolig — automatisk. AI skaber præsentationsvideoer fra dine billeder, poster til sociale medier og synkroniserer din bookingkalender.",
     heroCta: "Kom i gang i dag", heroCta2: "Se priser", heroNoCard: "Ingen binding · opsig når som helst",
@@ -223,7 +226,8 @@ export const LANDING: Record<Locale, LandingT> = {
   },
   en: {
     navHome: "Home", navFeatures: "Features", navVideo: "Video", navPricing: "Pricing",
-    navLogin: "Log in", navStart: "Get started",
+    navLogin: "Log in", navStart: "Get started", navWhy: "Why us", footerWhy: "Why somevideopost.com",
+    badgeAi: "AI-powered", badgeSocial: "Social media", badgePresentation: "Presentation videos",
     heroLine1: "Rent out your", heroLine2: "private home", heroLine3: "", heroAccent: "smarter",
     heroSub: "SOME Video Post helps private landlords market their vacation property — automatically. AI creates presentation videos from your photos, posts to social media and syncs your booking calendar.",
     heroCta: "Get started today", heroCta2: "See pricing", heroNoCard: "No commitment · cancel anytime",
@@ -291,7 +295,8 @@ export const LANDING: Record<Locale, LandingT> = {
   },
   es: {
     navHome: "Inicio", navFeatures: "Características", navVideo: "Vídeo", navPricing: "Precios",
-    navLogin: "Iniciar sesión", navStart: "Comenzar",
+    navLogin: "Iniciar sesión", navStart: "Comenzar", navWhy: "Por qué", footerWhy: "Por qué somevideopost.com",
+    badgeAi: "Con IA", badgeSocial: "Redes sociales", badgePresentation: "Vídeos de presentación",
     heroLine1: "Alquila tu", heroLine2: "casa privada", heroLine3: "", heroAccent: "más inteligente",
     heroSub: "SOME Video Post ayuda a los propietarios privados a comercializar su propiedad de vacaciones — automáticamente. La IA crea vídeos de presentación desde tus fotos, publica en redes sociales y sincroniza tu calendario de reservas.",
     heroCta: "Empieza hoy", heroCta2: "Ver precios", heroNoCard: "Sin compromiso · cancela cuando quieras",
@@ -359,7 +364,8 @@ export const LANDING: Record<Locale, LandingT> = {
   },
   de: {
     navHome: "Startseite", navFeatures: "Funktionen", navVideo: "Video", navPricing: "Preise",
-    navLogin: "Anmelden", navStart: "Loslegen",
+    navLogin: "Anmelden", navStart: "Loslegen", navWhy: "Warum wir", footerWhy: "Warum somevideopost.com",
+    badgeAi: "KI-gestützt", badgeSocial: "Social Media", badgePresentation: "Präsentationsvideos",
     heroLine1: "Vermiete dein", heroLine2: "privates Zuhause", heroLine3: "", heroAccent: "klüger",
     heroSub: "SOME Video Post hilft privaten Vermietern, ihre Ferienimmobilie zu vermarkten — automatisch. KI erstellt Präsentationsvideos aus Ihren Fotos, postet in sozialen Medien und synchronisiert Ihren Buchungskalender.",
     heroCta: "Jetzt starten", heroCta2: "Preise ansehen", heroNoCard: "Keine Bindung · jederzeit kündbar",
