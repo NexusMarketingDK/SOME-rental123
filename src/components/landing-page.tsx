@@ -231,7 +231,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
             <a href="#" className="hover:text-white transition-colors">{t.navHome}</a>
             <a href="#features" className="hover:text-white transition-colors">{t.navFeatures}</a>
             <a href="#ai" className="hover:text-white transition-colors">{t.navVideo}</a>
-            <Link href="/hvorfor-somevideopost" className="hover:text-white transition-colors">Hvorfor os</Link>
+            <Link href="/hvorfor-somevideopost" className="hover:text-white transition-colors">{t.navWhy}</Link>
             <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
             <Link href="/priser" className="hover:text-white transition-colors">{t.navPricing}</Link>
           </nav>
@@ -245,6 +245,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
               { href: LOCALE_PATHS[locale], label: t.navHome },
               { href: `${LOCALE_PATHS[locale]}#features`, label: t.navFeatures, external: true },
               { href: `${LOCALE_PATHS[locale]}#ai`, label: t.navVideo, external: true },
+              { href: "/hvorfor-somevideopost", label: t.navWhy },
               { href: "/blog", label: "Blog" },
               { href: "/priser", label: t.navPricing },
               { href: "/login", label: t.navLogin },
@@ -267,9 +268,9 @@ export function LandingPage({ locale }: { locale: Locale }) {
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
               <div className="mb-5 flex flex-wrap gap-2">
-                <Pill><Sparkles size={11} className="text-orange-300" /> AI-powered</Pill>
-                <Pill><Globe size={11} /> Social media</Pill>
-                <Pill><Video size={11} /> Presentation videos</Pill>
+                <Pill><Sparkles size={11} className="text-orange-300" /> {t.badgeAi}</Pill>
+                <Pill><Globe size={11} /> {t.badgeSocial}</Pill>
+                <Pill><Video size={11} /> {t.badgePresentation}</Pill>
               </div>
               <h1 className="text-4xl font-bold leading-tight text-white md:text-5xl lg:text-[3.25rem]">
                 {t.heroLine1}<br />{t.heroLine2}<br />
@@ -643,7 +644,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
               <ul className="flex flex-col gap-3 text-sm text-slate-400">
                 <li><a href="#features" className="transition-colors hover:text-white">{t.footerFeatures}</a></li>
                 <li><a href="#ai" className="transition-colors hover:text-white">{t.footerAiVideo}</a></li>
-                <li><Link href="/hvorfor-somevideopost" className="transition-colors hover:text-white">Hvorfor somevideopost.com</Link></li>
+                <li><Link href="/hvorfor-somevideopost" className="transition-colors hover:text-white">{t.footerWhy}</Link></li>
                 <li><Link href="/priser" className="transition-colors hover:text-white">{t.footerPricing}</Link></li>
                 <li><Link href="/blog" className="transition-colors hover:text-white">Blog</Link></li>
                 <li><Link href="/signup" className="transition-colors hover:text-white">{t.footerCreateAccount}</Link></li>
