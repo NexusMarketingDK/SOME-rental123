@@ -82,7 +82,14 @@ export async function proxy(request: NextRequest) {
   }
 
   const res = await updateSession(request);
-  setLocaleCookie(res, locale);
+  // Only persist the detected locale on navigations (GET). Server actions
+  // (signup / login / saving preferences) are POSTs that set the `locale`
+  // cookie themselves to the language the user just chose. `detectLocale`
+  // above reads the *previous* cookie, so overwriting it here would clobber
+  // that fresh choice — landing e.g. a newly created Spanish user on Danish.
+  if (request.method === "GET") {
+    setLocaleCookie(res, locale);
+  }
   return res;
 }
 
